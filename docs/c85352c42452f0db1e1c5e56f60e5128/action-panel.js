@@ -1,10 +1,11 @@
 /* Live feed for one operator. Titles, briefs, lane, and board come only from the feed card.
    Standing work is cards whose name or short already says "standing" — not a new feed field. */
 (function (root) {
-  const OPS = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal"];
+  const OPS = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal", "Ju Kwon"];
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   function designator(op) {
     if (op === "Price") return "BRAVO-6";
+    if (op === "Ju Kwon") return "EXT-01";
     const i = OPS.indexOf(op);
     return i < 0 ? "" : "141-" + String(i).padStart(2, "0");
   }
@@ -16,7 +17,7 @@
   function safeUrl(u) { return /^https:\/\/trello\.com\//.test(u || "") ? u : ""; }
   function norm(t) {
     let s = String(t || "").toLowerCase().trim();
-    const lane = "price|ghost|cho|west|ko|park|jae|dunn|soap|gaz|kal";
+    const lane = "ju kwon|price|ghost|cho|west|ko|park|jae|dunn|soap|gaz|kal";
     s = s.replace(new RegExp("^(" + lane + ")\\s*[:\\u2014\\u2013-]\\s*"), "");
     s = s.replace(new RegExp("^(" + lane + ")\\s+"), "");
     return s.replace(/[^a-z0-9]+/g, "");
@@ -31,7 +32,8 @@
   function cardHtml(c, kind) {
     const { title, detail } = linesOf(c);
     const lane = String(c.lane || "—");
-    const board = String(c.board || "");
+    const rawBoard = String(c.board || "");
+    const board = rawBoard === "KAL" ? "TRADING" : rawBoard;
     const url = safeUrl(c.url);
     const status = kind === "stand" ? "STANDING" : "DOING";
     const body = `<div class="actx-title">${esc(title)}</div>` +
@@ -47,7 +49,7 @@
     const finite = cards.filter((c) => !isStanding(c));
     const standing = cards.filter(isStanding);
     const des = (opts && opts.des) || designator(op);
-    const ini = op.slice(0, 2).toUpperCase();
+    const ini = op === "Ju Kwon" ? "JK" : op.slice(0, 2).toUpperCase();
     const avatar = (opts && opts.avatar) || ("avatars/" + op.toLowerCase() + ".png");
     const face = `<img class="actx-face" src="${esc(avatar)}" alt="" onerror="this.outerHTML='<b class=&quot;actx-face ini&quot;>${esc(ini)}</b>'">`;
     const close = '<button class="x" type="button">CLOSE</button>';

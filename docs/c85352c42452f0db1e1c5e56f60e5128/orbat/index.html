@@ -169,7 +169,7 @@ a{color:inherit;text-decoration:none}
       const d = await r.json();
       if (!d || d.ct) return;
       const cards = [];
-      for (const [board, B, fb] of [['CMD', d.command, ''], ['KAL', d.kal, 'Kal']]) {
+      for (const [board, B, fb] of [['CMD', d.command, ''], ['KAL', d.kal, 'Ghost']]) {
         const L = (B && B.lists) || {};
         for (const k of ['doing', 'waiting', 'backlog', 'done']) for (const c of L[k] || []) {
           cards.push({ ...c, list: k, lane: c.lane || fb });

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import vm from 'node:vm';
 
 const require = createRequire(import.meta.url);
 const R = require('../docs/c85352c42452f0db1e1c5e56f60e5128/roster.js');
@@ -29,6 +30,13 @@ assert.equal(ids(by.price.to).length, 0, 'Price file does not draw a management 
 assert.ok(ids(by.price.from).includes('kal'));
 assert.ok(!ids(by.ghost.from).includes('price') && !ids(by.ghost.to).includes('price'));
 assert.equal(by.kal.role.startsWith('Intake'), true);
+assert.equal(by.kal.board, 'CMD');
+assert.equal(by.ghost.board, 'KAL', 'trading feed key stays KAL');
+assert.equal(by.ghost.stamp, 'TRADING');
+assert.equal(R.boardTag('KAL'), 'TRADING');
+assert.equal(R.boardTag('CMD'), 'CMD');
+assert.ok(labels(by.ghost.to).includes('TRADING BOARD'));
+assert.equal(labels(by.ghost.to).includes('KAL BOARD'), false);
 assert.equal(by.ghost.map, 'Trading');
 assert.equal(by.ju.map, 'Kinsora ops');
 assert.equal(by.dunn.map, 'Personal');
@@ -85,5 +93,22 @@ assert.match(hudCss, /\.tok\.s-hold \.pl\{[\s\S]*?repeating-linear-gradient\(-45
 assert.match(hudCss, /\.rt \.face img\{[^}]*object-position:center top;transform:scale\(1\.35\);transform-origin:center top\}/, 'FILES callsign crop stays top-anchored');
 assert.match(filesHtml, /class="face"/, 'FILES rail still wraps the callsign photo');
 assert.doesNotMatch(hudCss, /margin-bottom:4px/, 'Doing ring is not lifted clear of the plate');
+
+const actionSrc = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/action-panel.js', import.meta.url), 'utf8');
+const actionCtx = vm.createContext({ window: {} });
+vm.runInContext(actionSrc, actionCtx);
+const A = actionCtx.window.MW4Action;
+assert.equal(A.designator('Ju Kwon'), 'EXT-01');
+assert.equal(A.designator('Ghost'), '141-01');
+assert.equal(A.designator('Kal'), '141-10');
+assert.equal(A.designator('Price'), 'BRAVO-6');
+const juHtml = A.html({ op: 'Ju Kwon', cards: [{ name: 'Ju Kwon: Intercom refunds', short: 'Intercom refunds', lane: 'Ju Kwon', board: 'CMD', list: 'doing', url: 'https://trello.com/c/jurefund' }] });
+assert.match(juHtml, /EXT-01/);
+assert.match(juHtml, /JU KWON/);
+assert.doesNotMatch(juHtml, /141-/);
+const hubHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/hub/index.html', import.meta.url), 'utf8');
+assert.match(hubHtml, /Ju Kwon/);
+assert.match(hubHtml, /TRADING BOARD/);
+assert.doesNotMatch(hubHtml, /KAL BOARD/);
 
 console.log('hud elevate checks ok');

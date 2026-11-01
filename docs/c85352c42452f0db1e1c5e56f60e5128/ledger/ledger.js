@@ -254,7 +254,8 @@
     state.win = btn.dataset.win;
     paintWindow();
   });
-  $('dsync').addEventListener('click', (e) => { e.preventDefault(); boot(); });
+  const dockSync = $('dsync');
+  if (dockSync) dockSync.addEventListener('click', (e) => { e.preventDefault(); boot(); });
   window.addEventListener('resize', placePlates);
   clock();
   setInterval(clock, 1000);

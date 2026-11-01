@@ -28,7 +28,7 @@ Developers: edit `scriptable/src/*`, run `node tools/build-scriptable.mjs`, merg
   from the Postiz/Windsor pull, with the same auth code + salt as `status.json`, so one unlock opens both pages in a tab.
 
 ## Command suite chrome (v2)
-- `docs/<token>/suite.css` — shared TF141 chrome for the suite pages: classification band with live PT clock, bottom dock nav (HUB · HUD · LEDGER · SOCIAL · SYNC), corner brackets, rulers.
+- `docs/<token>/suite.css` — shared TF141 chrome for the suite pages: classification band with live PT clock, bottom dock nav (HUB · HUD · LEDGER · ORBAT · FILES), corner brackets, rulers.
 - HUD: ORBAT roster, wire-heat meter (crossings in the last hour), HOLD cage, sector-coded zones, counter meters, T+ since deploy on AO plates, two-column desktop layout.
 - Social: channel tiles with sparklines, segmented range/mode pickers, chart crosshair, top-3 posts, caption filter, view-share bars.
 - Hub: inline unlock; once unlocked it decrypts status.json + social/metrics.json in the browser for live counts and a 6 h SITREP. Nothing readable is published.

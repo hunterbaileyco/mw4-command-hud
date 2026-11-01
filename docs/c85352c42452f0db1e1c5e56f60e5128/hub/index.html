@@ -173,6 +173,8 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   </section>
 
   <div class="links">
+    <a href="../orbat/">ORBAT MAP <span>▸</span></a>
+    <a href="../files/">OPERATOR FILES <span>▸</span></a>
     <a id="cmdLink" class="off" target="_blank" rel="noopener">CMD BOARD <span>↗</span></a>
     <a id="kalLink" class="off" target="_blank" rel="noopener">KAL BOARD <span>↗</span></a>
   </div>
@@ -184,8 +186,8 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 <div class="sx-dock"><nav>
   <a class="on" href="./"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
   <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
-  <a href="../social/"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
-  <a href="#" id="dsync"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>SYNC</a>
+  <a href="../orbat/"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v3.5M12 11H6.5V16.5M12 11h5.5V16.5"/></svg>ORBAT</a>
+  <a href="../files/"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8 13h8M8 17h5"/></svg>FILES</a>
 </nav></div>
 
 <script>
@@ -233,7 +235,6 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     try { soc(await get('social')); } catch (err) { $('socHint').innerHTML = '<span class="w">⚠ SOCIAL FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
     if (ok) { $('ilk').classList.add('live'); $('ist').textContent = 'INTEL LIVE'; }
   }
-  $('dsync').addEventListener('click', (e) => { e.preventDefault(); pull(); });
   $('sync2').addEventListener('click', (e) => { e.preventDefault(); pull(); });
   function setN(id, v) { const el = $(id); el.textContent = v; el.classList.remove('lk'); }
   function hud(d) {
@@ -290,7 +291,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     parts.push(finiteOps.length ? finiteOps.map(([op, cs]) => btn(op, cs, false)).join('') : '<div class="lockd">AO QUIET · NO FINITE MISSIONS</div>');
     if (standOps.length) parts.push('<div class="wlab stn">Standing · always on</div>' + standOps.map(([op, cs]) => btn(op, cs, true)).join(''));
     host.innerHTML = parts.join('');
-    host.querySelectorAll('.wop').forEach((b) => b.addEventListener('click', () => openAct(b.dataset.op, rows)));
+    host.querySelectorAll('.wop').forEach((b) => b.addEventListener('click', () => { location.href = '../files/#' + String(b.dataset.op || '').toLowerCase(); }));
   }
   function openAct(op, rows) {
     const mine = rows.filter((c) => String(c.lane || '') === op);

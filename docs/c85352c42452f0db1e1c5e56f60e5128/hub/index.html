@@ -158,6 +158,24 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
         <div><div class="l">PIN</div><div class="n a lk">▒▒</div></div>
       </div>
     </a>
+
+    <a class="tile ledger" href="../ledger/">
+      <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+      <div class="th">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3M9 11h6M9 15h4"/></svg></span>
+        <div><span class="tag a">P&amp;L · KO</span><div class="t">MW4 // LEDGER</div></div>
+        <span class="go">OPEN ▸</span>
+      </div>
+      <div class="d">Contribution is the hero: Shopify revenue minus product cost minus Meta, TikTok, and Google spend. Mercury cash sits beside it.</div>
+      <div class="chips"><span>CONTRIB</span><span>COGS</span><span>PAID LANES</span><span>TREASURY</span><span id="lgChip">SAMPLE</span></div>
+      <div class="hint" id="lgHint">SAMPLE · not a live feed</div>
+      <div class="stats">
+        <div><div class="l">CM MTD</div><div class="n a" id="lgCm">—</div></div>
+        <div><div class="l">CM%</div><div class="n a" id="lgPct">—</div></div>
+        <div><div class="l">SPEND</div><div class="n h" id="lgSpend">—</div></div>
+        <div><div class="l">CASH</div><div class="n g" id="lgCash">—</div></div>
+      </div>
+    </a>
   </div>
 
   <section class="wireops" id="wireops">
@@ -184,6 +202,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 <div class="sx-dock"><nav>
   <a class="on" href="./"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
   <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
+  <a href="../ledger/"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3M9 11h6M9 15h4"/></svg>LEDGER</a>
   <a href="../social/"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
   <a href="#" id="dsync"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>SYNC</a>
 </nav></div>
@@ -314,6 +333,19 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   }
   paintChannels(FALLBACK_CH);
   pull(); setInterval(pull, 30000);
+})();
+</script>
+<script src="../ledger/model.js"></script>
+<script>
+(() => {
+  const L = window.MW4Ledger;
+  if (!L) return;
+  const m = L.derive(L.SAMPLE);
+  const $ = (id) => document.getElementById(id);
+  $('lgCm').textContent = L.format.moneyK(m.mtd.contrib);
+  $('lgPct').textContent = m.mtd.cm.toFixed(1) + '%';
+  $('lgSpend').textContent = L.format.moneyK(m.mtd.spend);
+  $('lgCash').textContent = L.format.moneyK(m.mercury.balance);
 })();
 </script>
 </body>

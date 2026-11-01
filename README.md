@@ -22,22 +22,26 @@ Each run downloads the matching built script from GitHub Raw (`main`) and runs i
 Developers: edit `scriptable/src/*`, run `node tools/build-scriptable.mjs`, merge to `main`. The build rewrites the full widgets and both loaders. Loaders do not contain the feed URL. The widget they run still requests the encrypted Vercel `status.json` (bypass query included) and decrypts it on the phone. It does not call `/api/feed`.
 
 ## Dashboard hub
-- `docs/<token>/hub/` — phone-first index with tiles for the MW4 Command HUD and the Social (Jae) board.
+- `docs/<token>/hub/` — phone-first index with tiles for the MW4 Command HUD, LEDGER, and the Social (Jae) board.
 - `docs/<token>/social/` — static "Kinsora social — published metrics" board (TikTok @kinsora.co, TikTok @wearkinsora,
   IG @wearkinsora, Pinterest). Its feed `social/metrics.json` is an encrypted envelope built by `tools/build-social.mjs`
   from the Postiz/Windsor pull, with the same auth code + salt as `status.json`, so one unlock opens both pages in a tab.
 
 ## Command suite chrome (v2)
-- `docs/<token>/suite.css` — shared TF141 chrome for all three pages: classification band with live PT clock, bottom dock nav (HUB · HUD · SOCIAL · LOCK), corner brackets, rulers.
+- `docs/<token>/suite.css` — shared TF141 chrome for the suite pages: classification band with live PT clock, bottom dock nav (HUB · HUD · LEDGER · SOCIAL · SYNC), corner brackets, rulers.
 - HUD: ORBAT roster, wire-heat meter (crossings in the last hour), HOLD cage, sector-coded zones, counter meters, T+ since deploy on AO plates, two-column desktop layout.
 - Social: channel tiles with sparklines, segmented range/mode pickers, chart crosshair, top-3 posts, caption filter, view-share bars.
 - Hub: inline unlock; once unlocked it decrypts status.json + social/metrics.json in the browser for live counts and a 6 h SITREP. Nothing readable is published.
+- LEDGER (`docs/<token>/ledger/`): sales / spend / contribution. Hero is REV − COGS − SPEND. Sample figures ship in `ledger/model.js` (`source: "sample"`) until a live `GET /api/feed?f=ledger` payload with `source: "live"` exists. Shipping, payment fees, and app costs are not subtracted. COGS gaps count as $0 and stay flagged. Runway is Mercury balance ÷ |30-day net burn|.
+
+## LEDGER feed
+`ledger/model.js` is the contract. A later live mapper should emit the same raw shape (windows, lanes, cogs.top, mercury, log) and set `source` to `"live"`. The page derives contribution, CM%, breakeven ROAS, after-COGS dollars, and runway. It does not invent those from the view. Pinterest stays a held slot. Soap stays a dashed placeholder until the paid handoff.
 
 ## Access (no second code on Vercel)
 - The Vercel deployment is behind Vercel Authentication. The HUD, Social and Hub pages have **no unlock form**: they fetch
   `GET /api/feed?f=status` / `?f=social` (`docs/api/feed.js`, a Vercel function), which decrypts the committed envelopes
   server-side with the `MW4_FEED_PASS` project env var and returns JSON with `Cache-Control: no-store`.
-- The repo still only holds the AES-256-GCM envelopes — `status.json` and `social/metrics.json` are
-  unchanged and keep being written encrypted by `build-status.mjs` / `build-social.mjs`. Nothing readable is committed.
+- The repo still only holds AES-256-GCM envelopes for the ops and social feeds — `status.json` and `social/metrics.json` are
+  unchanged and keep being written encrypted by `build-status.mjs` / `build-social.mjs`. LEDGER sample dollars in `ledger/model.js` are invented figures labeled SAMPLE, not the books.
 - Scriptable widgets fetch the encrypted `status.json` from Vercel and still decrypt on-device with the Keychain auth code (AES-GCM is unchanged). `STATUS_URL` in `scriptable/src/common.js` is the Vercel `status.json` URL plus the Deployment Protection bypass query param. Widgets do not call `/api/feed` (that cleartext endpoint stays SSO-gated). Phone install is the two loaders above; do not re-paste the full scripts after a merge.
 - `api/feed.js` at the repo root is a shim that only matters if the Vercel Root Directory is the repo root.

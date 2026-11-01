@@ -10,6 +10,9 @@ const { webcrypto: wc } = require('node:crypto');
 const FILES = {
   status: path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/status.json'),
   social: path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/social/metrics.json'),
+  // ledger is not an encrypted envelope yet. The LEDGER page asks for f=ledger and,
+  // on 404, renders docs/.../ledger/model.js SAMPLE. Add a ciphertext file here when
+  // Shopify / ads / Mercury are wired, and return source:"live" in that cleartext.
 };
 const keys = new Map(); // `${salt}|${iter}` -> CryptoKey; PBKDF2 is slow, derive once per warm instance
 

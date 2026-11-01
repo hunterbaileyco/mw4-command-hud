@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MW4 LEDGER">
+<meta name="theme-color" content="#0B0E0C">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon-32.png" type="image/png" sizes="32x32">
+<link rel="shortcut icon" href="../favicon.ico">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="180x180">
+<link rel="stylesheet" href="../suite.css">
+<link rel="stylesheet" href="ledger.css">
+<title>MW4 // LEDGER</title>
+</head>
+<body class="sx-pad sample">
+<div class="lg-sticky">
+  <div class="lg-mock" id="srcFlag">▲ Mock — not live · sales / spend ▲<small>Profit first · rev − cogs − spend · all figures sample</small></div>
+  <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · LEDGER</span><span class="clk" id="clk">—</span></div>
+</div>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="kick">● TF141 · Quartermaster · CMD read</div>
+      <div class="brand">MW4 <span class="sl">//</span> LEDGER</div>
+      <div class="mastsub">P&amp;L theater · <span class="h">profit before revenue</span> · <span class="smp" id="smp">SAMPLE</span></div>
+    </div>
+    <div class="asof"><span class="dot"></span><span id="asof">AS OF —</span></div>
+  </div>
+  <div class="chrome ldg" id="counters"></div>
+  <div class="maincol">
+    <div class="win" id="win" role="tablist" aria-label="Contribution window"></div>
+    <div class="hero-shell" id="heroShell">
+      <section class="hero panel topo scan" id="hero">
+        <div class="sweep"></div>
+        <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+        <div class="zhead"><b><span class="sec">CM</span><span class="zt">CONTRIBUTION</span><span class="zw">Rev − COGS − Spend</span></b><span id="heroWin">MTD</span></div>
+        <div class="cp-tag"><img src="../avatars/price.png" alt="Price"><span>Price<br><span style="color:var(--dim)">CMD read</span></span></div>
+        <div class="xy">GRID 38S MB<br>LAT 34.0522 N</div>
+        <div class="heroin">
+          <div class="ret">
+            <div class="tgt" id="tgt"></div>
+            <div class="beltk legend"><span class="k-cg">■ COGS</span><span class="k-sp">■ SPEND</span><span class="k-cm">■ CONTRIB</span><span class="k-mo">◔ MONTH <span id="moFrac">—</span></span></div>
+          </div>
+          <div class="eqcol" id="eqcol"></div>
+        </div>
+      </section>
+      <div class="plates" id="plates"></div>
+    </div>
+    <div class="wire" aria-hidden="true"><span class="chev l"><span>›</span><span>›</span><span>›</span></span><span class="lbl">— WHERE IT WENT —</span><span class="chev r"><span>‹</span><span>‹</span><span>‹</span></span></div>
+    <section class="paid panel topo">
+      <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+      <div class="zhead"><b><span class="sec">PAID</span><span class="zt">SPEND</span><span class="zw">Feeds the profit line</span></b><span id="paidTot">MTD</span></div>
+      <div class="berule" id="beRule"></div>
+      <div class="soap"><img src="../avatars/soap.png" alt="Soap"><div class="tx" id="soapTx"></div></div>
+      <div class="lanes" id="lanes"></div>
+      <div class="beltk" style="margin-top:8px"><span>scale 0 → 4.0× · <span style="color:var(--holdink)">BE</span> tick = breakeven</span><span>attr = platform-reported · sample</span></div>
+    </section>
+    <section class="qm panel">
+      <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+      <div class="zhead"><b><span class="sec">QM</span><span class="zt">LOADOUT · COGS</span><span class="zw">Shopify cost per item</span></b><span>TOP 4 · MTD</span></div>
+      <div class="gap" id="gap"></div>
+      <div class="loadout" id="loadout"></div>
+      <div class="side3" id="side3"></div>
+    </section>
+    <div class="wire cashwire" aria-hidden="true"><span class="chev l"><span>›</span><span>›</span><span>›</span></span><span class="lbl">— CASH —</span><span class="chev r"><span>‹</span><span>‹</span><span>‹</span></span></div>
+  </div>
+  <div class="sidecol">
+    <section class="tres">
+      <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+      <div class="zhead"><b><span class="sec">FOB</span><span class="zt">TREASURY</span><span class="zw">Mercury · cash on hand</span></b><span id="tresFlag">SAMPLE</span></div>
+      <div class="row"><div><div class="bal" id="bal">—</div><div class="bl">MERCURY · ALL ACCOUNTS</div></div>
+        <div class="rw"><b id="runway">—</b><span>runway-ish<br>at 30d net burn</span></div></div>
+      <div class="fuel"><i id="fuel" style="width:0"></i><em>12 MO</em></div>
+      <div class="acc" id="accs"></div>
+    </section>
+    <div class="ticker"><span class="tl">AAR</span><div class="tx" id="aar"></div></div>
+    <section class="rounds">
+      <span class="sx-brk tl"></span><span class="sx-brk br"></span>
+      <div class="zhead"><b><span class="sec">CM</span><span class="zt">DAILY ROUNDS</span><span class="zw">contrib / day · oct</span></b><span id="dayEnd">D1–D28</span></div>
+      <div class="bars" id="bars"></div>
+      <div class="beltk" style="margin-top:5px"><span>D1</span><span id="dayNote" style="color:var(--holdink)"></span><span id="daySpan"></span></div>
+    </section>
+    <section class="mlog">
+      <span class="sx-brk tl"></span><span class="sx-brk br"></span>
+      <div class="zhead"><b><span class="sec">LOG</span><span class="zt">MONEY LOG</span><span class="zw">today · sample</span></b><span id="logCount">0</span></div>
+      <ol id="log"></ol>
+    </section>
+  </div>
+  <div class="ft" id="foot"></div>
+</div>
+<div class="sx-dock"><nav>
+  <a href="../hub/"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
+  <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
+  <a class="on" href="./"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3M9 11h6M9 15h4"/></svg>LEDGER</a>
+  <a href="../social/"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
+  <a href="#" id="dsync"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>SYNC</a>
+</nav></div>
+<script src="model.js"></script>
+<script src="ledger.js"></script>
+</body>
+</html>

@@ -1,6 +1,6 @@
 # command-hud
 
-Static, phone-first status page served from `docs/` on GitHub Pages.
+Phone-first status page. The live site is the Vercel deployment (`mw4-command-hud.vercel.app`); GitHub Pages is disabled. `docs/` still only holds encrypted envelopes.
 
 - The data feed (`status.json`) is an **encrypted envelope**: `{ v, alg: "AES-GCM", kdf: "PBKDF2-SHA256", iter, salt, iv, ct }`.
   The page derives an AES-256-GCM key in the browser with PBKDF2-SHA256 from the access code and decrypts locally (Web Crypto). No readable data is published.
@@ -23,9 +23,7 @@ Static, phone-first status page served from `docs/` on GitHub Pages.
 - The Vercel deployment is behind Vercel Authentication. The HUD, Social and Hub pages have **no unlock form**: they fetch
   `GET /api/feed?f=status` / `?f=social` (`docs/api/feed.js`, a Vercel function), which decrypts the committed envelopes
   server-side with the `MW4_FEED_PASS` project env var and returns JSON with `Cache-Control: no-store`.
-- The repo (and GitHub Pages) still only hold the AES-256-GCM envelopes — `status.json` and `social/metrics.json` are
-  unchanged and keep being written encrypted by `build-status.mjs` / `build-social.mjs`. On Pages `/api/feed` doesn't exist,
-  so the pages show LINK DOWN and nothing readable is served.
-- Scriptable widgets are unchanged: they still fetch the encrypted `status.json` and decrypt on-device with the Keychain code.
-  (If they ever move to Vercel, they'd need the protection-bypass header; the `/api/feed` cleartext endpoint is SSO-gated.)
+- The repo still only holds the AES-256-GCM envelopes — `status.json` and `social/metrics.json` are
+  unchanged and keep being written encrypted by `build-status.mjs` / `build-social.mjs`. Nothing readable is committed.
+- Scriptable widgets fetch the encrypted `status.json` from Vercel and still decrypt on-device with the Keychain auth code (AES-GCM is unchanged). `STATUS_URL` in `scriptable/src/common.js` is the Vercel `status.json` URL plus the Deployment Protection bypass query param. Widgets do not call `/api/feed` (that cleartext endpoint stays SSO-gated). Edit `scriptable/src/*`, then `node tools/build-scriptable.mjs`. After the URL changes, re-paste each built script in Scriptable on the phone, or pull the Raw file after merge — the widget keeps the copy already saved on the device.
 - `api/feed.js` at the repo root is a shim that only matters if the Vercel Root Directory is the repo root.

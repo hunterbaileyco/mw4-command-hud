@@ -1,4 +1,4 @@
-/* MW4 // TF141 command suite — shared chrome for HUD, Social and Hub (classification band, header, dock nav). */
+/* MW4 // TF141 command suite — shared chrome for HUD, LEDGER, Social and Hub (classification band, header, dock nav). */
 :root{--bg:#0B0E0C;--panel:#121612;--panel2:#0d110e;--line:#2A3328;--line2:#3a4636;--tan:#C5A572;--coyote:#9c8256;--olive:#6B7C3A;--olive2:#9bb05a;
   --amber:#E8A317;--hold:#8B3A2A;--holdink:#E07A5F;--ink:#E8E2D6;--dim:#8a8676;--idle:#1A1E1A;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
@@ -21,13 +21,13 @@
 /* dock: phone-first bottom nav, same on every page */
 .sx-dock{position:fixed;left:0;right:0;bottom:0;z-index:44;display:flex;justify-content:center;
   padding:0 calc(var(--safe-r) + 8px) var(--safe-b) calc(var(--safe-l) + 8px);background:linear-gradient(rgba(11,14,12,.0),rgba(11,14,12,.92) 30%);pointer-events:none}
-.sx-dock nav{pointer-events:auto;display:grid;grid-template-columns:repeat(4,1fr);width:min(460px,100%);height:var(--dockh);margin-bottom:6px;
+.sx-dock nav{pointer-events:auto;display:grid;grid-template-columns:repeat(5,1fr);width:min(520px,100%);height:var(--dockh);margin-bottom:6px;
   background:rgba(18,22,18,.94);border:1px solid var(--line2);border-radius:8px;box-shadow:0 -6px 24px rgba(0,0,0,.5),inset 0 1px 0 rgba(197,165,114,.08);
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);overflow:hidden}
-.sx-dock a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--dim);
-  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;border-right:1px solid var(--line);text-decoration:none}
+.sx-dock a{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--dim);
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-right:1px solid var(--line);text-decoration:none}
 .sx-dock a:last-child{border-right:0}
-.sx-dock a svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6}
+.sx-dock a svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6}
 .sx-dock a.on{color:var(--amber);background:linear-gradient(rgba(232,163,23,.10),transparent)}
 .sx-dock a.on::before{content:"";position:absolute;top:0;left:22%;right:22%;height:2px;background:var(--amber);box-shadow:0 0 10px var(--amber)}
 .sx-dock a:active{background:rgba(232,163,23,.12)}

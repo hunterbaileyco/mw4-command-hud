@@ -2,15 +2,15 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: yellow; icon-glyph: exclamation-triangle;
 /*
- * MW4 Waiting — Scriptable widget (medium / large). Lists "Waiting on Hunter" cards (Command, then Kal).
+ * MW4 Waiting — Scriptable widget (small / medium / large). HOLD cage: "Waiting on Hunter" cards (Command, then Kal) under a hazard rail.
  *
  * INSTALL (2 minutes, once per phone)
  *  1. App Store → install "Scriptable" (free).
- *  2. Scriptable → tap + → paste this WHOLE file → tap the title → rename to "MW4 Waiting".
+ *  2. Scriptable → tap + → paste this WHOLE file → tap the title → rename to "Waiting" (or "MW4 Waiting" — either works).
  *  3. Tap ▶ once. A prompt asks for the AUTH CODE (the same code you type on the HUD).
  *     It is checked, then saved in the iOS Keychain (Keychain.set "mw4hud.authcode"); the widget never asks again.
  *  4. Home Screen → long-press → + → Scriptable → pick a size → Add → long-press it → Edit Widget →
- *     Script: "MW4 Waiting". Tapping the widget opens the live HUD.
+ *     Script: "Waiting" (whatever you named it). Tapping the widget opens the live HUD.
  *  If the widget shows "AUTH NEEDED": open Scriptable and run this script once (step 3).
  *  Changed code? Set RESET = true below, run once, enter the new code, set RESET back to false.
  *
@@ -86,6 +86,135 @@ async function loadFeed() {
   try { return { d: MW4C.open(env, k.key), offline }; }
   catch (e) { kcDel(KC_KEY); return { d: null, offline, need: "AUTH NEEDED" }; }
 }
+
+// ===== MW4 theater chrome — same palette + zone language as the live HUD (FOB · WIRE · AO · HOLD) =====
+// NOTE: only the weight-named monospaced fonts below (regular/medium/semibold/bold/heavy); the generic
+// size+weight monospaced constructor crashes on Hunter's iOS.
+const P = { bg: "#0B0E0C", panel: "#121612", line: "#2A3328", tan: "#C5A572", olive: "#6B7C3A", amber: "#E8A317",
+            hold: "#8B3A2A", holdink: "#E07A5F", ink: "#E8E2D6", dim: "#8a8676", ship: "#9bb05a", dark: "#0d110e" };
+const col = (k, a) => new Color(P[k] || k, a == null ? 1 : a);
+const F = { r: (s) => Font.regularMonospacedSystemFont(s), m: (s) => Font.mediumMonospacedSystemFont(s),
+            sb: (s) => Font.semiboldMonospacedSystemFont(s), b: (s) => Font.boldMonospacedSystemFont(s),
+            h: (s) => Font.heavyMonospacedSystemFont(s) };
+// Approx. widget size in points (iPhone 6.1–6.7"); background images are aspect-filled, so close is enough.
+const FAM_PT = { small: [170, 170], medium: [364, 170], large: [364, 382], extraLarge: [364, 382] };
+
+function ago(iso) {
+  const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  return m < 1 ? "now" : m < 60 ? m + "m" : m < 1440 ? Math.floor(m / 60) + "h" + (m % 60 ? (m % 60) + "m" : "") : Math.floor(m / 1440) + "d";
+}
+function hhmm(iso) { const t = new Date(iso); return String(t.getHours()).padStart(2, "0") + String(t.getMinutes()).padStart(2, "0"); }
+function txt(stack, s, font, color, lines) {
+  const t = stack.addText(String(s == null ? "" : s)); t.font = font; t.textColor = color;
+  if (lines) t.lineLimit = lines; t.minimumScaleFactor = 0.7; return t;
+}
+// Diagonal hazard stripes (HUD HOLD-box top rail): amber bands on near-black.
+function drawHazard(dc, x, y, w, h, a) {
+  dc.setFillColor(col("dark")); dc.fillRect(new Rect(x, y, w, h));
+  dc.setFillColor(col("amber", a == null ? 0.9 : a));
+  for (let i = -h; i < w + h; i += 9) {
+    const p = new Path();
+    p.addLines([new Point(x + i, y + h), new Point(x + i + 4, y + h), new Point(x + i + 4 + h, y), new Point(x + i + h, y)]);
+    p.closeSubpath(); dc.addPath(p); dc.fillPath();
+  }
+  dc.setFillColor(col("bg")); dc.fillRect(new Rect(x - h - 9, y, h + 9, h)); dc.fillRect(new Rect(x + w, y, h + 9, h)); // trim overhang
+}
+function hazardImg(w, h) {
+  const dc = new DrawContext(); dc.size = new Size(w, h); dc.opaque = true; dc.respectScreenScale = true;
+  drawHazard(dc, 0, 0, w, h); return dc.getImage();
+}
+// Barbed-wire rail: amber line with crosshatch "X" barbs (HUD "CROSSING THE WIRE" band).
+function wireImg(w, h) {
+  const dc = new DrawContext(); dc.size = new Size(w, h); dc.opaque = true; dc.respectScreenScale = true;
+  dc.setFillColor(col("bg")); dc.fillRect(new Rect(0, 0, w, h));
+  dc.setFillColor(col("amber", 0.12)); dc.fillRect(new Rect(0, 0, w, h));
+  const m = h / 2;
+  dc.setStrokeColor(col("amber", 0.85)); dc.setLineWidth(1);
+  const p = new Path();
+  p.move(new Point(0, m - 1.5)); p.addLine(new Point(w, m - 1.5));
+  p.move(new Point(0, m + 1.5)); p.addLine(new Point(w, m + 1.5));
+  for (let x = 2; x < w; x += 9) { p.move(new Point(x, m - 3.5)); p.addLine(new Point(x + 5, m + 3.5)); p.move(new Point(x + 5, m - 3.5)); p.addLine(new Point(x, m + 3.5)); }
+  dc.addPath(p); dc.strokePath();
+  return dc.getImage();
+}
+// Full-widget backdrop: bg, tactical grid, scanlines, vignette, corner brackets, optional hazard rail on top.
+function theaterBg(fam, opts) {
+  opts = opts || {};
+  const [W, H] = FAM_PT[fam] || FAM_PT.medium;
+  const dc = new DrawContext(); dc.size = new Size(W, H); dc.opaque = true; dc.respectScreenScale = true;
+  dc.setFillColor(col("bg")); dc.fillRect(new Rect(0, 0, W, H));
+  dc.setFillColor(col("olive", 0.07)); dc.fillRect(new Rect(0, 0, W, H * 0.55)); // olive haze up top (AO)
+  dc.setFillColor(col("line", 0.55));
+  for (let x = 18; x < W; x += 18) dc.fillRect(new Rect(x, 0, 0.5, H));
+  for (let y = 18; y < H; y += 18) dc.fillRect(new Rect(0, y, W, 0.5));
+  dc.setFillColor(new Color("#000000", 0.16));
+  for (let y = 0; y < H; y += 3) dc.fillRect(new Rect(0, y, W, 1));
+  for (let i = 0; i < 6; i++) { // cheap vignette
+    dc.setFillColor(new Color("#000000", 0.07)); const k = i * 3;
+    dc.fillRect(new Rect(0, 0, W, 3 + k)); dc.fillRect(new Rect(0, H - 3 - k, W, 3 + k));
+    dc.fillRect(new Rect(0, 0, 3 + k, H)); dc.fillRect(new Rect(W - 3 - k, 0, 3 + k, H));
+  }
+  if (opts.hazard) drawHazard(dc, 0, 0, W, opts.hazard);
+  dc.setStrokeColor(col("line")); dc.setLineWidth(1);
+  const fr = new Path(); fr.addRect(new Rect(4.5, 4.5, W - 9, H - 9)); dc.addPath(fr); dc.strokePath();
+  const L = fam === "small" ? 12 : 16, i0 = 6;
+  dc.setStrokeColor(col(opts.bracket || "tan", 0.9)); dc.setLineWidth(2);
+  const b = new Path();
+  for (const [x, y, sx, sy] of [[i0, i0, 1, 1], [W - i0, i0, -1, 1], [i0, H - i0, 1, -1], [W - i0, H - i0, -1, -1]]) {
+    b.move(new Point(x, y + sy * L)); b.addLine(new Point(x, y)); b.addLine(new Point(x + sx * L, y));
+  }
+  dc.addPath(b); dc.strokePath();
+  return dc.getImage();
+}
+function newTheaterWidget(fam, opts) {
+  const w = new ListWidget();
+  w.backgroundColor = col("bg"); w.url = HUD_URL;
+  try { w.backgroundImage = theaterBg(fam, opts); } catch (e) {}
+  w.refreshAfterDate = new Date(Date.now() + 15 * 60 * 1000);
+  return w;
+}
+// "▌ LABEL" zone header like the HUD panels.
+function zoneLabel(stack, label, barColor, inkColor, size) {
+  const s = stack.addStack(); s.centerAlignContent(); s.spacing = 4;
+  const bar = s.addStack(); bar.size = new Size(3, size + 2); bar.backgroundColor = col(barColor);
+  txt(s, label, F.h(size), col(inkColor || "tan"), 1);
+  return s;
+}
+// Thin amber wire band with a centered plate.
+function wireBar(w, label, h, size) {
+  const r = w.addStack(); r.size = new Size(0, h); r.centerAlignContent();
+  try { r.backgroundImage = wireImg(360, h); } catch (e) { r.backgroundColor = col("amber", 0.25); }
+  r.addSpacer();
+  if (label) {
+    const p = r.addStack(); p.backgroundColor = col("bg"); p.borderColor = col("amber"); p.borderWidth = 1; p.setPadding(0, 5, 0, 5);
+    txt(p, label, F.h(size || 7), col("amber"), 1);
+    r.addSpacer();
+  }
+  return r;
+}
+// Small chip / pill.
+function chip(stack, s, fg, bg, size, border) {
+  const c = stack.addStack(); c.backgroundColor = bg; c.setPadding(1, 4, 1, 4); c.cornerRadius = 1;
+  if (border) { c.borderColor = border; c.borderWidth = 1; }
+  txt(c, s, F.h(size), fg, 1); return c;
+}
+function hazardChip(stack, s, size) {
+  const c = stack.addStack(); c.setPadding(1, 4, 1, 4); c.centerAlignContent();
+  try { c.backgroundImage = hazardImg(60, 16); } catch (e) { c.backgroundColor = col("amber"); }
+  const inner = c.addStack(); inner.backgroundColor = col("bg", 0.85); inner.setPadding(0, 3, 0, 3);
+  txt(inner, s, F.h(size), col("amber"), 1); return c;
+}
+function softFail(w, need, script) {
+  w.addSpacer();
+  const auth = need === "AUTH NEEDED";
+  const r = w.addStack(); r.centerAlignContent(); r.spacing = 5;
+  if (auth) hazardChip(r, "⚠", 9); else chip(r, "✕", col("bg"), col("holdink"), 9);
+  txt(r, need || "NO SIGNAL", F.h(14), auth ? col("amber") : col("holdink"), 1);
+  w.addSpacer(4);
+  txt(w, auth ? `Open Scriptable → run “${script}” (or “MW4 ${script}”) once → enter auth code.` : "Feed unreachable · retrying on next refresh.", F.r(9), col("dim"), 3);
+  w.addSpacer();
+}
+const LANE_TAG = (c) => String(c.lane || (c.tag === "KAL" ? "KAL" : "CMD")).toUpperCase();
 
 // mw4crypto — tiny pure-JS PBKDF2-HMAC-SHA256 + AES-256-GCM decrypt (no deps, no Web Crypto needed).
 // Used by the Scriptable widgets (JavaScriptCore has no crypto.subtle). Inlined into each script by
@@ -206,43 +335,62 @@ const MW4C = (() => {
 })();
 
 // ===== widget =====
-const C = { bg: new Color("#0b0d0a"), coyote: new Color("#8B7355"), amber: new Color("#D4A017"),
-            txt: new Color("#d9d4c3"), dim: new Color("#8a8676"), red: new Color("#b4492f") };
+// ===== Waiting — the HOLD cage: hazard rail, HOLD plates (Command lanes coyote, Kal amber) =====
+function cageRow(w, c, fam) {
+  const kal = c.tag === "KAL";
+  const r = w.addStack(); r.centerAlignContent(); r.spacing = 6;
+  r.backgroundColor = col("panel", 0.94); r.borderColor = col(kal ? "amber" : "hold", kal ? 0.55 : 0.9); r.borderWidth = 1;
+  r.setPadding(2, 0, 2, 6);
+  const bar = r.addStack(); bar.size = new Size(3, 12); bar.backgroundColor = col(kal ? "amber" : "holdink");
+  const tg = r.addStack(); tg.size = new Size(fam === "small" ? 30 : 38, 0);
+  txt(tg, LANE_TAG(c).slice(0, 5), F.h(fam === "small" ? 7.5 : 8), col(kal ? "amber" : "tan"), 1); tg.addSpacer();
+  txt(r, c.short || c.name, F.m(fam === "small" ? 8.5 : 9.5), col("ink"), 1);
+  r.addSpacer();
+  if (c.url && fam !== "small") txt(r, "↗", F.b(8), col("dim"), 1);
+  if (c.url) r.url = c.url;
+  return r;
+}
 
 async function build() {
   const { d, offline, need } = await loadFeed();
-  const w = new ListWidget();
-  w.backgroundColor = C.bg; w.url = HUD_URL; w.setPadding(12, 14, 12, 14);
-  w.refreshAfterDate = new Date(Date.now() + 15 * 60 * 1000);
   const fam = config.widgetFamily || "large";
-  const max = fam === "large" ? 12 : fam === "small" ? 3 : 5;
-  const hdr = w.addStack(); hdr.centerAlignContent();
-  const h = hdr.addText("⚠ WAITING ON HUNTER"); h.font = Font.heavyMonospacedSystemFont(11); h.textColor = C.amber;
+  const max = fam === "large" || fam === "extraLarge" ? 12 : fam === "small" ? 3 : 5;
+  const w = newTheaterWidget(fam, { hazard: 7, bracket: "amber" });
+  w.setPadding(fam === "small" ? 14 : 15, fam === "small" ? 11 : 14, fam === "small" ? 10 : 12, fam === "small" ? 11 : 14);
+  const hdr = w.addStack(); hdr.centerAlignContent(); hdr.spacing = 5;
+  hazardChip(hdr, "⚠", 8);
+  txt(hdr, fam === "small" ? "HOLD CAGE" : "HOLD CAGE · WAITING ON HUNTER", F.h(fam === "small" ? 9.5 : 10.5), col("amber"), 1);
   hdr.addSpacer();
-  if (!d) {
+  if (!d) { softFail(w, need || "NO SIGNAL", "Waiting"); return w; }
+  const cmdW = ((d.command || {}).lists || {}).waiting || [], kalW = ((d.kal || {}).lists || {}).waiting || [];
+  const items = [...cmdW.map((c) => ({ ...c, tag: "CMD" })), ...kalW.map((c) => ({ ...c, tag: "KAL", lane: c.lane || "Kal" }))];
+  chip(hdr, String(items.length), col("holdink"), col("hold", 0.45), 10, col("holdink", 0.8));
+
+  w.addSpacer(3);
+  const sub = w.addStack(); sub.centerAlignContent(); sub.spacing = 4;
+  if (fam !== "small") { txt(sub, `CMD ${cmdW.length}`, F.sb(7.5), col("tan"), 1); txt(sub, "·", F.sb(7.5), col("dim"), 1); txt(sub, `KAL ${kalW.length}`, F.sb(7.5), col("amber"), 1); }
+  sub.addSpacer();
+  const stale = offline || Date.now() - new Date(d.updatedAt).getTime() > 30 * 60 * 1000;
+  txt(sub, (offline ? "OFFLINE · " : stale ? "STALE · " : "") + ago(d.updatedAt), F.sb(7.5), stale ? col("holdink") : col("dim"), 1);
+  w.addSpacer(5);
+
+  if (!items.length) {
     w.addSpacer();
-    const e = w.addText(need || "NO SIGNAL"); e.textColor = need === "AUTH NEEDED" ? C.amber : C.red; e.font = Font.heavyMonospacedSystemFont(14);
-    if (need === "AUTH NEEDED") { const s = w.addText("Open Scriptable → run “MW4 Waiting” once → enter auth code."); s.textColor = C.dim; s.font = Font.regularMonospacedSystemFont(9); }
+    const e = w.addStack(); e.addSpacer(); e.backgroundColor = col("panel", 0.9); e.borderColor = col("olive"); e.borderWidth = 1; e.setPadding(7, 8, 7, 8);
+    txt(e, "✓ ", F.h(11), col("ship"), 1); txt(e, fam === "small" ? "ALL CLEAR" : "NOTHING ON HUNTER · ALL CLEAR", F.sb(fam === "small" ? 9 : 10), col("dim"), 1); e.addSpacer();
     w.addSpacer(); return w;
   }
-  const items = [
-    ...(((d.command || {}).lists || {}).waiting || []).map((c) => ({ ...c, tag: c.lane || "CMD" })),
-    ...(((d.kal || {}).lists || {}).waiting || []).map((c) => ({ ...c, tag: "KAL" })),
-  ];
-  const n = hdr.addText(String(items.length) + (offline ? " · OFF" : ""));
-  n.font = Font.heavyMonospacedSystemFont(11); n.textColor = offline ? C.red : C.amber;
-  w.addSpacer(6);
-  if (!items.length) { const t = w.addText("All clear."); t.textColor = C.dim; t.font = Font.regularMonospacedSystemFont(12); }
-  for (const c of items.slice(0, max)) {
-    const r = w.addStack(); r.spacing = 6;
-    const tg = r.addText(String(c.tag).toUpperCase().slice(0, 5).padEnd(5, " "));
-    tg.font = Font.semiboldMonospacedSystemFont(9); tg.textColor = c.tag === "KAL" ? C.amber : C.coyote;
-    const t = r.addText(fam === "large" ? c.name : (c.short || c.name)); t.font = Font.regularMonospacedSystemFont(11); t.textColor = C.txt; t.lineLimit = 1;
-    if (c.url) r.url = c.url;
-    w.addSpacer(3);
-  }
-  if (items.length > max) { const m = w.addText(`+${items.length - max} more`); m.font = Font.regularMonospacedSystemFont(9); m.textColor = C.dim; }
+  const shown = items.slice(0, max);
+  shown.forEach((c, i) => {
+    if (i && c.tag === "KAL" && shown[i - 1].tag !== "KAL" && fam === "large") { w.addSpacer(2); zoneLabel(w, "KAL BOARD", "amber", "amber", 7); w.addSpacer(2); }
+    cageRow(w, c, fam); w.addSpacer(2);
+  });
   w.addSpacer();
+  const more = items.length - shown.length;
+  if (fam === "small") { if (more > 0) txt(w, `+${more} MORE ON HUNTER`, F.sb(7.5), col("holdink"), 1); return w; }
+  const f = w.addStack(); f.centerAlignContent();
+  txt(f, more > 0 ? `+${more} MORE IN THE CAGE` : "CAGE SECURE", F.sb(7.5), more > 0 ? col("holdink") : col("dim"), 1);
+  f.addSpacer(); txt(f, "TAP ▸ LIVE HUD", F.sb(7.5), col("dim"), 1);
   return w;
 }
 

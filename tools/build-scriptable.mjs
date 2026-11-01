@@ -11,11 +11,11 @@ const INSTALL = (name, sizes, what) => `/*
  *
  * INSTALL (2 minutes, once per phone)
  *  1. App Store → install "Scriptable" (free).
- *  2. Scriptable → tap + → paste this WHOLE file → tap the title → rename to "${name}".
+ *  2. Scriptable → tap + → paste this WHOLE file → tap the title → rename to "${name.replace('MW4 ', '')}" (or "${name}" — either works).
  *  3. Tap ▶ once. A prompt asks for the AUTH CODE (the same code you type on the HUD).
  *     It is checked, then saved in the iOS Keychain (Keychain.set "mw4hud.authcode"); the widget never asks again.
  *  4. Home Screen → long-press → + → Scriptable → pick a size → Add → long-press it → Edit Widget →
- *     Script: "${name}". Tapping the widget opens the live HUD.
+ *     Script: "${name.replace('MW4 ', '')}" (whatever you named it). Tapping the widget opens the live HUD.
  *  If the widget shows "AUTH NEEDED": open Scriptable and run this script once (step 3).
  *  Changed code? Set RESET = true below, run once, enter the new code, set RESET back to false.
  *
@@ -27,8 +27,8 @@ const INSTALL = (name, sizes, what) => `/*
  */
 `;
 const targets = [
-  ['MW4 Glance', 'glance.body.js', 'deep-brown', 'crosshairs', 'small / medium', 'Glance line, latest deploy/RTB event, DOING / WAIT counts.'],
-  ['MW4 Waiting', 'waiting.body.js', 'yellow', 'exclamation-triangle', 'medium / large', 'Lists "Waiting on Hunter" cards (Command, then Kal).'],
+  ['MW4 Glance', 'glance.body.js', 'deep-brown', 'crosshairs', 'small / medium', 'Theater HUD: ACT/HOLD/QUEUE/SHIPPED chrome, AO plates, the wire, HOLD, AAR ticker.'],
+  ['MW4 Waiting', 'waiting.body.js', 'yellow', 'exclamation-triangle', 'small / medium / large', 'HOLD cage: "Waiting on Hunter" cards (Command, then Kal) under a hazard rail.'],
 ];
 for (const [name, body, color, glyph, sizes, what] of targets) {
   const out = `// Variables used by Scriptable.\n// These must be at the very top of the file. Do not edit.\n// icon-color: ${color}; icon-glyph: ${glyph};\n` +

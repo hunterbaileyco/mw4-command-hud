@@ -230,12 +230,14 @@ details li{margin:4px 0}
     D = d;
     if (!D.channels.some((c) => c.key === ch)) ch = D.channels[0].key;
     const gen = D.generatedAt || '';
-    $('asof').textContent = 'PULLED ' + gen;
-    $('sub').textContent = 'Every published post, back to each channel\u2019s first post. Snapshot ' + gen + '.';
     const asOfMs = new Date((D.asOfDay || '1970-01-01') + 'T23:59:59-07:00').getTime();
-    const stale = Date.now() - asOfMs > STALE_MS;
+    const stale = !D.asOfDay || Date.now() - asOfMs > STALE_MS;
+    $('asof').textContent = (stale ? 'SNAPSHOT ' : 'LIVE ') + (D.asOfDay || gen);
+    $('sub').textContent = stale
+      ? 'Every published post, back to each channel\u2019s first post. Snapshot ' + gen + '.'
+      : 'Every published post, back to each channel\u2019s first post. Live as of ' + (D.asOfDay || gen) + '.';
     $('dot').classList.toggle('stale', stale);
-    $('stale').textContent = stale ? '⚠ Snapshot from ' + gen + ' · posts after ' + fmtDay(D.asOfDay) + ' not included' : '';
+    $('stale').textContent = stale ? '⚠ SNAPSHOT from ' + gen + ' · posts after ' + fmtDay(D.asOfDay) + ' not included' : '';
     $('notes').innerHTML = [...D.notes, ...D.errors].map((n) => '<li>' + esc(n) + '</li>').join('');
     $('foot').textContent = 'Sources · ' + D.sources.join(' · ');
     render();

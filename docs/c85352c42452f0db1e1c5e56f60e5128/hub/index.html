@@ -258,6 +258,17 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   }
   $('sync2').addEventListener('click', (e) => { e.preventDefault(); pull(); });
   function setN(id, v) { const el = $(id); el.textContent = v; el.classList.remove('lk'); }
+  // Older feeds put Command waiting only in glance.line1. Badge already merged both boards.
+  function glanceOf(d) {
+    const g = (d && d.glance) || {};
+    const cc = (d.command && d.command.counts) || {};
+    const kc = (d.kal && d.kal.counts) || {};
+    const W = (cc.waiting || 0) + (kc.waiting || 0);
+    let line1 = String(g.line1 || '');
+    if (/\bwaiting on you\b/i.test(line1)) line1 = line1.replace(/\d+(?=\s+waiting on you\b)/i, String(W));
+    else if (!line1) line1 = ((cc.doing || 0) + (kc.doing || 0)) + ' doing · ' + W + ' waiting on you';
+    return { ...g, line1, badge: W ? W + ' WAIT' : 'CLEAR' };
+  }
   function hud(d) {
     const C = d.command || {}, K = d.kal || {}, cc = C.counts || {}, kc = K.counts || {};
     const rows = doingRows(d);
@@ -267,7 +278,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     $('hStn').textContent = standN ? standN + ' STN' : '';
     const t = new Date(d.updatedAt), age = Date.now() - t.getTime(), stale = !(age <= 30 * 60 * 1000);
     $('isync').innerHTML = (stale ? '<span style="color:var(--holdink)">⚠ STALE · </span>' : '') + 'HUD ' + PT(t) + ' PT · ' + agoShort(age);
-    const g = d.glance || {};
+    const g = glanceOf(d);
     $('hudHint').innerHTML = g.line1 ? `${g.badge ? `<b>${esc(g.badge)}</b> · ` : ''}${esc(g.line1)}` : '◆ Feed live';
     const cu = safeUrl(C.boardUrl), ku = safeUrl(K.boardUrl);
     if (cu) { $('cmdLink').href = cu; $('cmdLink').classList.remove('off'); }
@@ -337,8 +348,18 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
       const n = box[i].querySelector('.n'); n.textContent = fmtK(v); n.classList.remove('lk'); n.title = v.toLocaleString('en-US') + ' ' + (c.reach || 'views').toLowerCase();
     });
     const total = (d.posts || []).length;
-    const asOf = new Date((d.asOfDay || '1970-01-01') + 'T23:59:59-07:00').getTime(), stale = Date.now() - asOf > 36 * 3600 * 1000;
-    $('socHint').innerHTML = `${stale ? '<span class="w">⚠ SNAPSHOT</span>' : '<b>SNAPSHOT</b>'} ${esc(d.generatedAt || '')} · ${total} posts · views / impressions`;
+    // TODO(Price→Jae): social/metrics.json is still the 2026-10-31 envelope (as-of day 2026-10-30).
+    // Do not invent metrics. A live rebuild needs the off-repo pull
+    // kinsora-video/multi_channel_metrics_latest.json plus MW4_FEED_PASS and cache/kdf.json
+    // (neither is in this environment — a new key would break /api/feed). Postiz can list posts
+    // but not view counts. Windsor is connected (tiktok_organic, instagram, pinterest_organic);
+    // the daily series + per-post assembler is Jae's pull, not this page.
+    const asOf = new Date((d.asOfDay || '1970-01-01') + 'T23:59:59-07:00').getTime();
+    const stale = !d.asOfDay || Date.now() - asOf > 36 * 3600 * 1000;
+    const when = d.asOfDay || d.generatedAt || '';
+    $('socHint').innerHTML = stale
+      ? `<span class="w">⚠ SNAPSHOT</span> ${esc(when)} · ${total} posts · views / impressions`
+      : `<b>LIVE</b> ${esc(when)} · ${total} posts · views / impressions`;
   }
   function ledger(d) {
     const L = window.MW4Ledger;

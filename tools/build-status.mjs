@@ -10,8 +10,13 @@
 //   <prev>.next         next snapshot {at, snap, events}; caller renames both .next files after a push
 //   --out               public envelope {v,alg,kdf,iter,salt,iv,ct} — no readable card data
 // Prints "SAME" when the cleartext (ignoring updatedAt) equals <clear>, else "CHANGED".
+// Done cards count as shipped today only when the dump says they moved into Done on today's
+// America/Los_Angeles date: actions[].listAfter (or data.listAfter) named Done, or
+// completedAt / dateCompleted / movedToDoneAt. lastActivityAt is a touch, not a completion.
+// The refresh that writes cache/command.json and cache/kal.json must keep those fields.
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { webcrypto as wc } from 'node:crypto';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, v, i, arr) =>
@@ -32,11 +37,44 @@ const FLOW = 'Kal → Price → lane';
 const TZ = 'America/Los_Angeles';
 const EVENT_TTL_MS = 6 * 3600 * 1000;
 const dayKey = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date(d));
-const hitLane = (w) => {
+// Duo is the fold device (Duo-primary / Duo width), not a callsign. HUD cards tagged Lane: Duo
+// belong to Ko. Leaving the token unmatched used to drop the lane (blank plate, or TF141 on events).
+const LANE_ALIAS = { duo: 'Ko' };
+export function hitLane(w) {
   const s = String(w || '').trim().toLowerCase();
+  if (LANE_ALIAS[s]) return LANE_ALIAS[s];
+  const first = s.split(/\s+/)[0];
+  if (LANE_ALIAS[first]) return LANE_ALIAS[first];
   return LANES.find((x) => x.toLowerCase() === s)
-    || LANES.find((x) => !x.includes(' ') && x.toLowerCase() === s.split(/\s+/)[0]);
-};
+    || LANES.find((x) => !x.includes(' ') && x.toLowerCase() === first);
+}
+
+function listAfterName(action) {
+  if (!action || typeof action !== 'object') return '';
+  const data = action.data && typeof action.data === 'object' ? action.data : {};
+  const raw = action.listAfter || data.listAfter || (data.list && data.list.after);
+  if (typeof raw === 'string') return raw;
+  if (raw && raw.name) return String(raw.name);
+  return '';
+}
+
+// When the card entered the Done list. Not lastActivityAt.
+export function doneAtOf(card) {
+  if (!card || typeof card !== 'object') return null;
+  for (const key of ['completedAt', 'dateCompleted', 'movedToDoneAt']) {
+    if (card[key]) return card[key];
+  }
+  const acts = Array.isArray(card.actions) ? card.actions : Array.isArray(card.activity) ? card.activity : [];
+  let best = '';
+  for (const action of acts) {
+    const after = listAfterName(action).trim();
+    const key = String(action.displayKey || action.type || '');
+    if (!/^done$/i.test(after) && key !== 'action_move_card_to_done') continue;
+    const t = String(action.date || action.t || '');
+    if (t > best) best = t;
+  }
+  return best || null;
+}
 
 // Gap 5: lanes for cards (incl. Done cards) that carry no lane prefix. Order: label → "Lane: X" in
 // description (explicit wins) → name prefix → keyword map.
@@ -45,7 +83,7 @@ const LANE_KEYWORDS = [
   [/\b(avatar|portrait)s?\b/i, 'Dunn'], [/\btheme\b|\bClarity\b/i, 'Ko'], [/\bSEO\b/i, 'Park'],
   [/Postiz|Reels?|TikTok|Windsor/i, 'Jae'], [/retention|BFCM email/i, 'West'], [/packaging/i, 'Cho'],
 ];
-function laneOf(card, fallback = '') {
+export function laneOf(card, fallback = '') {
   const name = card.name || '';
   for (const l of card.labels || []) { const m = LANES.find((x) => (l.name || '').toLowerCase().includes(x.toLowerCase())); if (m) return m; }
   const m2 = /Lane:\s*([A-Za-z]+(?:\s+[A-Za-z]+)?)/i.exec(card.description || card.desc || '');
@@ -92,12 +130,12 @@ function shortOf(name, lane) {
 
 const slim = (c, fb) => { const lane = laneOf(c, fb); return { id: (c.id || '').split('/').pop(), name: c.name, short: shortOf(c.name, lane), lane, url: c.shortUrl || c.url || '' }; };
 
-function board(dump, fb, tag) {
+export function board(dump, fb, tag, now = NOW) {
   const by = {};
   for (const l of dump.lists || []) by[l.name.trim().toLowerCase()] = l.cards || [];
   const get = (...names) => names.map((n) => by[n]).find(Boolean) || [];
   const doing = get('doing'), waiting = get('waiting on hunter', 'waiting'), backlog = get('backlog'), done = get('done');
-  const today = dayKey(NOW);
+  const today = dayKey(now);
   const snap = {};
   for (const [list, arr] of [['doing', doing], ['waiting', waiting], ['backlog', backlog], ['done', done]])
     for (const c of arr) { const s = slim(c, fb); snap[s.id] = { list, op: s.lane || 'TF141', short: s.short, board: tag }; }
@@ -106,15 +144,37 @@ function board(dump, fb, tag) {
     out: {
       lists: { doing: doing.map((c) => slim(c, fb)), waiting: waiting.map((c) => slim(c, fb)), backlog: backlog.map((c) => slim(c, fb)),
         done: [...done].sort((a, b) => String(b.lastActivityAt || '').localeCompare(String(a.lastActivityAt || ''))).slice(0, 8)
-          .map((c) => ({ ...slim(c, fb), doneAt: c.lastActivityAt || null })) },
+          .map((c) => ({ ...slim(c, fb), doneAt: doneAtOf(c) })) },
       counts: { doing: doing.length, waiting: waiting.length, backlog: backlog.length,
-        doneToday: done.filter((c) => c.lastActivityAt && dayKey(c.lastActivityAt) === today).length },
+        doneToday: done.filter((c) => { const at = doneAtOf(c); return at && dayKey(at) === today; }).length },
     },
   };
 }
 
-const C = board(readJSON(args.command), '', 'CMD');
-const Kb = board(readJSON(args.kal), 'Ghost', 'KAL');
+export function glanceFor(cmd, kal) {
+  const W = (cmd.counts.waiting || 0) + (kal.counts.waiting || 0);
+  const nextWait = (cmd.lists.waiting || [])[0] || (kal.lists.waiting || [])[0];
+  const nowCard = (cmd.lists.doing || [])[0] || (kal.lists.doing || [])[0];
+  return {
+    line1: `${(cmd.counts.doing || 0) + (kal.counts.doing || 0)} doing · ${W} waiting on you`,
+    line2: nextWait ? `Next: ${nextWait.short}` : (nowCard ? `Now: ${nowCard.short}` : 'All clear'),
+    badge: W ? `${W} WAIT` : 'CLEAR',
+  };
+}
+
+// An --extra glance blob must not put Command-only waiting back into line1 or the badge.
+export function glanceMerged(extra, cmd, kal) {
+  const base = glanceFor(cmd, kal);
+  const over = extra && extra.glance;
+  if (!over) return base;
+  let line1 = String(over.line1 || base.line1);
+  if (/\bwaiting on you\b/i.test(line1)) line1 = line1.replace(/\d+(?=\s+waiting on you\b)/i, String((cmd.counts.waiting || 0) + (kal.counts.waiting || 0)));
+  return { ...base, ...over, line1, badge: base.badge };
+}
+
+async function main() {
+const C = board(readJSON(args.command), '', 'CMD', NOW);
+const Kb = board(readJSON(args.kal), 'Ghost', 'KAL', NOW);
 const cmd = C.out, kal = Kb.out;
 const extra = args.extra && fs.existsSync(args.extra) ? readJSON(args.extra) : {};
 const snap = { ...C.snap, ...Kb.snap };
@@ -159,7 +219,8 @@ const lanes = LANES.filter((n) => n !== 'Price').map((name) => {
 const alerts = [];
 const W = cmd.counts.waiting + kal.counts.waiting;
 if (W) alerts.push({ level: 'warn', text: `${W} card${W > 1 ? 's' : ''} waiting on Hunter (${cmd.counts.waiting} Command · ${kal.counts.waiting} Ghost)` });
-if (cmd.counts.doneToday) alerts.push({ level: 'go', text: `${cmd.counts.doneToday} shipped today` });
+const shipped = (cmd.counts.doneToday || 0) + (kal.counts.doneToday || 0);
+if (shipped) alerts.push({ level: 'go', text: `${shipped} shipped today` });
 if (!cmd.counts.doing) alerts.push({ level: 'info', text: 'Nothing in Doing on Command' });
 
 const status = {
@@ -171,11 +232,7 @@ const status = {
   alerts: extra.alerts || alerts,
   roster: ROSTER,
   flow: FLOW,
-  glance: extra.glance || {
-    line1: `${cmd.counts.doing + kal.counts.doing} doing · ${W} waiting on you`,
-    line2: (cmd.lists.waiting[0] || kal.lists.waiting[0]) ? `Next: ${(cmd.lists.waiting[0] || kal.lists.waiting[0]).short}` : (cmd.lists.doing[0] ? `Now: ${cmd.lists.doing[0].short}` : 'All clear'),
-    badge: W ? `${W} WAIT` : 'CLEAR',
-  },
+  glance: glanceMerged(extra, cmd, kal),
   events,
 };
 
@@ -207,5 +264,9 @@ const env = { v: 1, alg: 'AES-GCM', kdf: 'PBKDF2-SHA256', iter: kdf.iter, salt: 
 const out = args.out || 'status.json';
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, JSON.stringify(env) + '\n');
-console.error(`built: command doing=${cmd.counts.doing} waiting=${cmd.counts.waiting} backlog=${cmd.counts.backlog} doneToday=${cmd.counts.doneToday} | kal doing=${kal.counts.doing} waiting=${kal.counts.waiting} | +${stamped.length} events (${events.length} kept) | ${out} encrypted ${ct.length}B`);
+console.error(`built: command doing=${cmd.counts.doing} waiting=${cmd.counts.waiting} backlog=${cmd.counts.backlog} doneToday=${cmd.counts.doneToday} | kal doing=${kal.counts.doing} waiting=${kal.counts.waiting} doneToday=${kal.counts.doneToday} | glance waiting=${W} | +${stamped.length} events (${events.length} kept) | ${out} encrypted ${ct.length}B`);
 console.log(same ? 'SAME' : 'CHANGED');
+}
+
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) await main();

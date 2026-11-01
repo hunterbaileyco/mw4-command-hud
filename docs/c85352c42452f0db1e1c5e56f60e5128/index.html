@@ -603,11 +603,14 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     return `${p.day} ${String(p.month).toUpperCase()} · ${p.hour}${p.minute} PT`;
   };
   const laneOf = (c, fb) => {
+    if (/^duo$/i.test(c.lane || '')) return 'Ko';
     if (c.lane) return c.lane;
     const name = String(c.name || '');
     const multi = OPS.find((o) => /\s/.test(o) && new RegExp('^\\s*' + o.replace(/\s+/g, '\\s+') + '\\b', 'i').test(name));
     if (multi) return multi;
-    const m = /^\s*([A-Za-z]+)/.exec(name); const hit = m && OPS.find((o) => o.toLowerCase() === m[1].toLowerCase());
+    const m = /^\s*([A-Za-z]+)/.exec(name);
+    if (m && /^duo$/i.test(m[1])) return 'Ko'; // Duo fold device — HUD lane is Ko, never blank/TF141
+    const hit = m && OPS.find((o) => o.toLowerCase() === m[1].toLowerCase());
     return hit || fb || '';
   };
   const shortOf = (c) => { // feed supplies c.short (build-status.mjs); this is only a fallback
@@ -978,7 +981,12 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       $('intel').className = 'intel hold';
       $('intel').innerHTML = `<span class="bd">INTEL</span><span class="tx">OLDEST HOLD · ${esc(who)}${esc(age)} · <i>${esc(fullMission(top.c))}</i></span>`;
     } else {
-      const g = d.glance || {};
+      const ccG = (d.command && d.command.counts) || {}, kcG = (d.kal && d.kal.counts) || {};
+      const WG = (ccG.waiting || 0) + (kcG.waiting || 0);
+      const g0 = d.glance || {};
+      let line1 = String(g0.line1 || '');
+      if (/\bwaiting on you\b/i.test(line1)) line1 = line1.replace(/\d+(?=\s+waiting on you\b)/i, String(WG));
+      const g = { ...g0, line1, badge: WG ? WG + ' WAIT' : (g0.badge || 'CLEAR') };
       $('intel').className = 'intel';
       $('intel').innerHTML = (g.line1 || g.line2) ? `${g.badge ? `<span class="bd">${esc(g.badge)}</span>` : ''}<span class="tx">${esc(g.line1 || '')}${g.line2 ? ' · <i>' + esc(g.line2) + '</i>' : ''}</span>` : '';
     }

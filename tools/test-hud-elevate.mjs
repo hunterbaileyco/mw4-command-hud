@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -75,5 +76,14 @@ for (const width of [390, 430]) {
   const blob = JSON.stringify(segs);
   assert.equal(blob.includes('kal') , false);
 }
+
+const hudCss = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/theater.css', import.meta.url), 'utf8');
+const filesHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/files/index.html', import.meta.url), 'utf8');
+assert.match(hudCss, /--lap:18px/, 'theater plates overlap the box by the ORBAT lap');
+assert.match(hudCss, /margin-bottom:calc\(var\(--lap\) \* -1\)/, 'avatar sits on the plate, not above it');
+assert.match(hudCss, /\.tok\.s-hold \.pl\{[\s\S]*?repeating-linear-gradient\(-45deg,var\(--amber\)/, 'HOLD plates keep the Cho hazard stripe');
+assert.match(hudCss, /\.rt \.face img\{[^}]*object-position:center top;transform:scale\(1\.35\);transform-origin:center top\}/, 'FILES callsign crop stays top-anchored');
+assert.match(filesHtml, /class="face"/, 'FILES rail still wraps the callsign photo');
+assert.doesNotMatch(hudCss, /margin-bottom:4px/, 'Doing ring is not lifted clear of the plate');
 
 console.log('hud elevate checks ok');

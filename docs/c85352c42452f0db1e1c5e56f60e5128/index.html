@@ -701,7 +701,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     el.className = 'tok'; el.dataset.op = op;
     const ini = iniOf(op);
     el.innerHTML = `<span class="flash"></span><div class="bod"><div class="ring"><img src="avatars/${faceFile(op)}.png" alt="${esc(op)}" onerror="this.outerHTML='<div class=&quot;ini&quot;>${ini}</div>'"></div>
-      <div class="pl"><div class="cs">${esc(op.toUpperCase())}</div><div class="dsr"><span class="ds">${esc(DES[op] || '')}</span><span class="tp"></span></div><div class="mk"></div><div class="mt"></div></div></div>`;
+      <div class="pl"><div class="cs">${esc(op.toUpperCase())}</div><div class="dsr"><span class="ds">${esc(DES[op] || '')}</span><span class="tp"></span></div><div class="mk"></div><div class="mt"></div><div class="ftag"></div></div></div>`;
     el.addEventListener('click', () => goFile(op));
     return el;
   }
@@ -714,16 +714,18 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     el.className = 'tok s-' + zone + (kal ? ' kal' : '') + (echo ? ' echo' : '') + (fly ? ' fly' : '');
     el.querySelectorAll('.x2,.stillao,.stamp,.ov').forEach((n) => n.remove());
     const tp = el.querySelector('.tp'), mk = el.querySelector('.mk'), mt = el.querySelector('.mt'), pl = el.querySelector('.pl');
+    const ftag = pl.querySelector('.ftag');
     if (tp) tp.textContent = '';
-    mk.innerHTML = '';
+    if (mk) mk.innerHTML = '';
     mt.textContent = '';
     let ageMs = 0;
+    let foot = 'STBY';
     if (zone === 'hold') {
       const card = askCard || oldestWait(m) || (m.waiting || [])[0];
       const age = card ? holdAgeMs(card, m.op) : null;
       ageMs = age || 0;
       const stale = age != null && age >= 2 * 3600 * 1000;
-      mk.innerHTML = '<span>ASK</span>' + (age != null ? `<span class="age${stale ? ' stale' : ''}">⏱ ${esc(fmtAge(age))}</span>` : '');
+      foot = 'HOLD' + (age != null ? ` <span class="age${stale ? ' stale' : ''}">⏱ ${esc(fmtAge(age))}</span>` : '');
       mt.textContent = card ? fullMission(card) : 'Awaiting Hunter';
       if (echo) {
         const s = document.createElement('span');
@@ -735,7 +737,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       const finite = (m.finite && m.finite.length) ? m.finite : (m.doing || []).filter((c) => !isStanding(c));
       const dep = feedEvents.filter((e) => e.op === m.op && e.kind === 'deploy' && !standingEvent(e)).map((e) => Date.parse(e.t)).sort((a, c) => c - a)[0];
       if (tp && dep && !(finite[0] && finite[0].drill)) tp.textContent = 'T+' + agoShort(Date.now() - dep);
-      mk.innerHTML = `<span>${finite[0] && finite[0].drill ? 'SIM · ' : ''}${m.op === 'Ghost' ? 'MISSION · GHOST' : 'MISSION'}</span>`;
+      foot = finite[0] && finite[0].drill ? 'AO · SIM' : 'AO';
       mt.textContent = finite[0] ? fullMission(finite[0]) : 'Deployed';
       if (finite.length > 1) {
         const x = document.createElement('div');
@@ -751,7 +753,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       }
     } else if (zone === 'stand') {
       const standing = (m.standing && m.standing.length) ? m.standing : (m.doing || []).filter(isStanding);
-      mk.innerHTML = '<span>ALWAYS ON</span>';
+      foot = 'STN';
       mt.textContent = standing[0] ? fullMission(standing[0]) : 'On station';
       if (standing.length > 1) {
         const x = document.createElement('div');
@@ -760,14 +762,16 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
         pl.appendChild(x);
       }
     } else if (zone === 'ready') {
-      mk.innerHTML = `<span>NEXT</span><span class="q">Q${m.backlog.length}</span>`;
+      foot = `FOB<span class="q">Q${m.backlog.length}</span>`;
       mt.textContent = m.backlog[0] ? fullMission(m.backlog[0]) : '';
     } else if (zone === 'cp') {
+      foot = 'CMD';
       const o = document.createElement('div');
       o.className = 'ov';
       o.textContent = 'OVERWATCH';
       pl.appendChild(o);
-    } else mk.innerHTML = '<span>STBY</span>';
+    }
+    if (ftag) ftag.innerHTML = foot;
     el.dataset.age = String(ageMs);
   }
 

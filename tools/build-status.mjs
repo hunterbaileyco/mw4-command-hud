@@ -3,17 +3,23 @@
 // deploy/rtb/hold/cleared events, then ENCRYPT it (AES-256-GCM, key = PBKDF2-SHA256(auth code, salt)).
 // Usage:
 //   node build-status.mjs --command cache/command.json --kal cache/kal.json [--extra cache/extra.json] \
+//     [--command-activity cache/command.activity.json] [--kal-activity cache/kal.activity.json] \
 //     --prev cache/prev-status.json --clear cache/status.clear.json --kdf cache/kdf.json \
 //     --pass-file .pass --out docs/<token>/status.json [--now ISO]
+// Sidecars cache/command.activity.json and cache/kal.activity.json are read when present.
+// Activity is a Trello action list or { activities | activity | actions }.
 // Writes (all box-only except --out):
 //   <clear>.next        cleartext model (for build scripts / debugging; never committed)
 //   <prev>.next         next snapshot {at, snap, events}; caller renames both .next files after a push
 //   --out               public envelope {v,alg,kdf,iter,salt,iv,ct} — no readable card data
 // Prints "SAME" when the cleartext (ignoring updatedAt) equals <clear>, else "CHANGED".
-// Done cards count as shipped today only when the dump says they moved into Done on today's
-// America/Los_Angeles date: actions[].listAfter (or data.listAfter) named Done, or
-// completedAt / dateCompleted / movedToDoneAt. lastActivityAt is a touch, not a completion.
-// The refresh that writes cache/command.json and cache/kal.json must keep those fields.
+// Done cards count as shipped today only when they moved into Done on today's
+// America/Los_Angeles date. A touch (lastActivityAt) or a comment does not count.
+// Stamps on the card (actions into Done, completedAt / dateCompleted / movedToDoneAt)
+// are used when the dump has them. When it does not, list-move activity is read from
+// the dump (activities / activity / actions), a sidecar <dump>.activity.json,
+// --command-activity / --kal-activity, or Trello updateCard:idList when
+// TRELLO_KEY and TRELLO_TOKEN (or cache/trello-auth.json) are set.
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -21,7 +27,14 @@ import { webcrypto as wc } from 'node:crypto';
 
 const args = Object.fromEntries(process.argv.slice(2).reduce((a, v, i, arr) =>
   v.startsWith('--') ? [...a, [v.slice(2), arr[i + 1]]] : a, []));
-const readJSON = (p) => { const t = fs.readFileSync(p, 'utf8'); return JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1)); };
+const readJSON = (p) => {
+  const t = fs.readFileSync(p, 'utf8');
+  const obj = t.indexOf('{');
+  const arr = t.indexOf('[');
+  const start = [obj, arr].filter((n) => n >= 0).sort((a, b) => a - b)[0];
+  const end = t.lastIndexOf(t[start] === '[' ? ']' : '}');
+  return JSON.parse(t.slice(start, end + 1));
+};
 const NOW = args.now ? new Date(args.now).getTime() : Date.now();
 
 const LANES = ['Ju Kwon', 'Price', 'West', 'Ko', 'Cho', 'Jae', 'Park', 'Dunn', 'Ghost', 'Soap', 'Gaz', 'Kal'];
@@ -58,21 +71,96 @@ function listAfterName(action) {
   return '';
 }
 
-// When the card entered the Done list. Not lastActivityAt.
-export function doneAtOf(card) {
+function isDoneMove(action) {
+  const after = listAfterName(action).trim();
+  const key = String((action && (action.displayKey || action.type)) || '');
+  return /^done$/i.test(after) || key === 'action_move_card_to_done';
+}
+
+function cardKeys(card) {
+  const keys = [];
+  const push = (v) => {
+    const s = String(v || '').trim();
+    if (s && !keys.includes(s)) keys.push(s);
+  };
+  if (!card || typeof card !== 'object') return keys;
+  push(card.shortLink);
+  push(card.id);
+  push(String(card.id || '').split('/').pop());
+  for (const u of [card.shortUrl, card.url]) {
+    const m = /\/c\/([A-Za-z0-9]+)/.exec(String(u || ''));
+    if (m) push(m[1]);
+  }
+  return keys;
+}
+
+function actionCardKeys(action) {
+  const data = action && action.data && typeof action.data === 'object' ? action.data : {};
+  const card = { ...(data.card || {}), ...(action && action.card || {}) };
+  if (!card.id && action && action.idCard) card.id = action.idCard;
+  return cardKeys(card);
+}
+
+function normalizeActivity(activity) {
+  if (!activity || activity instanceof Map || typeof activity !== 'object') return [];
+  if (Array.isArray(activity)) return activity;
+  if (Array.isArray(activity.activities)) return activity.activities;
+  if (Array.isArray(activity.activity)) return activity.activity;
+  if (Array.isArray(activity.actions)) return activity.actions;
+  return [];
+}
+
+// Latest move into Done, keyed by card id tail and short link. Comments are not entries.
+export function doneMoveIndex(activity) {
+  const idx = new Map();
+  for (const action of normalizeActivity(activity)) {
+    if (!isDoneMove(action)) continue;
+    const t = String(action.date || action.t || '');
+    if (!t) continue;
+    for (const id of actionCardKeys(action)) {
+      if (t > (idx.get(id) || '')) idx.set(id, t);
+    }
+  }
+  return idx;
+}
+
+function lookupMove(card, index) {
+  if (!index || !index.size) return '';
+  let best = '';
+  for (const k of cardKeys(card)) {
+    const t = index.get(k) || '';
+    if (t > best) best = t;
+  }
+  return best;
+}
+
+export function activityOf(dump, extra) {
+  return [
+    ...normalizeActivity(extra),
+    ...normalizeActivity(dump && dump.activities),
+    ...normalizeActivity(dump && dump.activity),
+    ...normalizeActivity(dump && dump.actions),
+  ];
+}
+
+// When the card entered the Done list. Not lastActivityAt. `moves` is a doneMoveIndex
+// or a board activity list/wrapper used when the card itself has no stamp.
+export function doneAtOf(card, moves) {
   if (!card || typeof card !== 'object') return null;
+  let best = '';
   for (const key of ['completedAt', 'dateCompleted', 'movedToDoneAt']) {
-    if (card[key]) return card[key];
+    const t = card[key] ? String(card[key]) : '';
+    if (t > best) best = t;
   }
   const acts = Array.isArray(card.actions) ? card.actions : Array.isArray(card.activity) ? card.activity : [];
-  let best = '';
   for (const action of acts) {
-    const after = listAfterName(action).trim();
-    const key = String(action.displayKey || action.type || '');
-    if (!/^done$/i.test(after) && key !== 'action_move_card_to_done') continue;
+    if (!isDoneMove(action)) continue;
     const t = String(action.date || action.t || '');
     if (t > best) best = t;
   }
+  const index = moves instanceof Map ? moves : doneMoveIndex(moves);
+  const fromBoard = lookupMove(card, index);
+  if (fromBoard > best) best = fromBoard;
   return best || null;
 }
 
@@ -130,12 +218,17 @@ function shortOf(name, lane) {
 
 const slim = (c, fb) => { const lane = laneOf(c, fb); return { id: (c.id || '').split('/').pop(), name: c.name, short: shortOf(c.name, lane), lane, url: c.shortUrl || c.url || '' }; };
 
-export function board(dump, fb, tag, now = NOW) {
+function listsOf(dump) {
   const by = {};
-  for (const l of dump.lists || []) by[l.name.trim().toLowerCase()] = l.cards || [];
+  for (const l of (dump && dump.lists) || []) by[String(l.name || '').trim().toLowerCase()] = l.cards || [];
   const get = (...names) => names.map((n) => by[n]).find(Boolean) || [];
-  const doing = get('doing'), waiting = get('waiting on hunter', 'waiting'), backlog = get('backlog'), done = get('done');
+  return { doing: get('doing'), waiting: get('waiting on hunter', 'waiting'), backlog: get('backlog'), done: get('done') };
+}
+
+export function board(dump, fb, tag, now = NOW, moves) {
+  const { doing, waiting, backlog, done } = listsOf(dump);
   const today = dayKey(now);
+  const index = doneMoveIndex(activityOf(dump, moves));
   const snap = {};
   for (const [list, arr] of [['doing', doing], ['waiting', waiting], ['backlog', backlog], ['done', done]])
     for (const c of arr) { const s = slim(c, fb); snap[s.id] = { list, op: s.lane || 'TF141', short: s.short, board: tag }; }
@@ -144,9 +237,9 @@ export function board(dump, fb, tag, now = NOW) {
     out: {
       lists: { doing: doing.map((c) => slim(c, fb)), waiting: waiting.map((c) => slim(c, fb)), backlog: backlog.map((c) => slim(c, fb)),
         done: [...done].sort((a, b) => String(b.lastActivityAt || '').localeCompare(String(a.lastActivityAt || ''))).slice(0, 8)
-          .map((c) => ({ ...slim(c, fb), doneAt: doneAtOf(c) })) },
+          .map((c) => ({ ...slim(c, fb), doneAt: doneAtOf(c, index) })) },
       counts: { doing: doing.length, waiting: waiting.length, backlog: backlog.length,
-        doneToday: done.filter((c) => { const at = doneAtOf(c); return at && dayKey(at) === today; }).length },
+        doneToday: done.filter((c) => { const at = doneAtOf(c, index); return at && dayKey(at) === today; }).length },
     },
   };
 }
@@ -172,9 +265,93 @@ export function glanceMerged(extra, cmd, kal) {
   return { ...base, ...over, line1, badge: base.badge };
 }
 
+const BOARD_SHORT = { CMD: 'JcLDGY59', KAL: '9zrVdX34' };
+
+function ptDayStartIso(now) {
+  const day = dayKey(now);
+  for (const off of ['-07:00', '-08:00']) {
+    const ms = Date.parse(`${day}T00:00:00.000${off}`);
+    if (Number.isNaN(ms) || dayKey(ms) !== day || dayKey(ms - 1) === day) continue;
+    return new Date(ms).toISOString();
+  }
+  return new Date(`${day}T08:00:00.000Z`).toISOString();
+}
+
+function boardShort(dump, tag) {
+  const url = (dump && dump.board && dump.board.url) || (dump && dump.url) || '';
+  const m = /\/b\/([A-Za-z0-9]+)/.exec(url);
+  if (m) return m[1];
+  if (dump && dump.board && dump.board.shortLink) return String(dump.board.shortLink);
+  return BOARD_SHORT[tag] || '';
+}
+
+function readActivity(p) {
+  if (!p || !fs.existsSync(p)) return [];
+  try { return normalizeActivity(readJSON(p)); } catch { return []; }
+}
+
+function sidecarFor(dumpPath) {
+  if (!dumpPath) return [];
+  const stem = dumpPath.replace(/\.json$/i, '');
+  return [...readActivity(`${stem}.activity.json`), ...readActivity(`${stem}.actions.json`)];
+}
+
+function trelloAuth() {
+  const key = process.env.TRELLO_KEY || process.env.TRELLO_API_KEY || '';
+  const token = process.env.TRELLO_TOKEN || process.env.TRELLO_API_TOKEN || '';
+  if (key && token) return { key, token };
+  const p = args['trello-auth'] || 'cache/trello-auth.json';
+  if (!fs.existsSync(p)) return null;
+  try {
+    const j = JSON.parse(fs.readFileSync(p, 'utf8'));
+    if (j.key && j.token) return { key: String(j.key), token: String(j.token) };
+  } catch { /* ignore */ }
+  return null;
+}
+
+async function fetchListMoves(shortLink, sinceIso) {
+  const auth = trelloAuth();
+  if (!auth || !shortLink) return [];
+  const out = [];
+  let before = '';
+  for (let page = 0; page < 10; page++) {
+    const url = new URL(`https://api.trello.com/1/boards/${shortLink}/actions`);
+    url.searchParams.set('filter', 'updateCard:idList');
+    url.searchParams.set('since', sinceIso);
+    url.searchParams.set('limit', '1000');
+    url.searchParams.set('key', auth.key);
+    url.searchParams.set('token', auth.token);
+    if (before) url.searchParams.set('before', before);
+    let res;
+    try { res = await fetch(url); } catch { return out; }
+    if (!res.ok) return out;
+    let batch;
+    try { batch = await res.json(); } catch { return out; }
+    if (!Array.isArray(batch) || !batch.length) break;
+    out.push(...batch);
+    if (batch.length < 1000) break;
+    before = batch[batch.length - 1] && batch[batch.length - 1].id;
+    if (!before) break;
+  }
+  return out;
+}
+
+async function extraMoves(dumpPath, dump, tag, explicitPath) {
+  const extra = [...readActivity(explicitPath), ...sidecarFor(dumpPath)];
+  const index = doneMoveIndex(activityOf(dump, extra));
+  const missing = listsOf(dump).done.some((c) => !doneAtOf(c, index));
+  if (!missing) return extra;
+  const fetched = await fetchListMoves(boardShort(dump, tag), ptDayStartIso(NOW));
+  return fetched.length ? [...extra, ...fetched] : extra;
+}
+
 async function main() {
-const C = board(readJSON(args.command), '', 'CMD', NOW);
-const Kb = board(readJSON(args.kal), 'Ghost', 'KAL', NOW);
+const commandDump = readJSON(args.command);
+const kalDump = readJSON(args.kal);
+const commandMoves = await extraMoves(args.command, commandDump, 'CMD', args['command-activity']);
+const kalMoves = await extraMoves(args.kal, kalDump, 'KAL', args['kal-activity']);
+const C = board(commandDump, '', 'CMD', NOW, commandMoves);
+const Kb = board(kalDump, 'Ghost', 'KAL', NOW, kalMoves);
 const cmd = C.out, kal = Kb.out;
 const extra = args.extra && fs.existsSync(args.extra) ? readJSON(args.extra) : {};
 const snap = { ...C.snap, ...Kb.snap };
@@ -264,7 +441,7 @@ const env = { v: 1, alg: 'AES-GCM', kdf: 'PBKDF2-SHA256', iter: kdf.iter, salt: 
 const out = args.out || 'status.json';
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, JSON.stringify(env) + '\n');
-console.error(`built: command doing=${cmd.counts.doing} waiting=${cmd.counts.waiting} backlog=${cmd.counts.backlog} doneToday=${cmd.counts.doneToday} | kal doing=${kal.counts.doing} waiting=${kal.counts.waiting} doneToday=${kal.counts.doneToday} | glance waiting=${W} | +${stamped.length} events (${events.length} kept) | ${out} encrypted ${ct.length}B`);
+console.error(`built: command doing=${cmd.counts.doing} waiting=${cmd.counts.waiting} backlog=${cmd.counts.backlog} doneToday=${cmd.counts.doneToday} moves=${commandMoves.length} | kal doing=${kal.counts.doing} waiting=${kal.counts.waiting} doneToday=${kal.counts.doneToday} moves=${kalMoves.length} | glance waiting=${W} | +${stamped.length} events (${events.length} kept) | ${out} encrypted ${ct.length}B`);
 console.log(same ? 'SAME' : 'CHANGED');
 }
 

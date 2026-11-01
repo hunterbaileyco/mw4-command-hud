@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#0B0E0C">
 <link rel="apple-touch-icon" href="../icon.svg">
 <link rel="stylesheet" href="../suite.css">
+<script src="../brand-icons.js"></script>
 <title>Kinsora social — published metrics</title>
 <style>
 *{box-sizing:border-box}
@@ -43,14 +44,22 @@ h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.01em}
 @media(min-width:720px){.all{grid-template-columns:repeat(4,1fr)}}
 .tile{position:relative;appearance:none;text-align:left;background:#0d110e;border:1px solid var(--line);border-radius:5px;padding:8px 8px 6px;color:var(--ink);cursor:pointer;min-height:104px;display:flex;flex-direction:column;gap:2px;overflow:hidden}
 .tile .pf{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tile .pf .g{flex:0 0 auto;font-weight:800;color:#0B0E0C;background:var(--tan);border-radius:2px;padding:0 4px;font-size:8px}
+.tile .pf .g{flex:0 0 auto;display:flex;align-items:center;background:transparent;padding:0;line-height:0}
 .tile .n{font-family:var(--mono);font-size:21px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums;line-height:1.1}
 .tile .n small{font-size:8.5px;letter-spacing:.14em;color:var(--dim);font-weight:400;margin-left:4px}
 .tile .d{font-size:10.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tile svg{display:block;width:100%;height:24px;margin-top:auto}
-.tile.on{border-color:var(--amber);background:linear-gradient(rgba(232,163,23,.08),#0d110e 70%);box-shadow:0 0 0 1px rgba(232,163,23,.5),0 0 16px rgba(232,163,23,.15)}
+.tile svg.spark{display:block;width:100%;height:24px;margin-top:auto}
+.tile .mw4-mark{width:16px;height:16px}
+.zh .mw4-mark{margin-right:6px}
+.tile.on{border-color:var(--amber);background:linear-gradient(rgba(232,163,23,.10),rgba(13,17,14,.92) 70%);box-shadow:0 0 0 1px rgba(232,163,23,.5),0 0 16px rgba(232,163,23,.15),inset 0 1px 0 rgba(232,226,214,.06)}
 .tile.on::before{content:"◆ ACTIVE";position:absolute;top:6px;right:6px;font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;color:var(--amber)}
-.tile.on .pf .g{background:var(--amber)}
+.tile[data-kind="tiktok"]{border-top:2px solid #25F4EE}
+.tile[data-kind="instagram"]{border-top:2px solid #d62976}
+.tile[data-kind="pinterest"]{border-top:2px solid #E60023}
+.tile[data-kind="youtube"]{border-top:2px solid #FF0000}
+.tile[data-kind="x"]{border-top:2px solid #E8E2D6}
+.tile[data-kind="facebook"]{border-top:2px solid #0866FF}
+.pn{background:linear-gradient(180deg,rgba(18,22,18,.92),rgba(13,17,14,.94));box-shadow:inset 0 1px 0 rgba(197,165,114,.08)}
 /* range + mode segs */
 .ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:#0d110e;border:1px solid var(--line);border-radius:5px;padding:3px;gap:3px;flex:1;min-width:220px}
@@ -216,7 +225,7 @@ details li{margin:4px 0}
   const fmtDay = (iso) => { const [, m, d] = iso.split('-').map(Number); return MON[m - 1] + ' ' + d; };
   const daysBefore = (iso, n) => new Date(new Date(iso + 'T12:00:00Z').getTime() - n * 86400000).toISOString().slice(0, 10);
   const sum = (rows, i) => rows.reduce((a, r) => a + (r[i] ?? 0), 0);
-  const GLYPH = { tt_kco: 'TT', tt_wk: 'TT', ig: 'IG', pin: 'PIN' };
+  const mark = (c, px) => (window.MW4Icons ? MW4Icons.markHtml(c, px) : '');
   let D = null, ch = 'tt_kco', range = 'all', mode = 'calendar', sort = 'new', limit = 24, q = '';
 
   function start(d) {
@@ -242,11 +251,11 @@ details li{margin:4px 0}
       pts = [...m.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map((p) => p[1]);
     }
     pts = pts.slice(-45);
-    if (pts.length < 1) return '<svg viewBox="0 0 100 24"></svg>';
+    if (pts.length < 1) return '<svg class="spark" viewBox="0 0 100 24"></svg>';
     const mx = Math.max(1, ...pts), x = (i) => (i * 100) / (pts.length - 1), y = (v) => 22 - (v / mx) * 20;
-    if (pts.length < 8) { const bw = 100 / pts.length; return `<svg viewBox="0 0 100 24" preserveAspectRatio="none">${pts.map((v, i) => `<rect x="${(i * bw + bw * 0.2).toFixed(1)}" y="${y(v).toFixed(1)}" width="${(bw * 0.6).toFixed(1)}" height="${(24 - y(v)).toFixed(1)}" fill="#E8A317" opacity=".7"/>`).join('')}</svg>`; }
+    if (pts.length < 8) { const bw = 100 / pts.length; return `<svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none">${pts.map((v, i) => `<rect x="${(i * bw + bw * 0.2).toFixed(1)}" y="${y(v).toFixed(1)}" width="${(bw * 0.6).toFixed(1)}" height="${(24 - y(v)).toFixed(1)}" fill="#E8A317" opacity=".7"/>`).join('')}</svg>`; }
     const line = pts.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-    return `<svg viewBox="0 0 100 24" preserveAspectRatio="none"><polygon points="0,24 ${line} 100,24" fill="rgba(232,163,23,.12)"/><polyline points="${line}" fill="none" stroke="#E8A317" stroke-width="1.2" vector-effect="non-scaling-stroke"/></svg>`;
+    return `<svg class="spark" viewBox="0 0 100 24" preserveAspectRatio="none"><polygon points="0,24 ${line} 100,24" fill="rgba(232,163,23,.12)"/><polyline points="${line}" fill="none" stroke="#E8A317" stroke-width="1.2" vector-effect="non-scaling-stroke"/></svg>`;
   }
   function render() {
     const C = D.channels, meta = C.find((c) => c.key === ch);
@@ -254,8 +263,8 @@ details li{margin:4px 0}
     $('all').innerHTML = C.map((c) => {
       const rs = D.posts.filter((r) => r[0] === c.key);
       const first = rs.reduce((a, r) => (r[1] < a ? r[1] : a), '9999');
-      return `<button class="tile${c.key === ch ? ' on' : ''}" data-ch="${c.key}" type="button" aria-pressed="${c.key === ch}">
-        <div class="pf"><span class="g">${GLYPH[c.key] || esc(c.short)}</span>${esc(c.handle || c.label)}</div>
+      return `<button class="tile${c.key === ch ? ' on' : ''}" data-ch="${c.key}" data-kind="${window.MW4Icons ? MW4Icons.kindFrom(c) : ''}" type="button" aria-pressed="${c.key === ch}">
+        <div class="pf"><span class="g">${mark(c, 16)}</span>${esc(c.handle || c.label)}</div>
         <div class="n" title="${fmt(sum(rs, 4))}">${fmtK(sum(rs, 4))}<small>${esc(c.reach.toUpperCase())}${c.key === 'pin' ? ' · 90D' : ''}</small></div>
         <div class="d">${rs.length} posts since ${first === '9999' ? '—' : fmtDay(first)}${c.queue ? ' · +' + c.queue + ' queued' : ''}</div>${spark(c.key)}</button>`;
     }).join('');
@@ -268,7 +277,7 @@ details li{margin:4px 0}
     const withData = rows.filter((r) => r[4] != null);
     const top = [...withData].sort((a, b) => b[4] - a[4])[0];
     const pin = ch === 'pin';
-    $('chname').innerHTML = `<span class="sec">${esc(GLYPH[ch] || meta.short)}</span>${esc(meta.label)}`;
+    $('chname').innerHTML = `${mark(meta, 15)}<span class="sec">${esc(meta.short)}</span>${esc(meta.label)}`;
     $('chplat').textContent = meta.platform + ' · ' + meta.handle;
     const rlabel = range === 'all' ? 'since first post' : 'last ' + range + ' days';
     $('kv').innerHTML = [

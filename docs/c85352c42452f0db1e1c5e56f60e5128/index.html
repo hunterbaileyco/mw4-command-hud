@@ -13,6 +13,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon.svg">
 <link rel="stylesheet" href="suite.css">
+<script src="action-panel.js"></script>
 <title>MW4 // COMMAND</title>
 <style>
 :root{
@@ -333,6 +334,57 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 }
 @media(max-width:899px){.sidecol{display:contents}}
 @media (prefers-reduced-motion:reduce){.holdbox .zhead b{animation:none!important}.sweep,.tok .bod,.ring::after,.wire::before{animation:none!important}:root{--fly:400ms}}
+
+/* ===== v3 ops theater ===== */
+.mastsub{font-family:var(--mono);font-size:8px;letter-spacing:.22em;color:var(--coyote);margin-top:4px}
+.top .brand{font-size:20px;letter-spacing:.18em;text-shadow:0 0 18px rgba(197,165,114,.18)}
+.chrome{background:rgba(10,14,11,.78);border-color:rgba(197,165,114,.34);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 1px 0 rgba(232,226,214,.07),0 14px 36px rgba(0,0,0,.4)}
+.chrome div{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"l n" "s n" "b b";align-items:center;padding:8px 8px 7px;row-gap:1px}
+.chrome .l{grid-area:l;color:var(--ink);font-weight:800;font-size:9px;letter-spacing:.16em}
+.chrome .sub{grid-area:s;font-family:var(--mono);font-size:7px;letter-spacing:.11em;color:var(--dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chrome .n{grid-area:n;font-size:22px;line-height:.85;justify-self:end}
+.chrome .bar{grid-area:b;margin-top:5px;height:3px}
+.chrome .act{box-shadow:inset 0 2px 0 var(--amber)}
+.chrome .hld{box-shadow:inset 0 2px 0 var(--holdink)}
+.chrome .q{box-shadow:inset 0 2px 0 var(--tan)}
+.chrome .shp{box-shadow:inset 0 2px 0 var(--olive2)}
+.stage{background:linear-gradient(180deg,rgba(22,28,20,.9),rgba(8,10,9,.96));box-shadow:0 0 0 1px rgba(197,165,114,.2),inset 0 1px 0 rgba(232,226,214,.06),0 24px 54px rgba(0,0,0,.48);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.zhead b{gap:6px;flex:1;min-width:0}
+.zt{font-weight:800;letter-spacing:.18em;color:var(--ink)}
+.zw{font-weight:500;color:var(--dim);letter-spacing:.12em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ao .zt{color:var(--amber)}
+.holdbox .zt{color:var(--holdink)}
+.fob .zt,.orbat .zt{color:var(--tan)}
+.tok.s-ao{width:128px;padding:8px 6px 7px;border-radius:4px;background:linear-gradient(180deg,rgba(232,163,23,.14),rgba(11,14,12,.78));border:1px solid rgba(232,163,23,.42);box-shadow:0 12px 24px rgba(0,0,0,.4),inset 0 1px 0 rgba(232,163,23,.28)}
+.tok.s-hold{width:98px;padding:6px 4px;border-radius:3px;background:linear-gradient(180deg,rgba(139,58,42,.32),rgba(11,14,12,.82));border:1px solid rgba(224,122,95,.5);box-shadow:inset 0 0 18px rgba(139,58,42,.35)}
+.tok.s-ready{padding:4px 2px 6px;border-radius:3px;background:rgba(107,124,58,.1);border:1px solid rgba(107,124,58,.38)}
+.tok.s-cp{padding:2px}
+.cs{font-size:11px;letter-spacing:.16em}
+.orbat,details.log,.ticker{background:linear-gradient(180deg,rgba(18,22,18,.94),rgba(10,13,11,.96));box-shadow:inset 0 1px 0 rgba(197,165,114,.1),0 14px 30px rgba(0,0,0,.32);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.orow{min-height:46px;background:rgba(8,10,9,.78)}
+.orow .nm{font-size:11px}
+.orow .nm i{font-style:normal;font-weight:500;font-size:8px;letter-spacing:.12em;color:var(--dim);margin-left:4px}
+.orow img{width:30px;height:30px}
+.seg{grid-template-columns:repeat(4,1fr)}
+.seg button{font-size:8.5px;letter-spacing:.06em;padding:8px 1px}
+.card{display:grid;grid-template-columns:34px minmax(0,1fr);column-gap:8px;align-items:center;border-left:2px solid var(--line);padding-left:8px}
+.card .av{grid-row:1 / span 2;width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(197,165,114,.45);background:var(--idle)}
+span.av.ini{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:800;color:var(--tan);width:32px;height:32px;border-radius:50%;border:1px solid var(--line2);background:var(--idle)}
+.card.act{border-left-color:var(--amber)}
+.card.hold{border-left-color:var(--holdink)}
+.card.queue{border-left-color:var(--coyote)}
+.card.done{border-left-color:var(--olive)}
+.card .ch,.card .ct{grid-column:2;min-width:0}
+.card .ln{letter-spacing:.1em;text-transform:uppercase;font-family:var(--mono);font-size:11px;color:var(--tan)}
+#fobc{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--dim);margin-right:6px}
+#sheet .hd img{box-shadow:0 0 0 1px rgba(197,165,114,.45),0 0 16px rgba(232,163,23,.18)}
+@media(min-width:900px){
+  .top .brand{font-size:26px}
+  .tok.s-ao{width:156px}
+  .chrome .n{font-size:28px}
+  .chrome .sub{font-size:8px}
+  .mastsub{font-size:9px}
+}
 </style>
 </head>
 <body class="sx-pad">
@@ -341,14 +393,14 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · THEATER</span><span class="clk" id="clk">—</span></div>
 <div class="wrap">
   <div class="top">
-    <div><div class="kick"><span class="sx-rec"></span>Live theater · CMD + KAL</div><div class="brand">MW4 <span class="sl">//</span> COMMAND <span class="sl">·</span> TF141</div></div>
+    <div><div class="kick"><span class="sx-rec"></span>TF141 · Operator theater · CMD + KAL</div><div class="brand">MW4 <span class="sl">//</span> COMMAND</div><div class="mastsub">DOING · WAITING · QUEUE · DONE · HOLD</div></div>
     <div class="asof"><span class="dot" id="dot"></span><span id="upd">—</span><button class="snd" id="snd" type="button" aria-label="Toggle sound" title="Sound">🔊</button></div>
   </div>
   <div class="chrome">
-    <div class="act"><span class="l">ACT</span><span class="n" id="nAct">0</span><i class="bar"><b id="bAct"></b></i></div>
-    <div class="hld"><span class="l">HOLD</span><span class="n" id="nHold">0</span><i class="bar"><b id="bHold"></b></i></div>
-    <div class="q"><span class="l">QUEUE</span><span class="n" id="nQ">0</span><i class="bar"><b id="bQ"></b></i></div>
-    <div class="shp"><span class="l">SHIPPED</span><span class="n" id="nShip">0</span><i class="bar"><b id="bShip"></b></i></div>
+    <div class="act"><span class="l">DOING</span><span class="sub">ACT · WIRE</span><span class="n" id="nAct">0</span><i class="bar"><b id="bAct"></b></i></div>
+    <div class="hld"><span class="l">WAITING</span><span class="sub">HOLD · HUNTER</span><span class="n" id="nHold">0</span><i class="bar"><b id="bHold"></b></i></div>
+    <div class="q"><span class="l">QUEUE</span><span class="sub">FOB · READY</span><span class="n" id="nQ">0</span><i class="bar"><b id="bQ"></b></i></div>
+    <div class="shp"><span class="l">DONE</span><span class="sub">SHIPPED · TODAY</span><span class="n" id="nShip">0</span><i class="bar"><b id="bShip"></b></i></div>
   </div>
   <div class="intel" id="intel"></div>
 
@@ -357,7 +409,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     <div class="sx-ruler"></div>
     <div class="ao">
       <div class="sweep"></div>
-      <div class="zhead"><b><span class="sec">SEC A</span>AO · Across the wire</b><span id="aoc">0 DEPLOYED</span></div>
+      <div class="zhead"><b><span class="sec">DO</span><span class="zt">DOING</span><span class="zw">AO · Across the wire</span></b><span id="aoc">0 DEPLOYED</span></div>
       <div class="xy" id="xy">LAT 33.3152 N<br>LON 44.3661 E</div>
       <div class="grid">GRID 38S MB 4471<br>OBJ · KINSORA</div>
       <div class="cmp"></div>
@@ -372,11 +424,11 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     </div>
     <div class="holdbox" id="holdbox">
       <span class="hz"></span>
-      <div class="zhead"><b><svg class="lockic" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5"/><path d="M3.8 5.5V3.8a2.2 2.2 0 0 1 4.4 0v1.7"/></svg><span class="sec">SEC B</span>HOLD cage · Awaiting Hunter</b><span id="hdc">0 STALLED</span></div>
+      <div class="zhead"><b><svg class="lockic" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5"/><path d="M3.8 5.5V3.8a2.2 2.2 0 0 1 4.4 0v1.7"/></svg><span class="sec">HOLD</span><span class="zt">WAITING</span><span class="zw">Cage · Awaiting Hunter</span></b><span id="hdc">0 STALLED</span></div>
       <div class="zone" id="zHOLD"></div>
     </div>
     <div class="fob">
-      <div class="zhead"><b><span class="sec">SEC C</span>FOB · Ready room</b><span><button class="drill" id="drill" type="button">▶ DRILL</button></span></div>
+      <div class="zhead"><b><span class="sec">FOB</span><span class="zt">QUEUE</span><span class="zw">Ready room</span></b><span><span id="fobc">0 QUEUED</span> <button class="drill" id="drill" type="button">▶ DRILL</button></span></div>
       <div class="fobgrid">
         <div class="cp"><div class="zone" id="zCP"></div></div>
         <div class="zone" id="zREADY"></div>
@@ -387,7 +439,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
   <div class="sidecol">
   <section class="orbat" id="orbatbox">
     <span class="sx-brk tl"></span><span class="sx-brk br"></span>
-    <div class="zhead"><b>ORBAT · Operator callsigns</b><span id="orbc">11 OPS</span></div>
+    <div class="zhead"><b><span class="sec">ORB</span><span class="zt">CALLSIGNS</span><span class="zw">Operator roster</span></b><span id="orbc">11 OPS</span></div>
     <div class="orb" id="orb"></div>
   </section>
 
@@ -397,8 +449,9 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     <summary>MISSION LOG<span class="r" id="logc">CMD + KAL</span></summary>
     <div class="logb">
       <div class="seg" role="tablist">
-        <button data-tab="ops" class="on">OPS<span class="c" id="tOps"></span></button>
-        <button data-tab="hold">HOLD<span class="c" id="tHold"></span></button>
+        <button data-tab="doing" class="on">DOING<span class="c" id="tDo"></span></button>
+        <button data-tab="hold">WAITING<span class="c" id="tHold"></span></button>
+        <button data-tab="queue">QUEUE<span class="c" id="tQ"></span></button>
         <button data-tab="done">DONE<span class="c" id="tDone"></span></button>
       </div>
       <div id="feed"></div>
@@ -476,7 +529,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
   ['pointerdown', 'touchstart', 'keydown'].forEach((ev) => document.addEventListener(ev, () => { if (soundOn) audio(); }, { passive: true }));
   paintSnd();
 
-  let lastData = null, lastFetch = null, tab = 'ops', cards = [], pending = null, started = false;
+  let lastData = null, lastFetch = null, tab = 'doing', cards = [], pending = null, started = false;
   let prevZones = null;           // op -> committed zone from the previous render (in memory)
   const shown = {};               // op -> zone currently drawn on stage
   let events = [];                // locally observed transitions (fallback when the feed has no events)
@@ -500,6 +553,13 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     tab = b.dataset.tab; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b)); renderFeed();
   }));
   $('sheet').addEventListener('click', (e) => { if (e.target.id === 'sheet' || e.target.closest('.x')) $('sheet').classList.remove('on'); });
+  $('feed').addEventListener('click', (e) => {
+    const av = e.target.closest('[data-open]');
+    if (!av) return;
+    e.preventDefault();
+    openSheet(av.getAttribute('data-open'));
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('sheet').classList.remove('on'); });
 
   const ago = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'just now' : m < 60 ? m + 'm ago' : Math.floor(m / 60) + 'h ' + (m % 60) + 'm ago'; };
   const agoShort = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'NOW' : m < 60 ? m + 'M' : Math.floor(m / 60) + 'H'; };
@@ -638,6 +698,9 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     const nAO = order.zAO.length, nH = order.zHOLD.length;
     $('aoc').textContent = nAO + ' DEPLOYED'; $('quiet').style.display = nAO ? 'none' : '';
     $('hdc').textContent = nH + ' STALLED'; $('holdbox').classList.toggle('empty', !nH);
+    const nReady = order.zREADY.filter((op) => M[op].zone === 'ready').length;
+    const nIdle = order.zREADY.length - nReady;
+    $('fobc').textContent = nReady + ' QUEUED · ' + nIdle + ' STANDBY';
     let crossed = '';
     const was = { ...shown };
     for (const op of OPS) shown[op] = M[op].zone;
@@ -763,12 +826,30 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     for (const e of Array.isArray(d.events) ? d.events : []) if (!known.has(e.t + e.op + e.kind)) feedEvents.push({ ...e });
     feedEvents = feedEvents.filter((e) => Date.now() - Date.parse(e.t) < 6 * 3600 * 1000).sort((a, b) => a.t.localeCompare(b.t));
     if (playing || queue.length) stageDirty = true; else stageUpdate();
-    $('tOps').textContent = nAct + nHold + nQ; $('tHold').textContent = nHold;
+    $('tDo').textContent = nAct; $('tHold').textContent = nHold; $('tQ').textContent = nQ;
     $('tDone').textContent = by('done').length || nShip || '';
     $('logc').textContent = `${nAct + nHold + nQ} OPEN · CMD + KAL`;
     renderFeed();
     renderOrbat(); heat();
+    maybeHash();
   }
+  let hashOpened = '';
+  function requestedOp() {
+    let op = '';
+    try { op = new URLSearchParams(location.search).get('op') || ''; } catch (_) { op = ''; }
+    if (!op) {
+      const m = /^#op=([^&]+)/.exec(location.hash || '');
+      if (m) { try { op = decodeURIComponent(m[1]); } catch (_) { op = ''; } }
+    }
+    return OPS.includes(op) ? op : '';
+  }
+  function maybeHash() {
+    const op = requestedOp();
+    if (!op || hashOpened === op) return;
+    hashOpened = op;
+    openSheet(op);
+  }
+  window.addEventListener('hashchange', () => { hashOpened = ''; maybeHash(); });
 
   function newFeedEvents() {
     const fresh = feedEvents.filter((e) => OPS.includes(e.op) && e.t > lastEventSeen && !queue.includes(e));
@@ -837,7 +918,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
       const m = M[op], ini = op.slice(0, 2).toUpperCase();
       const ct = [m.doing.length ? `<b style="color:var(--amber)">A${m.doing.length}</b>` : '', m.waiting.length ? `<b style="color:var(--holdink)">H${m.waiting.length}</b>` : '', m.backlog.length ? `Q${m.backlog.length}` : ''].filter(Boolean).join(' ');
       const sub = m.zone === 'ao' ? (m.doing[0]?.short || '') : m.zone === 'hold' ? (m.waiting[0]?.short || '') : ZN[m.zone];
-      return `<button class="orow z-${m.zone}" type="button" data-op="${esc(op)}"><img src="avatars/${op.toLowerCase()}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op)}</div><div class="zn">${esc(sub)}</div></span><span class="ct">${ct}</span></button>`;
+      return `<button class="orow z-${m.zone}" type="button" data-op="${esc(op)}"><img src="avatars/${op.toLowerCase()}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op)} <i>${esc(DES[op] || '')}</i></div><div class="zn">${esc(sub)}</div></span><span class="ct">${ct}</span></button>`;
     }).join('');
     $('orb').querySelectorAll('.orow').forEach((b) => b.addEventListener('click', () => openSheet(b.dataset.op)));
   }
@@ -862,24 +943,43 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 
   function openSheet(op) {
     const mine = cards.filter((c) => c.lane === op).sort((a, b) => LIST[a.list].rank - LIST[b.list].rank);
+    const live = lastData ? model()[op] : null;
+    const doing = live && live.zone === 'ao' ? live.doing : [];
+    if (doing.length && window.MW4Action) {
+      $('sheetp').innerHTML = MW4Action.html({
+        op, des: DES[op], avatar: `avatars/${op.toLowerCase()}.png`,
+        cards: doing.map((c) => ({ name: c.name || '', short: c.short || '', lane: c.lane || op, url: c.url || '', board: c.board || '', list: 'doing' })),
+      });
+      $('sheet').classList.add('on');
+      return;
+    }
     const z = shown[op] || '';
     $('sheetp').innerHTML = `<div class="hd"><img src="avatars/${op.toLowerCase()}.png" alt=""><div><div class="nm">${esc(op.toUpperCase())}${op === 'Price' ? ' · CPT' : ''}</div><div class="zs">${esc(ZLABEL[z] || '')}</div></div><button class="x" type="button">✕ CLOSE</button></div>` +
       (mine.length ? mine.map(cardHtml).join('') : '<div class="empty">No cards on either board</div>');
     $('sheet').classList.add('on');
   }
 
-  const cardHtml = (c) => `<a class="card" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener" title="${esc(c.name || '')}">
-      <div class="ch">${chip(LIST[c.list].tag, LIST[c.list].tone)}<span class="btag ${c.board === 'KAL' ? 'kal' : ''}">${c.board}</span><span class="ln">${esc(c.lane || '—')}</span><span class="go">↗</span></div>
+  const cardHtml = (c) => {
+    const op = OPS.find((o) => o.toLowerCase() === String(c.lane || '').toLowerCase());
+    const ini = (op || c.lane || 'TF').slice(0, 2).toUpperCase();
+    const av = op
+      ? `<img class="av" data-open="${esc(op)}" src="avatars/${op.toLowerCase()}.png" alt="${esc(op)}" onerror="this.outerHTML='<span class=&quot;av ini&quot; data-open=&quot;${esc(op)}&quot;>${ini}</span>'">`
+      : `<span class="av ini">${esc(ini)}</span>`;
+    return `<a class="card ${LIST[c.list].tone}" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener" title="${esc(c.name || '')}">
+      ${av}<div class="ch">${chip(LIST[c.list].tag, LIST[c.list].tone)}<span class="btag ${c.board === 'KAL' ? 'kal' : ''}">${c.board}</span><span class="ln">${esc(op || c.lane || '—')}</span><span class="go">↗</span></div>
       <div class="ct">${esc(c.short)}</div></a>`;
+  };
 
   function renderFeed() {
     let list;
     if (tab === 'hold') list = cards.filter((c) => c.list === 'waiting');
     else if (tab === 'done') list = cards.filter((c) => c.list === 'done');
-    else list = cards.filter((c) => c.list !== 'done');
-    if (tab !== 'done') list = [...list].sort((a, b) => LIST[a.list].rank - LIST[b.list].rank || a.lane.localeCompare(b.lane));
+    else if (tab === 'queue') list = cards.filter((c) => c.list === 'backlog');
+    else list = cards.filter((c) => c.list === 'doing');
+    if (tab !== 'done') list = [...list].sort((a, b) => a.lane.localeCompare(b.lane));
+    const empty = { doing: 'No one across the wire', hold: 'Nothing on Hunter · all clear', queue: 'FOB queue empty', done: 'No recent ships on feed yet' };
     $('feed').innerHTML = list.length ? list.map(cardHtml).join('')
-      : `<div class="empty">${tab === 'done' ? 'No recent ships on feed yet' : tab === 'hold' ? 'Nothing on Hunter · all clear' : 'No missions'}</div>`;
+      : `<div class="empty">${empty[tab] || 'No missions'}</div>`;
   }
   try { sessionStorage.removeItem('mw4hud.unlock'); sessionStorage.removeItem('mw4hud.k'); } catch (_) { /* old unlock state */ }
   unlock();

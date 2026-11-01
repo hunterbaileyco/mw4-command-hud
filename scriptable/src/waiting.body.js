@@ -3,10 +3,11 @@ function cageRow(w, c, fam) {
   const kal = c.tag === "KAL";
   const r = w.addStack(); r.centerAlignContent(); r.spacing = 6;
   r.backgroundColor = col("panel", 0.94); r.borderColor = col(kal ? "amber" : "hold", kal ? 0.55 : 0.9); r.borderWidth = 1;
-  r.setPadding(2, 0, 2, 6);
-  const bar = r.addStack(); bar.size = new Size(3, 12); bar.backgroundColor = col(kal ? "amber" : "holdink");
-  const tg = r.addStack(); tg.size = new Size(fam === "small" ? 30 : 38, 0);
-  txt(tg, LANE_TAG(c).slice(0, 5), F.h(fam === "small" ? 7.5 : 8), col(kal ? "amber" : "tan"), 1); tg.addSpacer();
+  r.setPadding(3, 6, 3, 6);
+  mountFace(r, opFromLane(c), fam === "small" ? 16 : 22);
+  const bar = r.addStack(); bar.size = new Size(3, 14); bar.backgroundColor = col(kal ? "amber" : "holdink");
+  const tg = r.addStack(); tg.size = new Size(fam === "small" ? 34 : 46, 0);
+  txt(tg, LANE_TAG(c).slice(0, 6), F.h(fam === "small" ? 7.5 : 8), col(kal ? "amber" : "tan"), 1); tg.addSpacer();
   txt(r, c.short || c.name, F.m(fam === "small" ? 8.5 : 9.5), col("ink"), 1);
   r.addSpacer();
   if (c.url && fam !== "small") txt(r, "↗", F.b(8), col("dim"), 1);
@@ -44,6 +45,7 @@ async function build() {
     w.addSpacer(); return w;
   }
   const shown = items.slice(0, max);
+  await preloadAvatars(shown);
   shown.forEach((c, i) => {
     if (i && c.tag === "KAL" && shown[i - 1].tag !== "KAL" && fam === "large") { w.addSpacer(2); zoneLabel(w, "KAL BOARD", "amber", "amber", 7); w.addSpacer(2); }
     cageRow(w, c, fam); w.addSpacer(2);

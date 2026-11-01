@@ -4,7 +4,7 @@ Phone-first status page. The live site is the Vercel deployment (`mw4-command-hu
 
 - The data feed (`status.json`) is an **encrypted envelope**: `{ v, alg: "AES-GCM", kdf: "PBKDF2-SHA256", iter, salt, iv, ct }`.
   The page derives an AES-256-GCM key in the browser with PBKDF2-SHA256 from the access code and decrypts locally (Web Crypto). No readable data is published.
-- `tools/build-status.mjs` builds the cleartext model off-repo, diffs it against the previous snapshot (deploy / rtb / hold / cleared events, ~6 h retained), and encrypts it. Glance `line1` waiting and the badge both count Waiting on Hunter on Command and Kal Trading. `doneToday` counts a move into Done on the America/Los_Angeles day (`actions` / `completedAt`), not `lastActivityAt` — the refresh dump has to keep that stamp. `Lane: Duo` (the fold device) maps to Ko.
+- `tools/build-status.mjs` builds the cleartext model off-repo, diffs it against the previous snapshot (deploy / rtb / hold / cleared events, ~6 h retained), and encrypts it. Glance `line1` waiting and the badge both count Waiting on Hunter on Command and Kal Trading. `doneToday` counts a move into Done on the America/Los_Angeles day, not `lastActivityAt`. When the list dump has no completion stamp, the builder reads board list-move activity (dump `activities` / sidecar `<dump>.activity.json` / `--command-activity`, or Trello `updateCard:idList` when `TRELLO_KEY` and `TRELLO_TOKEN` are set). A comment is not a move. `Lane: Duo` (the fold device) maps to Ko.
 - `tools/mw4crypto.js` is a dependency-free PBKDF2-HMAC-SHA256 + AES-256-GCM decryptor used by the iOS Scriptable widgets (`scriptable/`), assembled by `tools/build-scriptable.mjs`.
 
 ## Scriptable install (paste once)

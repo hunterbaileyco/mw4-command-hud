@@ -16,7 +16,6 @@
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="suite.css">
-<script src="roster.js"></script>
 <script src="action-panel.js"></script>
 <title>MW4 // COMMAND</title>
 <style>
@@ -414,6 +413,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   .mastsub{font-size:9px}
 }
 </style>
+<link rel="stylesheet" href="theater.css">
 </head>
 <body class="sx-pad">
 
@@ -421,12 +421,12 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · THEATER</span><span class="clk" id="clk">—</span></div>
 <div class="wrap">
   <div class="top">
-    <div><div class="kick"><span class="sx-rec"></span>TF141 · Operator theater · CMD + KAL</div><div class="brand">MW4 <span class="sl">//</span> COMMAND</div><div class="mastsub">DOING · WAITING · QUEUE · DONE · HOLD</div></div>
+    <div><div class="kick"><span class="sx-rec"></span>TF141 · Operator theater · CMD + KAL</div><div class="brand">MW4 <span class="sl">//</span> COMMAND</div><div class="mastsub">AO DOING · <span class="h">HOLD = WAITING</span> · FOB QUEUE · DONE</div></div>
     <div class="asof"><span class="dot" id="dot"></span><span id="upd">—</span><button class="snd" id="snd" type="button" aria-label="Toggle sound" title="Sound">🔊</button></div>
   </div>
   <div class="chrome">
-    <div class="act"><span class="l">DOING</span><span class="sub" id="subAct">ACT · WIRE</span><span class="n" id="nAct">0</span><i class="bar"><b id="bAct"></b></i></div>
-    <div class="hld"><span class="l">WAITING</span><span class="sub">HOLD · HUNTER</span><span class="n" id="nHold">0</span><i class="bar"><b id="bHold"></b></i></div>
+    <div class="act"><span class="l">DOING</span><span class="sub" id="subAct">AO · ACROSS WIRE</span><span class="n" id="nAct">0</span><i class="bar"><b id="bAct"></b></i></div>
+    <div class="hld"><span class="l">HOLD</span><span class="sub">WAITING · HUNTER</span><span class="n" id="nHold">0</span><i class="bar"><b id="bHold"></b></i></div>
     <div class="q"><span class="l">QUEUE</span><span class="sub">FOB · READY</span><span class="n" id="nQ">0</span><i class="bar"><b id="bQ"></b></i></div>
     <div class="shp"><span class="l">DONE</span><span class="sub">SHIPPED · TODAY</span><span class="n" id="nShip">0</span><i class="bar"><b id="bShip"></b></i></div>
   </div>
@@ -445,7 +445,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       <div class="zone" id="zAO"></div>
     </div>
     <div class="standbay" id="standbay" hidden>
-      <div class="zhead"><b><span class="sec">STN</span><span class="zt">STANDING</span><span class="zw">Always on · not a finite mission</span></b><span id="stc">0 ON STATION</span></div>
+      <div class="zhead"><b><span class="sec">STN</span><span class="zt">STANDING</span><span class="zw">Always on · not counted in DOING</span></b><span id="stc">0 ON STATION</span></div>
       <div class="zone" id="zSTAND"></div>
     </div>
     <div class="wire" id="wire">
@@ -456,7 +456,8 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     </div>
     <div class="holdbox" id="holdbox">
       <span class="hz"></span>
-      <div class="zhead"><b><svg class="lockic" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5"/><path d="M3.8 5.5V3.8a2.2 2.2 0 0 1 4.4 0v1.7"/></svg><span class="sec">HOLD</span><span class="zt">WAITING</span><span class="zw">Cage · Awaiting Hunter</span></b><span id="hdc">0 STALLED</span></div>
+      <div class="zhead"><b><svg class="lockic" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5"/><path d="M3.8 5.5V3.8a2.2 2.2 0 0 1 4.4 0v1.7"/></svg><span class="sec">HOLD</span><span class="zt">WAITING ON HUNTER</span><span class="zw">Cage · oldest first</span></b><span id="hdc">0 ASKS</span></div>
+      <div class="rule">Every ask on Hunter lives here — count matches HOLD above</div>
       <div class="zone" id="zHOLD"></div>
     </div>
     <div class="fob">
@@ -471,7 +472,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   <div class="sidecol">
   <section class="orbat" id="orbatbox">
     <span class="sx-brk tl"></span><span class="sx-brk br"></span>
-    <div class="zhead"><b><span class="sec">ORB</span><span class="zt">CALLSIGNS</span><span class="zw">Kal → Price → lane</span></b><span id="orbc">12 OPS</span></div>
+    <div class="zhead"><b><span class="sec">ORB</span><span class="zt">CALLSIGNS</span><span class="zw">Kal → Price → lane</span></b><span id="orbc">11 OPS</span></div>
     <div class="orb" id="orb"></div>
   </section>
 
@@ -493,20 +494,22 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 
   <div class="ft">
     <div class="boards"><a id="cmdLink" target="_blank" rel="noopener">CMD BOARD ↗</a><a id="kalLink" target="_blank" rel="noopener">KAL BOARD ↗</a></div>
-    <div><span id="stale"></span>AUTO-REFRESH · POLLS 20S · <span id="ref">—</span> · <a href="hub/">HUB</a> · <a href="social/">SOCIAL</a> · <a href="#" id="fsync">SYNC</a></div>
+    <div><span id="stale"></span>AUTO-REFRESH · POLLS 20S · <span id="ref">—</span> · <a href="hub/">HUB</a> · <a href="ledger/">LEDGER</a> · <a href="orbat/">ORBAT</a> · <a href="files/">FILES</a> · <a href="social/">SOCIAL</a> · <a href="#" id="fsync">SYNC</a></div>
   </div>
 </div>
 <div class="sx-dock"><nav>
   <a href="hub/"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
   <a class="on" href="./"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
-  <a href="social/"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
-  <a href="#" id="dsync"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>SYNC</a>
+  <a href="ledger/"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3M9 11h6M9 15h4"/></svg>LEDGER</a>
+  <a href="orbat/"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v3.5M12 11H6.5V16.5M12 11h5.5V16.5"/></svg>ORBAT</a>
+  <a href="files/"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8 13h8M8 17h5"/></svg>FILES</a>
 </nav></div>
 </div>
 
 <div id="edge"></div>
 <div id="sheet"><div class="pn" id="sheetp"></div></div>
 
+<script src="roster.js"></script>
 <script>
 (() => {
   'use strict';
@@ -517,9 +520,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   const POLL_MS = 20000, STALE_MS = 30 * 60 * 1000, FLY_MS = 1200, STEP_MS = FLY_MS + 1100;
   const OPS = window.MW4Roster.OPS.slice();
   const LIST = { doing: { tag: 'ACT', tone: 'act', rank: 0 }, waiting: { tag: 'HOLD', tone: 'hold', rank: 1 }, backlog: { tag: 'QUEUE', tone: 'queue', rank: 2 }, done: { tag: 'DONE', tone: 'done', rank: 3 } };
-  const DES = Object.fromEntries(OPS.map((o) => [o, window.MW4Roster.designator(o)]));
-  const roleOf = (op) => window.MW4Roster.role(op);
-  const slug = (op) => window.MW4Roster.slug(op);
+  const DES = window.MW4Roster.DES;
   const ZLABEL = { ao: 'DEPLOYED · ACROSS THE WIRE', hold: 'HOLD · AWAITING HUNTER', ready: 'FOB · QUEUED', idle: 'FOB · STANDING BY', cp: 'FOB · COMMAND POST', stand: 'STANDING · ALWAYS ON' };
   const isStanding = (c) => !!(window.MW4Action && MW4Action.isStanding(c));
   const $ = (id) => document.getElementById(id);
@@ -580,7 +581,6 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (pending) { const d = pending; pending = null; render(d); } load(); } });
   }
   $('fsync').addEventListener('click', (e) => { e.preventDefault(); load(); });
-  $('dsync').addEventListener('click', (e) => { e.preventDefault(); load(); });
   const clk = () => { $('clk').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) + ' PT'; };
   clk(); setInterval(clk, 1000);
   if (window.matchMedia && matchMedia('(min-width:900px)').matches) $('log').open = true;
@@ -592,7 +592,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const av = e.target.closest('[data-open]');
     if (!av) return;
     e.preventDefault();
-    openSheet(av.getAttribute('data-open'));
+    goFile(av.getAttribute('data-open'));
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('sheet').classList.remove('on'); });
 
@@ -605,7 +605,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   const laneOf = (c, fb) => {
     if (c.lane) return c.lane;
     const name = String(c.name || '');
-    const multi = OPS.find((o) => o.includes(' ') && new RegExp('^\\s*' + o.replace(/\s+/g, '\\s+') + '\\b', 'i').test(name));
+    const multi = OPS.find((o) => /\s/.test(o) && new RegExp('^\\s*' + o.replace(/\s+/g, '\\s+') + '\\b', 'i').test(name));
     if (multi) return multi;
     const m = /^\s*([A-Za-z]+)/.exec(name); const hit = m && OPS.find((o) => o.toLowerCase() === m[1].toLowerCase());
     return hit || fb || '';
@@ -674,53 +674,101 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     return out;
   }
 
+  function goFile(op) { location.href = 'files/#' + (window.MW4Roster ? MW4Roster.slugOf(op) : String(op || '').toLowerCase()); }
+  function faceFile(op) { return window.MW4Roster ? MW4Roster.slugOf(op) : String(op || '').toLowerCase(); }
+  function iniOf(op) { return op === 'Ju Kwon' ? 'JK' : String(op || '').slice(0, 2).toUpperCase(); }
+  function fullMission(c) { return window.MW4Roster ? MW4Roster.missionText(c) : String((c && (c.name || c.short)) || '—'); }
+  function holdAgeMs(card, op) {
+    if (!card) return null;
+    const who = op || card.lane;
+    const hits = feedEvents.filter((e) => e.kind === 'hold' && ((card.id && e.card === card.id) || (e.op === who && e.mission && (e.mission === card.short || e.mission === card.name))));
+    if (!hits.length) return null;
+    const t = Math.max(...hits.map((e) => Date.parse(e.t)).filter((n) => !isNaN(n)));
+    return Number.isFinite(t) ? Date.now() - t : null;
+  }
+  function fmtAge(ms) {
+    const m = Math.max(0, Math.round(ms / 60000));
+    if (m < 60) return m + 'm';
+    return Math.floor(m / 60) + 'h' + (m % 60) + 'm';
+  }
+  function oldestWait(m) {
+    const w = (m && m.waiting) || [];
+    if (!w.length) return null;
+    return [...w].sort((a, b) => (holdAgeMs(b, m.op) || 0) - (holdAgeMs(a, m.op) || 0))[0];
+  }
   function makeTok(op) {
     const el = document.createElement('div');
     el.className = 'tok'; el.dataset.op = op;
-    const ini = op.slice(0, 2).toUpperCase();
-    el.innerHTML = `<span class="flash"></span><div class="bod"><div class="ring"><img src="avatars/${slug(op)}.png" alt="${esc(op)}" onerror="this.outerHTML='<div class=&quot;ini&quot;>${ini}</div>'"><span class="badge"></span><span class="hb"></span></div>
-      <div class="cs">${esc(op)}${op === 'Price' ? '<span class="rk">CPT</span>' : ''}<span class="ds">${DES[op] || ''}</span></div><div class="plate"></div><span class="rtbtag"></span></div>`;
-    el.addEventListener('click', () => openSheet(op));
+    const ini = iniOf(op);
+    el.innerHTML = `<span class="flash"></span><div class="bod"><div class="ring"><img src="avatars/${faceFile(op)}.png" alt="${esc(op)}" onerror="this.outerHTML='<div class=&quot;ini&quot;>${ini}</div>'"></div>
+      <div class="pl"><div class="cs">${esc(op.toUpperCase())}</div><div class="dsr"><span class="ds">${esc(DES[op] || '')}</span><span class="tp"></span></div><div class="mk"></div><div class="mt"></div></div></div>`;
+    el.addEventListener('click', () => goFile(op));
     return el;
   }
 
-  function paintTok(el, m) {
-    el.className = 'tok s-' + m.zone + (el.classList.contains('fly') ? ' fly' : '');
-    const badge = el.querySelector('.badge'), hb = el.querySelector('.hb'), plate = el.querySelector('.plate'), rtb = el.querySelector('.rtbtag');
-    let b = '', h = '', p = '';
-    if (m.zone === 'ao') {
-      const finite = m.finite || m.doing.filter((c) => !isStanding(c));
-      const standing = m.standing || m.doing.filter(isStanding);
-      if (finite.length > 1) b = '×' + finite.length;
-      if (m.waiting.length) h = 'H' + m.waiting.length;
-      const lines = finite.slice(0, 2).map((c) => `<span class="ln" title="${esc(c.name || c.short)}">${esc(c.short)}</span>`);
-      if (finite.length > 2) lines.push(`<span class="ln">+${finite.length - 2} more</span>`);
+  function paintTok(el, m, askCard) {
+    const echo = el.dataset.echo === '1';
+    const zone = echo ? 'hold' : m.zone;
+    const kal = m.op === 'Ghost' && zone === 'ao';
+    const fly = el.classList.contains('fly');
+    el.className = 'tok s-' + zone + (kal ? ' kal' : '') + (echo ? ' echo' : '') + (fly ? ' fly' : '');
+    el.querySelectorAll('.x2,.stillao,.stamp,.ov').forEach((n) => n.remove());
+    const tp = el.querySelector('.tp'), mk = el.querySelector('.mk'), mt = el.querySelector('.mt'), pl = el.querySelector('.pl');
+    if (tp) tp.textContent = '';
+    mk.innerHTML = '';
+    mt.textContent = '';
+    let ageMs = 0;
+    if (zone === 'hold') {
+      const card = askCard || oldestWait(m) || (m.waiting || [])[0];
+      const age = card ? holdAgeMs(card, m.op) : null;
+      ageMs = age || 0;
+      const stale = age != null && age >= 2 * 3600 * 1000;
+      mk.innerHTML = '<span>ASK</span>' + (age != null ? `<span class="age${stale ? ' stale' : ''}">⏱ ${esc(fmtAge(age))}</span>` : '');
+      mt.textContent = card ? fullMission(card) : 'Awaiting Hunter';
+      if (echo) {
+        const s = document.createElement('span');
+        s.className = 'stillao';
+        s.textContent = m.zone === 'ao' ? '▲ STILL IN AO · ASK ONLY' : (m.zone === 'cp' ? '▲ STILL AT CMD · ASK ONLY' : '▲ ASK ONLY');
+        pl.appendChild(s);
+      }
+    } else if (zone === 'ao') {
+      const finite = (m.finite && m.finite.length) ? m.finite : (m.doing || []).filter((c) => !isStanding(c));
       const dep = feedEvents.filter((e) => e.op === m.op && e.kind === 'deploy' && !standingEvent(e)).map((e) => Date.parse(e.t)).sort((a, c) => c - a)[0];
-      const tp = dep && !(finite[0] && finite[0].drill) ? `<span class="tp">T+${agoShort(Date.now() - dep)}</span>` : '';
-      const stn = standing.length ? `<span class="stn">· ${standing.length} STN</span>` : '';
-      p = `<span class="mk">${finite[0] && finite[0].drill ? 'SIM · ' : ''}MISSION${tp}${stn}</span>` + lines.join('');
-    } else if (m.zone === 'stand') {
-      const standing = m.standing || m.doing.filter(isStanding);
-      if (standing.length > 1) b = '×' + standing.length;
-      const lines = standing.slice(0, 2).map((c) => `<span class="ln" title="${esc(c.name || c.short)}">${esc(c.short)}</span>`);
-      if (standing.length > 2) lines.push(`<span class="ln">+${standing.length - 2} more</span>`);
-      p = '<span class="mk">ALWAYS ON</span>' + lines.join('');
-    } else if (m.zone === 'hold') {
-      b = 'HOLD' + (m.waiting.length > 1 ? ' ×' + m.waiting.length : '');
-      p = esc(m.waiting[0] ? m.waiting[0].short : 'Awaiting Hunter');
-    } else if (m.zone === 'ready') {
-      b = 'Q' + m.backlog.length; p = esc(m.backlog[0] ? m.backlog[0].short : '');
-    } else if (m.zone === 'cp') {
-      if (m.waiting.length) h = 'H' + m.waiting.length;
-      p = 'OVERWATCH';
-    } else p = 'STANDBY';
-    badge.textContent = b; badge.classList.toggle('on', !!b);
-    hb.textContent = h; hb.classList.toggle('on', !!h);
-    plate.innerHTML = p;
-    const last = m.done.filter((c) => c.doneAt).sort((a, c) => c.doneAt.localeCompare(a.doneAt))[0];
-    const age = last ? Date.now() - new Date(last.doneAt).getTime() : Infinity;
-    const showR = m.zone !== 'ao' && age < 3 * 3600 * 1000;
-    rtb.textContent = showR ? 'RTB ' + agoShort(age) : ''; rtb.classList.toggle('on', showR);
+      if (tp && dep && !(finite[0] && finite[0].drill)) tp.textContent = 'T+' + agoShort(Date.now() - dep);
+      mk.innerHTML = `<span>${finite[0] && finite[0].drill ? 'SIM · ' : ''}${m.op === 'Ghost' ? 'MISSION · GHOST' : 'MISSION'}</span>`;
+      mt.textContent = finite[0] ? fullMission(finite[0]) : 'Deployed';
+      if (finite.length > 1) {
+        const x = document.createElement('div');
+        x.className = 'x2';
+        x.innerHTML = `<b>+${finite.length - 1}</b><span>${esc(fullMission(finite[1]))}</span>`;
+        pl.appendChild(x);
+      }
+      if (m.op === 'Ghost') {
+        const st = document.createElement('span');
+        st.className = 'stamp';
+        st.textContent = 'TRADING';
+        pl.appendChild(st);
+      }
+    } else if (zone === 'stand') {
+      const standing = (m.standing && m.standing.length) ? m.standing : (m.doing || []).filter(isStanding);
+      mk.innerHTML = '<span>ALWAYS ON</span>';
+      mt.textContent = standing[0] ? fullMission(standing[0]) : 'On station';
+      if (standing.length > 1) {
+        const x = document.createElement('div');
+        x.className = 'x2';
+        x.innerHTML = `<b>+${standing.length - 1}</b><span>${esc(fullMission(standing[1]))}</span>`;
+        pl.appendChild(x);
+      }
+    } else if (zone === 'ready') {
+      mk.innerHTML = `<span>NEXT</span><span class="q">Q${m.backlog.length}</span>`;
+      mt.textContent = m.backlog[0] ? fullMission(m.backlog[0]) : '';
+    } else if (zone === 'cp') {
+      const o = document.createElement('div');
+      o.className = 'ov';
+      o.textContent = 'OVERWATCH';
+      pl.appendChild(o);
+    } else mk.innerHTML = '<span>STBY</span>';
+    el.dataset.age = String(ageMs);
   }
 
   function flashTok(el, kind, text) {
@@ -729,6 +777,32 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   }
   function edge(kind) { const e = $('edge'); e.className = ''; void e.offsetWidth; e.className = kind; }
 
+  const extras = {};
+  function syncCage(M) {
+    const keep = new Set();
+    let nAsks = 0;
+    for (const op of OPS) {
+      const m = M[op];
+      const waits = m.waiting || [];
+      nAsks += waits.length;
+      const oldest = oldestWait(m);
+      for (const card of waits) {
+        if (m.zone === 'hold' && card === oldest) continue;
+        const key = op + '|' + (card.id || fullMission(card));
+        keep.add(key);
+        if (!extras[key]) { extras[key] = makeTok(op); extras[key].dataset.extra = '1'; }
+        const el = extras[key];
+        el.dataset.echo = m.zone === 'hold' ? '' : '1';
+        paintTok(el, m, card);
+        $('zHOLD').appendChild(el);
+      }
+    }
+    for (const key of Object.keys(extras)) if (!keep.has(key)) { extras[key].remove(); delete extras[key]; }
+    const cage = $('zHOLD');
+    [...cage.children].sort((a, b) => Number(b.dataset.age || 0) - Number(a.dataset.age || 0)).forEach((el) => cage.appendChild(el));
+    $('hdc').textContent = nAsks + (nAsks === 1 ? ' ASK' : ' ASKS');
+    $('holdbox').classList.toggle('empty', !nAsks);
+  }
   const ZEL = { ao: 'zAO', hold: 'zHOLD', ready: 'zREADY', idle: 'zREADY', cp: 'zCP', stand: 'zSTAND' };
   const SIDE = (z) => (z === 'ao' ? 'field' : 'base');
 
@@ -748,9 +822,9 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
         z.appendChild(toks[op]);
       }
     }
-    const nAO = order.zAO.length, nH = order.zHOLD.length, nS = order.zSTAND.length;
+    syncCage(M);
+    const nAO = order.zAO.length, nS = order.zSTAND.length;
     $('aoc').textContent = nAO + ' DEPLOYED'; $('quiet').style.display = nAO ? 'none' : '';
-    $('hdc').textContent = nH + ' STALLED'; $('holdbox').classList.toggle('empty', !nH);
     $('standbay').hidden = !nS; $('stc').textContent = nS + ' ON STATION';
     const nReady = order.zREADY.filter((op) => M[op].zone === 'ready').length;
     const nIdle = order.zREADY.length - nReady;
@@ -882,25 +956,34 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     }
     const by = (k) => cards.filter((c) => c.list === k);
     const cc = C.counts || {}, kc = K.counts || {};
-    const nAct = by('doing').filter((c) => !isStanding(c)).length;
+    const finiteCards = by('doing').filter((c) => !isStanding(c));
+    const nAct = new Set(finiteCards.map((c) => c.lane).filter((lane) => OPS.includes(lane))).size;
     const nStand = by('doing').filter(isStanding).length;
     const nHold = by('waiting').length, nQ = by('backlog').length;
     const nShip = (cc.doneToday || 0) + (kc.doneToday || 0);
     $('nAct').textContent = nAct; $('nHold').textContent = nHold; $('nQ').textContent = nQ; $('nShip').textContent = nShip;
-    $('subAct').textContent = nStand ? nStand + ' STANDING' : 'ACT · WIRE';
-    $('subAct').classList.toggle('onstn', nStand > 0);
+    $('subAct').textContent = 'AO · ACROSS WIRE';
     const tot = Math.max(1, nAct + nHold + nQ + nShip);
     [['bAct', nAct], ['bHold', nHold], ['bQ', nQ], ['bShip', nShip]].forEach(([id, v]) => { $(id).style.width = Math.round((v / tot) * 100) + '%'; });
     $('cmdLink').href = safeUrl(C.boardUrl); $('kalLink').href = safeUrl(K.boardUrl);
 
-    const g = d.glance || {};
-    $('intel').innerHTML = (g.line1 || g.line2) ? `${g.badge ? `<span class="bd">${esc(g.badge)}</span>` : ''}<span class="tx">${esc(g.line1 || '')}${g.line2 ? ' · <i>' + esc(g.line2) + '</i>' : ''}</span>` : '';
+    const waits = by('waiting').map((c) => ({ c, age: holdAgeMs(c, c.lane) })).sort((a, b) => (b.age || 0) - (a.age || 0));
+    if (waits.length) {
+      const top = waits[0], who = String(top.c.lane || 'TF141').toUpperCase();
+      const age = top.age != null ? ' ' + fmtAge(top.age).toUpperCase() : '';
+      $('intel').className = 'intel hold';
+      $('intel').innerHTML = `<span class="bd">INTEL</span><span class="tx">OLDEST HOLD · ${esc(who)}${esc(age)} · <i>${esc(fullMission(top.c))}</i></span>`;
+    } else {
+      const g = d.glance || {};
+      $('intel').className = 'intel';
+      $('intel').innerHTML = (g.line1 || g.line2) ? `${g.badge ? `<span class="bd">${esc(g.badge)}</span>` : ''}<span class="tx">${esc(g.line1 || '')}${g.line2 ? ' · <i>' + esc(g.line2) + '</i>' : ''}</span>` : '';
+    }
 
     const known = new Set(feedEvents.map((e) => e.t + e.op + e.kind));
     for (const e of Array.isArray(d.events) ? d.events : []) if (!known.has(e.t + e.op + e.kind)) feedEvents.push({ ...e });
     feedEvents = feedEvents.filter((e) => Date.now() - Date.parse(e.t) < 6 * 3600 * 1000).sort((a, b) => a.t.localeCompare(b.t));
     if (playing || queue.length) stageDirty = true; else stageUpdate();
-    $('tDo').textContent = nAct; $('tHold').textContent = nHold; $('tQ').textContent = nQ;
+    $('tDo').textContent = finiteCards.length; $('tHold').textContent = nHold; $('tQ').textContent = nQ;
     $('tDone').textContent = by('done').length || nShip || '';
     $('logc').textContent = `${nAct + nStand + nHold + nQ} OPEN · CMD + KAL`;
     renderFeed();
@@ -921,7 +1004,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const op = requestedOp();
     if (!op || hashOpened === op) return;
     hashOpened = op;
-    openSheet(op);
+    goFile(op);
   }
   window.addEventListener('hashchange', () => { hashOpened = ''; maybeHash(); });
 
@@ -991,16 +1074,13 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const nStn = list.filter((o) => (M[o].standing || []).length).length;
     $('orbc').textContent = `${OPS.length} OPS · ${nOut} OUT` + (nStn ? ` · ${nStn} STN` : '');
     $('orb').innerHTML = list.map((op) => {
-      const m = M[op], ini = op.slice(0, 2).toUpperCase();
+      const m = M[op], ini = iniOf(op);
       const finite = m.finite || m.doing.filter((c) => !isStanding(c));
       const standing = m.standing || m.doing.filter(isStanding);
-      const ct = [finite.length ? `<b style="color:var(--amber)">A${finite.length}</b>` : '', standing.length ? `<b style="color:#9bb05a">S${standing.length}</b>` : '', m.waiting.length ? `<b style="color:var(--holdink)">H${m.waiting.length}</b>` : '', m.backlog.length ? `Q${m.backlog.length}` : ''].filter(Boolean).join(' ');
-      const sub = m.zone === 'ao' ? (finite[0]?.short || '') : m.zone === 'stand' ? (standing[0]?.short || 'Always on') : m.zone === 'hold' ? (m.waiting[0]?.short || '') : ZN[m.zone];
-      const role = roleOf(op);
-      const mark = [DES[op], role].filter(Boolean).join(' · ');
-      return `<button class="orow z-${m.zone}" type="button" data-op="${esc(op)}"><img src="avatars/${slug(op)}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op)} <i>${esc(mark)}</i></div><div class="zn">${esc(sub)}</div></span><span class="ct">${ct}</span></button>`;
+      const sub = m.zone === 'ao' ? (finite[0] ? fullMission(finite[0]) : '') : m.zone === 'stand' ? (standing[0] ? fullMission(standing[0]) : 'Always on') : m.zone === 'hold' ? (oldestWait(m) ? fullMission(oldestWait(m)) : '') : ZN[m.zone];
+      return `<button class="orow z-${m.zone}${op === 'Ghost' ? ' z-kal' : ''}" type="button" data-op="${esc(op)}"><img src="avatars/${faceFile(op)}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op.toUpperCase())} <i>${esc(DES[op] || '')}</i></div><div class="zn">${esc(sub)}</div></span></button>`;
     }).join('');
-    $('orb').querySelectorAll('.orow').forEach((b) => b.addEventListener('click', () => openSheet(b.dataset.op)));
+    $('orb').querySelectorAll('.orow').forEach((b) => b.addEventListener('click', () => goFile(b.dataset.op)));
   }
   function heat() {
     const n = feedEvents.filter((e) => (e.kind === 'deploy' || e.kind === 'rtb') && !standingEvent(e) && Date.now() - Date.parse(e.t) < 3600 * 1000).length;
@@ -1026,24 +1106,23 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const doing = mine.filter((c) => c.list === 'doing');
     if (doing.length && window.MW4Action) {
       $('sheetp').innerHTML = MW4Action.html({
-        op, des: DES[op], avatar: `avatars/${slug(op)}.png`,
+        op, des: DES[op], avatar: `avatars/${op.toLowerCase()}.png`,
         cards: doing.map((c) => ({ name: c.name || '', short: c.short || '', lane: c.lane || op, url: c.url || '', board: c.board || '', list: 'doing' })),
       });
       $('sheet').classList.add('on');
       return;
     }
     const z = shown[op] || '';
-    const fileRole = [roleOf(op), ZLABEL[z]].filter(Boolean).join(' · ');
-    $('sheetp').innerHTML = `<div class="hd"><img src="avatars/${slug(op)}.png" alt=""><div><div class="nm">${esc(op.toUpperCase())}${op === 'Price' ? ' · CPT' : ''}</div><div class="zs">${esc(fileRole)}</div></div><button class="x" type="button">✕ CLOSE</button></div>` +
+    $('sheetp').innerHTML = `<div class="hd"><img src="avatars/${faceFile(op)}.png" alt=""><div><div class="nm">${esc(op.toUpperCase())}${op === 'Price' ? ' · CPT' : ''}</div><div class="zs">${esc(ZLABEL[z] || '')}</div></div><button class="x" type="button">✕ CLOSE</button></div>` +
       (mine.length ? mine.map(cardHtml).join('') : '<div class="empty">No cards on either board</div>');
     $('sheet').classList.add('on');
   }
 
   const cardHtml = (c) => {
-    const op = OPS.find((o) => o.toLowerCase() === String(c.lane || '').toLowerCase());
-    const ini = (op || c.lane || 'TF').slice(0, 2).toUpperCase();
+    const op = OPS.find((o) => o.toLowerCase() === String(c.lane || '').toLowerCase() || faceFile(o) === String(c.lane || '').toLowerCase());
+    const ini = op ? iniOf(op) : String(c.lane || 'TF').slice(0, 2).toUpperCase();
     const av = op
-      ? `<img class="av" data-open="${esc(op)}" src="avatars/${slug(op)}.png" alt="${esc(op)}" onerror="this.outerHTML='<span class=&quot;av ini&quot; data-open=&quot;${esc(op)}&quot;>${ini}</span>'">`
+      ? `<img class="av" data-open="${esc(op)}" src="avatars/${faceFile(op)}.png" alt="${esc(op)}" onerror="this.outerHTML='<span class=&quot;av ini&quot; data-open=&quot;${esc(op)}&quot;>${ini}</span>'">`
       : `<span class="av ini">${esc(ini)}</span>`;
     const standing = isStanding(c);
     const tone = c.list === 'doing' && standing ? 'stand' : LIST[c.list].tone;
@@ -1051,7 +1130,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const extra = standing && tone !== 'stand' ? chip('STND', 'stand') : '';
     return `<a class="card ${tone}${standing && tone !== 'stand' ? ' stand' : ''}" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener" title="${esc(c.name || '')}">
       ${av}<div class="ch">${chip(tag, tone)}${extra}<span class="btag ${c.board === 'KAL' ? 'kal' : ''}">${c.board}</span><span class="ln">${esc(op || c.lane || '—')}</span><span class="go">↗</span></div>
-      <div class="ct">${esc(c.short)}</div></a>`;
+      <div class="ct">${esc(fullMission(c))}</div></a>`;
   };
 
   function renderFeed() {

@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MW4 FILES">
+<meta name="theme-color" content="#0B0E0C">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../suite.css">
+<link rel="stylesheet" href="../theater.css">
+<title>MW4 // FILES</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 var(--sans);-webkit-text-size-adjust:100%}
+body{min-height:100vh;min-height:100dvh;background:radial-gradient(ellipse at 50% -10%,rgba(107,124,58,.1),transparent 60%),var(--bg)}
+a{color:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 10px 24px;display:flex;flex-direction:column;gap:10px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.kick{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;color:var(--olive2);text-transform:uppercase;margin-bottom:3px}
+.brand{font-family:var(--mono);font-size:20px;font-weight:800;letter-spacing:.16em;color:var(--tan)}
+.brand .sl{color:var(--olive)}
+.mastsub{font-family:var(--mono);font-size:8px;letter-spacing:.16em;color:var(--coyote);margin-top:4px;text-transform:uppercase}
+.asof{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.08em;white-space:nowrap}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--olive2);margin-right:5px}
+.panel{position:relative;border:1px solid var(--line);border-radius:6px;background:linear-gradient(180deg,rgba(18,22,18,.96),rgba(10,13,11,.96));box-shadow:inset 0 1px 0 rgba(197,165,114,.1)}
+.zhead{display:flex;justify-content:space-between;gap:8px;padding:8px 10px 0;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.zhead b{color:var(--tan);font-weight:800}
+@media(min-width:900px){.brand{font-size:26px}}
+</style>
+</head>
+<body class="sx-pad">
+<div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · THEATER</span><span class="clk" id="clk">—</span></div>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="kick"><span class="sx-rec"></span>TF141 · Operator files · eyes only</div>
+      <div class="brand">MW4 <span class="sl">//</span> FILES</div>
+      <div class="mastsub">Operator dossiers · callsign · lane · boundary · flow</div>
+    </div>
+    <div class="asof"><span class="dot"></span>12 FILES</div>
+  </div>
+  <div class="files">
+    <section class="panel" id="roster">
+      <div class="zhead"><b>CALLSIGNS</b><span>12 ON ROSTER</span></div>
+      <div class="rail" id="rail"></div>
+    </section>
+    <article class="panel dos" id="dos"></article>
+  </div>
+</div>
+<div class="sx-dock"><nav>
+  <a href="../hub/"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
+  <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
+  <a href="../ledger/"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3M9 11h6M9 15h4"/></svg>LEDGER</a>
+  <a href="../orbat/"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v3.5M12 11H6.5V16.5M12 11h5.5V16.5"/></svg>ORBAT</a>
+  <a class="on" href="./"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8 13h8M8 17h5"/></svg>FILES</a>
+</nav></div>
+<script src="../roster.js"></script>
+<script>
+(() => {
+  'use strict';
+  const R = window.MW4Roster;
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const safeUrl = (u) => /^https:\/\/trello\.com\//.test(u || '') ? u : '';
+  const clk = () => { $('clk').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) + ' PT'; };
+  clk(); setInterval(clk, 1000);
+
+  const isStanding = (c) => /\(\s*standing\s*\)/i.test((c && c.name) || '') || /\(\s*standing\s*\)/i.test((c && c.short) || '') || /\bstanding\b/i.test((c && c.name) || '');
+  let feedCards = [];
+  let shown = 'price';
+
+  function mark(f) { return f && f.id === 'ju' ? 'JK' : (f ? f.name.slice(0, 2).toUpperCase() : '★'); }
+  function face(id, px) {
+    const f = R.BY_ID[id];
+    if (!f) return `<span class="ring" style="width:${px}px;height:${px}px"><span class="ini">★</span></span>`;
+    if (f.id === 'ju') return `<span class="ring" style="width:${px}px;height:${px}px"><span class="ini">JK</span></span>`;
+    const ini = mark(f);
+    return `<span class="ring" style="width:${px}px;height:${px}px"><img src="../avatars/${esc(f.id)}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"></span>`;
+  }
+  function chip(end) {
+    if (end.label && !end.id) return `<span class="chip np">${esc(end.label)}</span>`;
+    if (end.id === 'hunter') return `<span class="chip"><span class="ring"><span class="ini">★</span></span>${esc(end.name || 'HUNTER')}</span>`;
+    const f = R.BY_ID[end.id];
+    const label = end.name || (f ? f.name.toUpperCase() : end.id.toUpperCase());
+    return `<a class="chip" href="#${esc(end.id)}">${face(end.id, 18)}${esc(label)}</a>`;
+  }
+  function mine(opName) {
+    return feedCards.filter((c) => String(c.lane || '').toLowerCase() === opName.toLowerCase());
+  }
+  function zoneKey(f) {
+    if (f.off) return 'off';
+    const rows = mine(f.name);
+    const doing = rows.filter((c) => c.list === 'doing');
+    const finite = doing.filter((c) => !isStanding(c));
+    const waiting = rows.filter((c) => c.list === 'waiting');
+    const backlog = rows.filter((c) => c.list === 'backlog');
+    if (f.id === 'ghost' && finite.length) return 'kal';
+    if (finite.length) return 'ao';
+    if (f.id === 'price') return 'cp';
+    if (waiting.length) return 'hold';
+    if (doing.length) return 'stand';
+    if (backlog.length) return 'ready';
+    if (f.id === 'ghost') return 'kal';
+    return 'idle';
+  }
+  function nowLine(f) {
+    if (f.off) return 'NOW · OFF BOARD · PERSONAL';
+    const rows = mine(f.name);
+    const doing = rows.filter((c) => c.list === 'doing');
+    const finite = doing.filter((c) => !isStanding(c));
+    const standing = doing.filter(isStanding);
+    const waiting = rows.filter((c) => c.list === 'waiting');
+    const backlog = rows.filter((c) => c.list === 'backlog');
+    if (finite.length) return 'NOW · AO · ' + R.missionText(finite[0]);
+    if (f.id === 'price' && !waiting.length) return 'NOW · CMD POST · OVERWATCH';
+    if (waiting.length) return 'NOW · HOLD · ' + R.missionText(waiting[0]);
+    if (standing.length) return 'NOW · STANDING · ' + R.missionText(standing[0]);
+    if (f.id === 'price') return 'NOW · CMD POST · OVERWATCH';
+    if (backlog.length) return 'NOW · FOB · ' + backlog.length + ' QUEUED · ' + R.missionText(backlog[0]);
+    return 'NOW · FOB · STANDBY · NO CARD';
+  }
+  function feedBlock(f) {
+    const rows = mine(f.name).filter((c) => c.list !== 'done');
+    if (!rows.length) return '';
+    return '<div class="feedcards">' + rows.map((c) => {
+      const url = safeUrl(c.url);
+      const text = esc(R.missionText(c));
+      const tag = c.list === 'doing' && isStanding(c) ? 'STN' : c.list === 'doing' ? 'AO' : c.list === 'waiting' ? 'HOLD' : 'FOB';
+      const inner = esc(tag) + ' · ' + text;
+      return url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>` : `<div>${inner}</div>`;
+    }).join('') + '</div>';
+  }
+  function renderRail() {
+    $('rail').innerHTML = R.FILES.map((f) => {
+      const z = zoneKey(f);
+      const ring = f.id === 'ju'
+        ? '<span class="ring"><span class="ini">JK</span></span>'
+        : `<span class="ring"><span class="face"><img src="../avatars/${esc(f.id)}.png" alt=""></span></span>`;
+      return `<a class="rt z-${z}" href="#${esc(f.id)}" data-id="${esc(f.id)}" aria-selected="${f.id === shown}">${ring}<span class="pl"><div class="cs">${esc(f.name.split(' ')[0].toUpperCase())}</div><div class="ds">${esc(f.des)}</div><div class="zn">${esc(z === 'cp' ? 'CMD' : z === 'off' ? 'OFF' : z.toUpperCase())}</div></span></a>`;
+    }).join('');
+    const sel = document.querySelector('.rt[aria-selected="true"]');
+    if (sel && sel.parentElement && window.matchMedia('(max-width:899px)').matches) {
+      const rail = sel.parentElement;
+      rail.scrollLeft = sel.offsetLeft - rail.clientWidth / 2 + sel.clientWidth / 2;
+    }
+  }
+  function renderFile(id) {
+    const f = R.BY_ID[id] || R.BY_ID.price;
+    shown = f.id;
+    const z = zoneKey(f);
+    const ring = f.id === 'ju'
+      ? '<div class="pic"><span class="ini">JK</span><span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span></div>'
+      : `<div class="pic"><img src="../avatars/${esc(f.id)}.png" alt=""><span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span></div>`;
+    const selfRing = f.id === 'ju'
+      ? '<span class="ring"><span class="ini">JK</span></span>'
+      : `<span class="ring"><img src="../avatars/${esc(f.id)}.png" alt=""></span>`;
+    $('dos').className = 'panel dos z-' + z;
+    $('dos').innerHTML = `
+      <div class="fh"><b>OPERATOR FILE // ${esc(f.des)}</b><span>TF141 · EYES ONLY</span></div>
+      <div class="hero">
+        ${ring}
+        <div>
+          <div class="lbl">CALLSIGN</div>
+          <div class="big">${esc(f.name.toUpperCase())}</div>
+          <div class="meta">${esc(f.des)} · ${esc(f.unit)} · BOARD ${esc(f.board)}</div>
+          <div class="now"><i></i>${esc(nowLine(f))}</div>
+          ${feedBlock(f)}
+          <div class="stampbig">${esc(f.stamp)}</div>
+        </div>
+      </div>
+      <section class="dsec"><h4><span>§1</span>Role</h4><p class="role">${esc(f.role)}</p></section>
+      <section class="dsec"><h4><span>§2</span>What they do</h4><ol class="do">${f.does.map((t) => `<li>${esc(t)}</li>`).join('')}</ol></section>
+      <section class="dsec"><h4><span>§3</span>Lane boundary</h4><div class="nobox"><span class="x">✕ NOT THEIR JOB</span>${esc(f.not)}</div></section>
+      <section class="dsec" id="flow"><h4><span>§4</span>Flow</h4>
+        <div class="flow" data-flow="${esc(f.id)}" data-from="${esc(f.from.map((e) => e.id || e.label).join(','))}" data-to="${esc(f.to.map((e) => e.id || e.label).join(','))}">
+          <div class="fcol"><span class="fl">FROM</span>${f.from.map(chip).join('')}</div>
+          <span class="wirearrow"></span>
+          <div class="self">${selfRing}<b>${esc(f.name.toUpperCase())}</b></div>
+          <span class="wirearrow"></span>
+          <div class="fcol"><span class="fl">TO</span>${f.to.map(chip).join('')}</div>
+        </div>
+      </section>
+      <div class="dfoot">REF · BOARD ${esc(f.board)} · <a href="../orbat/">◂ ORBAT MAP</a> · <a href="../">◂ THEATER</a></div>`;
+    renderRail();
+    history.replaceState(null, '', '#' + f.id);
+  }
+  function fromHash() {
+    const id = (location.hash || '').replace(/^#/, '').toLowerCase();
+    return R.BY_ID[id] ? id : 'price';
+  }
+  $('rail').addEventListener('click', (e) => {
+    const a = e.target.closest('[data-id]');
+    if (!a) return;
+    e.preventDefault();
+    renderFile(a.dataset.id);
+  });
+  window.addEventListener('hashchange', () => renderFile(fromHash()));
+
+  async function pull() {
+    try {
+      const r = await fetch('/api/feed?f=status&t=' + Date.now(), { cache: 'no-store', credentials: 'same-origin' });
+      if (!r.ok) return;
+      const d = await r.json();
+      if (!d || d.ct) return;
+      const cards = [];
+      for (const [B, fb] of [[d.command, ''], [d.kal, 'Kal']]) {
+        const L = (B && B.lists) || {};
+        for (const k of ['doing', 'waiting', 'backlog', 'done']) for (const c of L[k] || []) cards.push({ ...c, list: k, lane: c.lane || fb });
+      }
+      feedCards = cards;
+      renderFile(shown);
+    } catch (_) { /* dossier copy still stands */ }
+  }
+  renderFile(fromHash());
+  pull();
+  setInterval(pull, 20000);
+})();
+</script>
+</body>
+</html>

@@ -1,17 +1,13 @@
 /* Live feed for one operator. Titles, briefs, lane, and board come only from the feed card.
    Standing work is cards whose name or short already says "standing" — not a new feed field. */
 (function (root) {
-  const FALLBACK_OPS = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal", "Ju Kwon"];
-  const ops = () => (root.MW4Roster && root.MW4Roster.OPS) || FALLBACK_OPS;
+  const OPS = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal"];
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   function designator(op) {
-    if (root.MW4Roster) return root.MW4Roster.designator(op);
     if (op === "Price") return "BRAVO-6";
-    const i = ops().indexOf(op);
+    const i = OPS.indexOf(op);
     return i < 0 ? "" : "141-" + String(i).padStart(2, "0");
   }
-  function roleOf(op) { return (root.MW4Roster && root.MW4Roster.role(op)) || ""; }
-  function slug(op) { return root.MW4Roster ? root.MW4Roster.slug(op) : String(op || "").toLowerCase().replace(/\s+/g, "-"); }
   function isStanding(c) {
     const name = String((c && c.name) || "");
     const short = String((c && c.short) || "");
@@ -20,7 +16,7 @@
   function safeUrl(u) { return /^https:\/\/trello\.com\//.test(u || "") ? u : ""; }
   function norm(t) {
     let s = String(t || "").toLowerCase().trim();
-    const lane = "ju kwon|price|ghost|cho|west|ko|park|jae|dunn|soap|gaz|kal";
+    const lane = "price|ghost|cho|west|ko|park|jae|dunn|soap|gaz|kal";
     s = s.replace(new RegExp("^(" + lane + ")\\s*[:\\u2014\\u2013-]\\s*"), "");
     s = s.replace(new RegExp("^(" + lane + ")\\s+"), "");
     return s.replace(/[^a-z0-9]+/g, "");
@@ -51,14 +47,12 @@
     const finite = cards.filter((c) => !isStanding(c));
     const standing = cards.filter(isStanding);
     const des = (opts && opts.des) || designator(op);
-    const role = roleOf(op);
     const ini = op.slice(0, 2).toUpperCase();
-    const avatar = (opts && opts.avatar) || ("avatars/" + slug(op) + ".png");
+    const avatar = (opts && opts.avatar) || ("avatars/" + op.toLowerCase() + ".png");
     const face = `<img class="actx-face" src="${esc(avatar)}" alt="" onerror="this.outerHTML='<b class=&quot;actx-face ini&quot;>${esc(ini)}</b>'">`;
     const close = '<button class="x" type="button">CLOSE</button>';
-    const id = `${esc(op.toUpperCase())}${des ? " <i>" + esc(des) + "</i>" : ""}${role ? " <i>" + esc(role) + "</i>" : ""}`;
     if (!finite.length && !standing.length) {
-      return `<div class="actx actx-empty"><div class="actx-top">${face}<div class="actx-id"><div class="actx-cs">${id}</div><div class="actx-st">NOT ACROSS THE WIRE</div></div>${close}</div><p class="actx-none">No Doing card on the feed for this callsign.</p></div>`;
+      return `<div class="actx actx-empty"><div class="actx-top">${face}<div class="actx-id"><div class="actx-cs">${esc(op.toUpperCase())}${des ? " <i>" + esc(des) + "</i>" : ""}</div><div class="actx-st">NOT ACROSS THE WIRE</div></div>${close}</div><p class="actx-none">No Doing card on the feed for this callsign.</p></div>`;
     }
     const st = finite.length
       ? (finite.length + " finite" + (standing.length ? " · " + standing.length + " standing" : ""))
@@ -69,7 +63,7 @@
     const standBlock = standing.length
       ? `<section class="actx-sec stand"><h3>Standing · always on</h3>${standing.map((c) => cardHtml(c, "stand")).join("")}</section>`
       : "";
-    return `<div class="actx"><div class="actx-top">${face}<div class="actx-id"><div class="actx-cs">${id}</div><div class="actx-st">${esc(st)}</div></div>${close}</div>${finiteBlock}${standBlock}</div>`;
+    return `<div class="actx"><div class="actx-top">${face}<div class="actx-id"><div class="actx-cs">${esc(op.toUpperCase())}${des ? " <i>" + esc(des) + "</i>" : ""}</div><div class="actx-st">${esc(st)}</div></div>${close}</div>${finiteBlock}${standBlock}</div>`;
   }
-  root.MW4Action = { html, designator, role: roleOf, isStanding };
+  root.MW4Action = { html, designator, isStanding };
 })(window);

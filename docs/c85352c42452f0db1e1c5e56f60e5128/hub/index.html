@@ -16,7 +16,6 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="../suite.css">
 <script src="../brand-icons.js"></script>
-<script src="../roster.js"></script>
 <script src="../action-panel.js"></script>
 <title>MW4 // COMMAND SUITE</title>
 <style>
@@ -159,6 +158,24 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
         <div><div class="l">PIN</div><div class="n a lk">▒▒</div></div>
       </div>
     </a>
+
+    <a class="tile ledger" href="../ledger/">
+      <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+      <div class="th">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3M9 11h6M9 15h4"/></svg></span>
+        <div><span class="tag a">P&amp;L · KO</span><div class="t">MW4 // LEDGER</div></div>
+        <span class="go">OPEN ▸</span>
+      </div>
+      <div class="d">Contribution is the hero: Shopify revenue minus product cost minus Meta, TikTok, and Google spend. Mercury cash sits beside it.</div>
+      <div class="chips"><span>CONTRIB</span><span>COGS</span><span>PAID LANES</span><span>TREASURY</span><span id="lgChip">SAMPLE</span></div>
+      <div class="hint" id="lgHint">SAMPLE · not a live feed</div>
+      <div class="stats">
+        <div><div class="l">CM MTD</div><div class="n a" id="lgCm">—</div></div>
+        <div><div class="l">CM%</div><div class="n a" id="lgPct">—</div></div>
+        <div><div class="l">SPEND</div><div class="n h" id="lgSpend">—</div></div>
+        <div><div class="l">CASH</div><div class="n g" id="lgCash">—</div></div>
+      </div>
+    </a>
   </div>
 
   <section class="wireops" id="wireops">
@@ -174,6 +191,8 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   </section>
 
   <div class="links">
+    <a href="../orbat/">ORBAT MAP <span>▸</span></a>
+    <a href="../files/">OPERATOR FILES <span>▸</span></a>
     <a id="cmdLink" class="off" target="_blank" rel="noopener">CMD BOARD <span>↗</span></a>
     <a id="kalLink" class="off" target="_blank" rel="noopener">KAL BOARD <span>↗</span></a>
   </div>
@@ -185,8 +204,9 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 <div class="sx-dock"><nav>
   <a class="on" href="./"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
   <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
-  <a href="../social/"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
-  <a href="#" id="dsync"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>SYNC</a>
+  <a href="../ledger/"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3M9 11h6M9 15h4"/></svg>LEDGER</a>
+  <a href="../orbat/"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v3.5M12 11H6.5V16.5M12 11h5.5V16.5"/></svg>ORBAT</a>
+  <a href="../files/"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8 13h8M8 17h5"/></svg>FILES</a>
 </nav></div>
 
 <script>
@@ -234,7 +254,6 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     try { soc(await get('social')); } catch (err) { $('socHint').innerHTML = '<span class="w">⚠ SOCIAL FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
     if (ok) { $('ilk').classList.add('live'); $('ist').textContent = 'INTEL LIVE'; }
   }
-  $('dsync').addEventListener('click', (e) => { e.preventDefault(); pull(); });
   $('sync2').addEventListener('click', (e) => { e.preventDefault(); pull(); });
   function setN(id, v) { const el = $(id); el.textContent = v; el.classList.remove('lk'); }
   function hud(d) {
@@ -261,7 +280,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     paintWire(d);
   }
   function doingRows(d) {
-    const OPSH = window.MW4Roster.OPS;
+    const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
     const canon = (lane) => OPSH.find((o) => o.toLowerCase() === String(lane || '').toLowerCase()) || lane || 'TF141';
     const rows = [];
     for (const [board, B] of [['CMD', d.command], ['KAL', d.kal]]) {
@@ -284,18 +303,18 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     const btn = (op, cs, stn) => {
       const ini = String(op).slice(0, 2).toUpperCase();
       const line = (stn ? cs.filter(stand) : cs.filter((c) => !stand(c)))[0] || cs[0];
-      return `<button type="button" class="wop${stn ? ' stn' : ''}" data-op="${esc(op)}"><img src="../avatars/${esc(window.MW4Roster.slug(op))}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(line.short || line.name || '')}</i></span></button>`;
+      return `<button type="button" class="wop${stn ? ' stn' : ''}" data-op="${esc(op)}"><img src="../avatars/${esc(op.toLowerCase())}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(line.short || line.name || '')}</i></span></button>`;
     };
     const host = $('wireRow');
     const parts = [];
     parts.push(finiteOps.length ? finiteOps.map(([op, cs]) => btn(op, cs, false)).join('') : '<div class="lockd">AO QUIET · NO FINITE MISSIONS</div>');
     if (standOps.length) parts.push('<div class="wlab stn">Standing · always on</div>' + standOps.map(([op, cs]) => btn(op, cs, true)).join(''));
     host.innerHTML = parts.join('');
-    host.querySelectorAll('.wop').forEach((b) => b.addEventListener('click', () => openAct(b.dataset.op, rows)));
+    host.querySelectorAll('.wop').forEach((b) => b.addEventListener('click', () => { location.href = '../files/#' + String(b.dataset.op || '').toLowerCase(); }));
   }
   function openAct(op, rows) {
     const mine = rows.filter((c) => String(c.lane || '') === op);
-    $('actp').innerHTML = window.MW4Action ? MW4Action.html({ op, avatar: '../avatars/' + window.MW4Roster.slug(op) + '.png', cards: mine, des: MW4Action.designator(op) }) : '';
+    $('actp').innerHTML = window.MW4Action ? MW4Action.html({ op, avatar: '../avatars/' + op.toLowerCase() + '.png', cards: mine, des: MW4Action.designator(op) }) : '';
     $('act').classList.add('on');
   }
   $('act').addEventListener('click', (e) => { if (e.target.id === 'act' || e.target.closest('.x')) $('act').classList.remove('on'); });
@@ -315,6 +334,19 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   }
   paintChannels(FALLBACK_CH);
   pull(); setInterval(pull, 30000);
+})();
+</script>
+<script src="../ledger/model.js"></script>
+<script>
+(() => {
+  const L = window.MW4Ledger;
+  if (!L) return;
+  const m = L.derive(L.SAMPLE);
+  const $ = (id) => document.getElementById(id);
+  $('lgCm').textContent = L.format.moneyK(m.mtd.contrib);
+  $('lgPct').textContent = m.mtd.cm.toFixed(1) + '%';
+  $('lgSpend').textContent = L.format.moneyK(m.mtd.spend);
+  $('lgCash').textContent = L.format.moneyK(m.mercury.balance);
 })();
 </script>
 </body>

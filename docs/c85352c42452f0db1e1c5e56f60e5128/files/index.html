@@ -212,7 +212,10 @@ a{color:inherit}
       const cards = [];
       for (const [B, fb] of [[d.command, ''], [d.kal, 'Ghost']]) {
         const L = (B && B.lists) || {};
-        for (const k of ['doing', 'waiting', 'backlog', 'done']) for (const c of L[k] || []) cards.push({ ...c, list: k, lane: c.lane || fb });
+        for (const k of ['doing', 'waiting', 'backlog', 'done']) for (const c of L[k] || []) {
+          const lane = /^duo$/i.test(c.lane || '') ? 'Ko' : (c.lane || (/^\s*Duo\s*[:—–-]/i.test(c.name || '') ? 'Ko' : fb));
+          cards.push({ ...c, list: k, lane });
+        }
       }
       feedCards = cards;
       renderFile(shown);

@@ -32,6 +32,17 @@ function chromeStrip(w, d, small) {
     const r = w.addStack(); r.spacing = 3; for (const [l, n, k] of pair) cell(r, l, n, k, 13); w.addSpacer(3);
   }
 }
+// Feed line1 used to count Command waiting only. Badge and chrome already add Kal Trading.
+function glanceOf(d) {
+  const g = (d && d.glance) || {};
+  const cc = (d.command && d.command.counts) || {};
+  const kc = (d.kal && d.kal.counts) || {};
+  const W = (cc.waiting ?? 0) + (kc.waiting ?? 0);
+  let line1 = String(g.line1 || "");
+  if (/\bwaiting on you\b/i.test(line1)) line1 = line1.replace(/\d+(?=\s+waiting on you\b)/i, String(W));
+  else if (!line1) line1 = ((cc.doing ?? 0) + (kc.doing ?? 0)) + " doing · " + W + " waiting on you";
+  return { line1: line1, line2: g.line2 || "", badge: W ? W + " WAIT" : "CLEAR" };
+}
 function intel(w, g, small) {
   const r = w.addStack(); r.centerAlignContent(); r.spacing = 5;
   if (g.badge) chip(r, g.badge, col("bg"), col("amber"), small ? 8 : 8.5);
@@ -132,7 +143,7 @@ async function build() {
   w.setPadding(small ? 11 : 12, small ? 11 : 14, small ? 11 : 12, small ? 11 : 14);
   brand(w, d, offline, small);
   if (!d) { softFail(w, need || "NO SIGNAL", "Glance"); return w; }
-  const g = d.glance || {};
+  const g = glanceOf(d);
   w.addSpacer(small ? 5 : 5);
   chromeStrip(w, d, small);
   if (small) {

@@ -122,5 +122,12 @@ assert.match(waitingSrc, /lane: c\.lane \|\| "Ghost"/);
 assert.doesNotMatch(waitingSrc, /KAL BOARD/);
 assert.match(glanceSrc, /\^ghost\$\/i/);
 assert.doesNotMatch(glanceSrc, /\^kal\$\/i/);
+assert.match(glanceSrc, /waiting on you/);
+assert.match(glanceSrc, /kc\.waiting/);
+assert.match(hubHtml, /<b>LIVE<\/b>/);
+assert.match(hubHtml, /⚠ SNAPSHOT/);
+assert.match(hubHtml, /TODO\(Price→Jae\)/);
+const hudHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/index.html', import.meta.url), 'utf8');
+assert.match(hudHtml, /\^duo\$\/i\.test\(m\[1\]\)\) return 'Ko'/);
 
 console.log('hud elevate checks ok');

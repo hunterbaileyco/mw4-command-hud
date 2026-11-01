@@ -172,7 +172,8 @@ a{color:inherit;text-decoration:none}
       for (const [board, B, fb] of [['CMD', d.command, ''], ['KAL', d.kal, 'Ghost']]) {
         const L = (B && B.lists) || {};
         for (const k of ['doing', 'waiting', 'backlog', 'done']) for (const c of L[k] || []) {
-          cards.push({ ...c, list: k, lane: c.lane || fb });
+          const duo = /^duo$/i.test(c.lane || '') || (!c.lane && /^\s*Duo\s*[:—–-]/i.test(c.name || ''));
+          cards.push({ ...c, list: k, lane: duo ? 'Ko' : (c.lane || fb) });
         }
       }
       document.querySelectorAll('[data-live]').forEach((el) => {

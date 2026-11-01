@@ -7,6 +7,12 @@
 //   node build-social.mjs --metrics /workspace/kinsora-video/multi_channel_metrics_latest.json \
 //     --data /workspace/kinsora-video/multi/data.json --kdf cache/kdf.json --pass-file .pass \
 //     --out docs/<token>/social/metrics.json
+// TODO(Price→Jae): do not hand-edit social/metrics.json. The committed envelope is the 2026-10-31
+// pull (hub as-of day 2026-10-30) and stays SNAPSHOT until this command is run with a real metrics
+// file. This environment has no kinsora-video pull, no cache/kdf.json, and no MW4_FEED_PASS.
+// Postiz can list posts but not view counts. Windsor is connected for tiktok_organic, instagram,
+// and pinterest_organic; the series + per-post assembler lives in that off-repo pull. Inventing
+// numbers here would ship a false LIVE board and a key /api/feed cannot open.
 import fs from 'node:fs';
 import path from 'node:path';
 import { webcrypto as wc } from 'node:crypto';

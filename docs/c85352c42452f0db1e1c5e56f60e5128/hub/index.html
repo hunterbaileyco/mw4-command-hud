@@ -11,55 +11,257 @@
 <meta name="apple-mobile-web-app-title" content="MW4 Hub">
 <meta name="theme-color" content="#0B0E0C">
 <link rel="apple-touch-icon" href="../icon.svg">
-<title>MW4 // DASHBOARD HUB</title>
+<link rel="stylesheet" href="../suite.css">
+<title>MW4 // COMMAND SUITE</title>
 <style>
-:root{--bg:#0B0E0C;--panel:#121612;--line:#2A3328;--tan:#C5A572;--olive:#6B7C3A;--amber:#E8A317;--ink:#E8E2D6;--dim:#8a8676;
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 var(--sans);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
 body{min-height:100vh;background:
-  linear-gradient(rgba(107,124,58,.07) 1px,transparent 1px) 0 0/28px 28px,
-  linear-gradient(90deg,rgba(107,124,58,.07) 1px,transparent 1px) 0 0/28px 28px,
-  radial-gradient(ellipse at 50% -10%,rgba(107,124,58,.14),transparent 60%),var(--bg)}
-a{color:inherit;text-decoration:none}
-.wrap{max-width:460px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 18px) 12px calc(env(safe-area-inset-bottom) + 24px);display:flex;flex-direction:column;gap:12px}
-.brand{font-family:var(--mono);color:var(--tan);font-size:13px;font-weight:700;letter-spacing:.16em}
-.brand .sl{color:var(--olive)}
-.cls{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;margin-top:3px}
-.tile{position:relative;display:block;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px 14px;overflow:hidden;transition:border-color .15s}
-.tile:active,.tile:hover{border-color:var(--amber)}
+  linear-gradient(rgba(107,124,58,.06) 1px,transparent 1px) 0 0/28px 28px,
+  linear-gradient(90deg,rgba(107,124,58,.06) 1px,transparent 1px) 0 0/28px 28px,
+  radial-gradient(ellipse at 50% -10%,rgba(107,124,58,.16),transparent 60%),var(--bg)}
+a{color:inherit;text-decoration:none}button,input{font:inherit}
+.wrap{max-width:980px;margin:0 auto;padding:14px 12px 24px;display:flex;flex-direction:column;gap:12px}
+.mono{font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase}
+/* intel status / inline unlock */
+.ilk{position:relative;display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 8px 6px 10px;border:1px solid var(--line);border-radius:6px;background:rgba(18,22,18,.85)}
+.ilk .st{font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.ilk .st i{width:8px;height:8px;border-radius:50%;background:var(--holdink);box-shadow:0 0 6px var(--holdink);flex:0 0 auto}
+.ilk.live .st i{background:var(--olive2);box-shadow:0 0 8px var(--olive2);animation:pulse 2s infinite}
+.ilk.live .st{color:var(--olive2)}
+@keyframes pulse{50%{opacity:.35}}
+.ilk form{display:flex;gap:6px;margin-left:auto;flex:1;justify-content:flex-end;min-width:0}
+.ilk input{min-width:0;width:100%;max-width:200px;height:34px;background:#0B0E0C;border:1px solid var(--line2);border-radius:3px;color:var(--ink);padding:0 10px;font-family:var(--mono);font-size:16px;letter-spacing:.2em;text-align:center;outline:none}
+.ilk input:focus{border-color:var(--olive);box-shadow:0 0 0 1px var(--olive)}
+.ilk button{height:34px;background:var(--olive);color:#0B0E0C;border:0;border-radius:3px;padding:0 12px;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.18em;cursor:pointer;white-space:nowrap}
+.ilk .err{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--holdink)}
+.ilk .sync{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;text-align:right}
+.ilk.live form{display:none}.ilk:not(.live) .sync{display:none}
+.ilk.shake{animation:sh .3s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+/* tiles */
+.tiles{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:780px){.tiles{grid-template-columns:1.25fr 1fr}}
+.tile{position:relative;display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,rgba(18,22,18,.97),rgba(13,17,14,.97));border:1px solid var(--line);border-radius:8px;padding:14px 14px 12px;overflow:hidden;transition:border-color .15s,transform .15s;min-height:236px}
 .tile::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 1px,transparent 1px 3px)}
-.brk{position:absolute;width:14px;height:14px;border-color:var(--tan);border-style:solid;opacity:.7}
-.brk.tl{top:-1px;left:-1px;border-width:2px 0 0 2px}.brk.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
-.tag{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;padding:2px 6px;border-radius:2px;background:var(--olive);color:#0B0E0C}
+.tile:hover{border-color:rgba(232,163,23,.7)}
+.tile:active{transform:scale(.99);border-color:var(--amber)}
+.tile .bg{position:absolute;right:-30px;top:-30px;width:190px;height:190px;opacity:.13;pointer-events:none}
+.tile .bg *{fill:none;stroke:var(--tan);stroke-width:1}
+.tile.hud .bg{animation:spin 40s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.th{display:flex;align-items:center;gap:10px}
+.ic{flex:0 0 auto;width:44px;height:44px;border:1px solid var(--line2);border-radius:6px;display:flex;align-items:center;justify-content:center;background:rgba(107,124,58,.10)}
+.ic svg{width:26px;height:26px;fill:none;stroke:var(--amber);stroke-width:1.6}
+.tag{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.18em;padding:2px 6px;border-radius:2px;background:var(--olive);color:#0B0E0C}
 .tag.a{background:var(--amber)}
-.t{font-size:19px;font-weight:650;margin:8px 0 4px}
-.d{color:var(--dim);font-size:12.5px}
-.go{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-family:var(--mono);color:var(--amber);font-size:20px}
-.foot{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);text-align:center;text-transform:uppercase;margin-top:6px}
+.t{font-size:19px;font-weight:700;margin-top:4px;letter-spacing:.005em}
+.go{margin-left:auto;align-self:flex-start;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.18em;color:#0B0E0C;background:var(--amber);padding:7px 10px;border-radius:3px;white-space:nowrap;box-shadow:0 0 14px rgba(232,163,23,.3)}
+.d{color:#b9b3a3;font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chips span{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--tan);border:1px solid var(--line2);padding:2px 6px;border-radius:2px;background:rgba(11,14,12,.6)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:4px;background:rgba(11,14,12,.7);margin-top:auto}
+.stats>div{padding:6px 8px;border-right:1px solid var(--line);min-width:0}
+.stats>div:last-child{border-right:0}
+.stats .l{font-family:var(--mono);font-size:8px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats .n{font-family:var(--mono);font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
+.stats .n.a{color:var(--amber)}.stats .n.h{color:var(--holdink)}.stats .n.t{color:var(--tan)}.stats .n.g{color:var(--olive2)}
+.stats .n.lk{color:#3d463a;letter-spacing:.05em}
+.hint{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:6px;min-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hint b{color:var(--amber)}.hint .w{color:var(--holdink)}
+/* sitrep strip */
+.sit{position:relative;border:1px solid var(--line);border-radius:6px;background:var(--panel);overflow:hidden}
+.sit .hd{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
+.sit .hd b{color:var(--tan)}.sit .hd b::before{content:"▌";color:var(--olive);margin-right:5px}
+.sit ul{list-style:none;margin:0;padding:4px 10px 8px;display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:780px){.sit ul{grid-template-columns:1fr 1fr;column-gap:18px}}
+.sit li{display:flex;gap:8px;align-items:baseline;padding:6px 0;border-bottom:1px dashed rgba(42,51,40,.9);font-size:12.5px;min-width:0}
+.sit li:last-child{border-bottom:0}
+.sit li .k{flex:0 0 auto;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.12em;color:var(--olive2);min-width:96px}
+.sit li .k.dep{color:var(--amber)}.sit li .k.hld,.sit li .k.warn{color:var(--holdink)}
+.sit li .x{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sit li .w{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--dim);flex:0 0 auto}
+.sit .lockd{padding:14px 10px;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;text-align:center}
+.links{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.links a{display:flex;align-items:center;justify-content:space-between;min-height:44px;padding:0 12px;border:1px solid var(--line2);border-radius:5px;background:rgba(18,22,18,.85);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--tan)}
+.links a.off{opacity:.4;pointer-events:none}
+.links a span{color:var(--amber)}
+.foot{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);text-align:center;text-transform:uppercase;line-height:1.8}
+@media (prefers-reduced-motion:reduce){.tile.hud .bg,.ilk.live .st i{animation:none}}
 </style>
 </head>
-<body>
+<body class="sx-pad">
+<div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · FWD CMD POST</span><span class="clk" id="clk">—</span></div>
 <div class="wrap">
-  <div>
-    <div class="brand">MW4 <span class="sl">//</span> DASHBOARD HUB</div>
-    <div class="cls">Task Force Kinsora · Restricted · one auth code opens every board</div>
+  <div class="sx-title">
+    <div><div class="kick">◆ Forward command post · Restricted</div><h1>MW4 <span class="sl">//</span> Command suite</h1></div>
   </div>
-  <a class="tile" href="../">
-    <span class="brk tl"></span><span class="brk br"></span>
-    <span class="tag">OPS · TF141</span>
-    <div class="t">MW4 Command HUD</div>
-    <div class="d">Live Trello theater — who's deployed, what's on hold for Hunter, queue &amp; shipped.</div>
-    <span class="go">▸</span>
-  </a>
-  <a class="tile" href="../social/">
-    <span class="brk tl"></span><span class="brk br"></span>
-    <span class="tag a">SOCIAL · JAE</span>
-    <div class="t">Kinsora social — published metrics</div>
-    <div class="d">TikTok @kinsora.co · TikTok @wearkinsora · IG @wearkinsora · Pinterest — views, engagement, daily trend, every post.</div>
-    <span class="go">▸</span>
-  </a>
-  <div class="foot">Feeds are encrypted · Unlock once per tab</div>
+
+  <div class="ilk" id="ilk">
+    <span class="st"><i></i><span id="ist">INTEL LOCKED</span></span>
+    <form id="uf" autocomplete="off">
+      <input id="pw" type="password" placeholder="AUTH CODE" aria-label="Auth code" autocomplete="current-password">
+      <button type="submit">▶ UNLOCK</button>
+    </form>
+    <span class="sync" id="isync">—</span>
+  </div>
+  <div class="ilk-err mono" id="uerr" style="font-size:9px;color:var(--holdink);min-height:0"></div>
+
+  <div class="tiles">
+    <a class="tile hud" href="../">
+      <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+      <svg class="bg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/><circle cx="50" cy="50" r="32"/><circle cx="50" cy="50" r="18"/><path d="M50 0v100M0 50h100"/></svg>
+      <div class="th">
+        <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/></svg></span>
+        <div><span class="tag">OPS · TF141</span><div class="t">MW4 Command HUD</div></div>
+        <span class="go">DEPLOY ▸</span>
+      </div>
+      <div class="d">Live Trello theater: who's deployed across the wire, who's caged on HOLD waiting for Hunter, the FOB queue and today's ships.</div>
+      <div class="chips"><span>AO</span><span>WIRE</span><span>HOLD CAGE</span><span>FOB</span><span>ORBAT</span><span>AAR</span><span>MISSION LOG</span></div>
+      <div class="hint" id="hudHint">▒ Unlock to light up live counts</div>
+      <div class="stats">
+        <div><div class="l">ACT</div><div class="n a lk" id="hAct">▒▒</div></div>
+        <div><div class="l">HOLD</div><div class="n h lk" id="hHold">▒▒</div></div>
+        <div><div class="l">QUEUE</div><div class="n t lk" id="hQ">▒▒</div></div>
+        <div><div class="l">SHIPPED</div><div class="n g lk" id="hShip">▒▒</div></div>
+      </div>
+    </a>
+
+    <a class="tile soc" href="../social/">
+      <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+      <svg class="bg" viewBox="0 0 100 100"><path d="M5 85L28 60L45 70L70 30L95 40"/><path d="M5 95h90M5 75h90M5 55h90M5 35h90"/></svg>
+      <div class="th">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg></span>
+        <div><span class="tag a">SOCIAL · JAE</span><div class="t">Kinsora social — published metrics</div></div>
+        <span class="go">OPEN ▸</span>
+      </div>
+      <div class="d">Every published post back to each channel's first: views, engagement, daily trend and a sortable post log.</div>
+      <div class="chips"><span>TT @KINSORA.CO</span><span>TT @WEARKINSORA</span><span>IG @WEARKINSORA</span><span>PINTEREST</span></div>
+      <div class="hint" id="socHint">▒ Unlock to see snapshot totals</div>
+      <div class="stats" id="socStats">
+        <div><div class="l">TT KCO</div><div class="n a lk">▒▒</div></div>
+        <div><div class="l">TT WK</div><div class="n a lk">▒▒</div></div>
+        <div><div class="l">IG</div><div class="n a lk">▒▒</div></div>
+        <div><div class="l">PIN</div><div class="n a lk">▒▒</div></div>
+      </div>
+    </a>
+  </div>
+
+  <section class="sit">
+    <span class="sx-brk tl"></span><span class="sx-brk br"></span>
+    <div class="hd"><b>SITREP · Last 6h</b><span id="sitc">—</span></div>
+    <div id="sit"><div class="lockd">▒▒▒ Intel encrypted · unlock above ▒▒▒</div></div>
+  </section>
+
+  <div class="links">
+    <a id="cmdLink" class="off" target="_blank" rel="noopener">CMD BOARD <span>↗</span></a>
+    <a id="kalLink" class="off" target="_blank" rel="noopener">KAL BOARD <span>↗</span></a>
+  </div>
+
+  <div class="foot">Feeds are AES-256-GCM encrypted · decrypted on this device only · one code opens every board<br><a href="#" id="lock2" style="color:var(--tan);border-bottom:1px dotted var(--tan)">LOCK THIS TAB</a></div>
 </div>
+
+<div class="sx-dock"><nav>
+  <a class="on" href="./"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
+  <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
+  <a href="../social/"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
+  <a class="lk" href="#" id="lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>LOCK</a>
+</nav></div>
+
+<script>
+(() => {
+  'use strict';
+  // Same key scheme as the HUD + Social boards: the auth code is checked against HASH, stretched with
+  // PBKDF2-SHA256 into an AES-256-GCM key, and the raw key (never the code) lives in sessionStorage for this tab.
+  // The hub only decrypts in the browser to show counts; nothing readable is published.
+  const HASH = '0b488216b0f3fff7076b1a9af7ed5abb84e17176fde44fddba9138b0ab08fcc9';
+  const KEY = 'mw4hud.unlock', KKEY = 'mw4hud.k';
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const safeUrl = (u) => /^https:\/\/trello\.com\//.test(u || '') ? u : '';
+  const te = new TextEncoder();
+  const b64 = { enc: (u) => btoa(String.fromCharCode(...new Uint8Array(u))), dec: (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0)) };
+  const sha256 = async (t) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode(t)))].map((x) => x.toString(16).padStart(2, '0')).join('');
+  const fmtK = (v) => v == null ? '—' : v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e4 ? Math.round(v / 1e3) + 'K' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : String(v);
+  const PT = (d, o) => new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', ...o }).format(d);
+  const agoShort = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'NOW' : m < 60 ? m + 'M' : Math.floor(m / 60) + 'H'; };
+  const clock = () => { $('clk').textContent = PT(new Date(), { second: '2-digit' }) + ' PT'; };
+  clock(); setInterval(clock, 1000);
+
+  let aesKey = null, keyMeta = null;
+  async function restoreKey() {
+    try {
+      if (sessionStorage.getItem(KEY) !== HASH) return false;
+      const s = JSON.parse(sessionStorage.getItem(KKEY) || 'null'); if (!s) return false;
+      aesKey = await crypto.subtle.importKey('raw', b64.dec(s.k), 'AES-GCM', false, ['decrypt']); keyMeta = { salt: s.salt, iter: s.iter }; return true;
+    } catch (_) { return false; }
+  }
+  async function deriveFrom(code, env) {
+    const km = await crypto.subtle.importKey('raw', te.encode(code), 'PBKDF2', false, ['deriveBits']);
+    const raw = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: b64.dec(env.salt), iterations: env.iter }, km, 256);
+    keyMeta = { salt: env.salt, iter: env.iter };
+    aesKey = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+    try { sessionStorage.setItem(KKEY, JSON.stringify({ ...keyMeta, k: b64.enc(raw) })); } catch (_) { /* private mode */ }
+  }
+  const get = async (p) => { const r = await fetch(p + '?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); };
+  async function open(env) {
+    if (!env || !env.ct || !aesKey) throw new Error('NO KEY');
+    if (keyMeta && (keyMeta.salt !== env.salt || keyMeta.iter !== env.iter)) throw new Error('KEY ROTATED');
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(env.iv) }, aesKey, b64.dec(env.ct));
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+  function lock() { sessionStorage.removeItem(KEY); sessionStorage.removeItem(KKEY); location.reload(); }
+  $('lock').addEventListener('click', (e) => { e.preventDefault(); lock(); });
+  $('lock2').addEventListener('click', (e) => { e.preventDefault(); lock(); });
+
+  $('uf').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = $('pw').value; $('pw').value = '';
+    if (await sha256(code) !== HASH) { $('uerr').textContent = '✕ ACCESS DENIED'; const g = $('ilk'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); return; }
+    $('uerr').textContent = 'DECRYPTING…';
+    try { const env = await get('../status.json'); await deriveFrom(code, env); await open(env); sessionStorage.setItem(KEY, HASH); $('uerr').textContent = ''; live(); }
+    catch (err) { $('uerr').textContent = '✕ DECRYPT FAILED · ' + String(err.message || err).toUpperCase().slice(0, 40); }
+  });
+
+  let timer = null;
+  function live() { $('ilk').classList.add('live'); $('ist').textContent = 'INTEL LIVE'; pull(); if (!timer) timer = setInterval(pull, 30000); }
+  async function pull() {
+    try { hud(await open(await get('../status.json'))); } catch (err) { $('hudHint').innerHTML = '<span class="w">⚠ HUD FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
+    try { soc(await open(await get('../social/metrics.json'))); } catch (err) { $('socHint').innerHTML = '<span class="w">⚠ SOCIAL FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
+  }
+  function setN(id, v) { const el = $(id); el.textContent = v; el.classList.remove('lk'); }
+  function hud(d) {
+    const C = d.command || {}, K = d.kal || {}, cc = C.counts || {}, kc = K.counts || {};
+    const n = (k) => (cc[k] || 0) + (kc[k] || 0);
+    setN('hAct', n('doing')); setN('hHold', n('waiting')); setN('hQ', n('backlog')); setN('hShip', n('doneToday'));
+    const t = new Date(d.updatedAt), age = Date.now() - t.getTime(), stale = !(age <= 30 * 60 * 1000);
+    $('isync').innerHTML = (stale ? '<span style="color:var(--holdink)">⚠ STALE · </span>' : '') + 'HUD ' + PT(t) + ' PT · ' + agoShort(age);
+    const g = d.glance || {};
+    $('hudHint').innerHTML = g.line1 ? `${g.badge ? `<b>${esc(g.badge)}</b> · ` : ''}${esc(g.line1)}` : '◆ Feed live';
+    const cu = safeUrl(C.boardUrl), ku = safeUrl(K.boardUrl);
+    if (cu) { $('cmdLink').href = cu; $('cmdLink').classList.remove('off'); }
+    if (ku) { $('kalLink').href = ku; $('kalLink').classList.remove('off'); }
+    // SITREP: alerts + crossings from the feed's 6h event log
+    const EK = { deploy: ['dep', 'DEPLOY'], rtb: ['rtb', 'RTB'], hold: ['hld', 'HOLD'], cleared: ['rtb', 'CLEARED'] };
+    const ev = (Array.isArray(d.events) ? d.events : []).slice().sort((a, b) => String(b.t).localeCompare(String(a.t))).slice(0, 8);
+    const items = (d.alerts || []).map((a) => `<li><span class="k ${a.level === 'warn' ? 'warn' : ''}">${a.level === 'warn' ? '⚠ ALERT' : '◆ GOOD'}</span><span class="x">${esc(a.text)}</span></li>`)
+      .concat(ev.map((e) => { const [k, tag] = EK[e.kind] || ['rtb', String(e.kind).toUpperCase()]; return `<li><span class="k ${k}">${tag} · ${esc(String(e.op).toUpperCase())}</span><span class="x">${esc(e.mission || '')}</span><span class="w">${agoShort(Date.now() - Date.parse(e.t))}</span></li>`; }));
+    $('sit').innerHTML = items.length ? '<ul>' + items.join('') + '</ul>' : '<div class="lockd">No crossings in the last 6h</div>';
+    $('sitc').textContent = ev.length + ' CROSSINGS · ' + (d.alerts || []).length + ' ALERTS';
+  }
+  function soc(d) {
+    const box = $('socStats').children;
+    (d.channels || []).slice(0, 4).forEach((c, i) => {
+      const rs = (d.posts || []).filter((r) => r[0] === c.key), v = rs.reduce((a, r) => a + (r[4] ?? 0), 0);
+      if (!box[i]) return;
+      box[i].querySelector('.l').textContent = c.short || c.key;
+      const n = box[i].querySelector('.n'); n.textContent = fmtK(v); n.classList.remove('lk'); n.title = v.toLocaleString('en-US') + ' ' + (c.reach || 'views').toLowerCase();
+    });
+    const total = (d.posts || []).length;
+    const asOf = new Date((d.asOfDay || '1970-01-01') + 'T23:59:59-07:00').getTime(), stale = Date.now() - asOf > 36 * 3600 * 1000;
+    $('socHint').innerHTML = `${stale ? '<span class="w">⚠ SNAPSHOT</span>' : '<b>SNAPSHOT</b>'} ${esc(d.generatedAt || '')} · ${total} posts · views / impressions`;
+  }
+  restoreKey().then((ok) => { if (ok) live(); });
+})();
+</script>
 </body>
 </html>

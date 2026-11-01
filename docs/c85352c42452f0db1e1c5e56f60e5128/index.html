@@ -12,6 +12,7 @@
 <meta name="theme-color" content="#0B0E0C">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="suite.css">
 <title>MW4 // COMMAND</title>
 <style>
 :root{
@@ -244,7 +245,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 
 /* gate */
 #gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;background:var(--bg)}
-#gate form{position:relative;width:min(340px,100%);display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px}
+#gate form{position:relative;box-shadow:0 0 40px rgba(107,124,58,.12);width:min(340px,100%);display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px}
 #gate .brand{font-size:14px;text-align:center}
 #gate .cls{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-align:center;text-transform:uppercase}
 #gate label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--tan);text-transform:uppercase}
@@ -262,11 +263,94 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 @keyframes edge{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
 .snd{appearance:none;background:transparent;border:1px solid var(--line);border-radius:2px;color:var(--tan);font-size:12px;line-height:1;padding:3px 5px;cursor:pointer}
 .snd.off{opacity:.55}
-@media (prefers-reduced-motion:reduce){.sweep,.tok .bod,.ring::after,.wire::before{animation:none!important}:root{--fly:400ms}}
+
+/* ===== v2 theater upgrade ===== */
+.wrap{max-width:480px;padding-top:12px}
+.top{align-items:flex-end}
+.top .kick{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;color:var(--olive2);text-transform:uppercase;margin-bottom:2px}
+.top .brand{font-size:13px;font-weight:800;letter-spacing:.12em;white-space:nowrap}
+.asof{white-space:nowrap;font-size:9.5px}
+@media(min-width:900px){.top .brand{font-size:16px}}
+.chrome{grid-template-columns:repeat(4,1fr);border-radius:5px;background:rgba(18,22,18,.85);position:relative}
+.chrome div{flex-wrap:wrap;padding:6px 8px 7px;row-gap:3px}
+.chrome .n{font-size:19px}
+.chrome .bar{flex:0 0 100%;height:3px;background:#1b211a;border-radius:1px;overflow:hidden}
+.chrome .bar b{display:block;height:100%;width:0;transition:width .6s ease;background:currentColor}
+.chrome .act .bar{color:var(--amber)}.chrome .hld .bar{color:var(--holdink)}.chrome .q .bar{color:var(--tan)}.chrome .shp .bar{color:var(--olive2)}
+.intel{border:1px solid rgba(232,163,23,.3);border-left:3px solid var(--amber);border-radius:3px;padding:5px 8px;background:rgba(232,163,23,.05);min-height:30px}
+.intel:empty{display:none}
+.stage .sx-ruler{position:absolute;left:14px;right:14px;top:3px;z-index:3}
+.ao .zhead,.fob .zhead{position:relative;z-index:3}
+.zhead .sec{font-family:var(--mono);font-size:8px;letter-spacing:.14em;color:#0B0E0C;background:var(--coyote);padding:1px 4px;border-radius:1px;margin-right:6px;font-weight:800}
+.zhead b{display:flex;align-items:center}
+.zhead b::before{content:none}
+.ao{padding-top:14px;min-height:220px}
+.ao .xy{position:absolute;top:22px;right:10px;font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;color:rgba(197,165,114,.38);pointer-events:none;text-align:right;line-height:1.5}
+/* wire heat */
+.side.hx{left:auto;right:10px;display:flex;align-items:center;gap:4px}
+.side.hx i{display:inline-block;width:6px;height:6px;border:1px solid rgba(232,163,23,.55);border-radius:1px}
+.wire.h1 .side.hx i:nth-child(1),.wire.h2 .side.hx i:nth-child(-n+2),.wire.h3 .side.hx i{background:var(--amber);box-shadow:0 0 5px var(--amber)}
+.wire.h0::before{opacity:.45;animation-duration:12s}
+.wire.h2::before{animation-duration:3.5s;filter:drop-shadow(0 0 5px rgba(232,163,23,.9))}
+.wire.h3::before{animation-duration:2s;filter:drop-shadow(0 0 8px rgba(232,163,23,1)) brightness(1.25)}
+.wire.h3::after{box-shadow:0 0 18px 4px rgba(232,163,23,.8),0 -9px 0 0 rgba(232,163,23,.5),0 9px 0 0 rgba(232,163,23,.5)}
+/* HOLD cage */
+.holdbox{margin:6px 10px 2px;padding:12px 8px 14px;border:1px solid rgba(232,163,23,.55);border-radius:3px;
+  background:linear-gradient(rgba(139,58,42,.16),rgba(139,58,42,.06));box-shadow:inset 0 0 22px rgba(139,58,42,.35)}
+.holdbox::before{background:repeating-linear-gradient(90deg,transparent 0 17px,rgba(197,165,114,.20) 17px 19px,transparent 19px 20px)}
+.holdbox::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:3px;background:repeating-linear-gradient(-45deg,var(--amber) 0 6px,#0d110e 6px 12px);opacity:.7;border-radius:0 0 3px 3px}
+.holdbox .hz{height:4px}
+.holdbox .zhead b{color:var(--amber)}
+.holdbox .lockic{width:11px;height:11px;margin-right:5px;fill:none;stroke:var(--amber);stroke-width:2}
+.holdbox:not(.empty) .zhead b{animation:hcage 2.4s ease-in-out infinite}
+@keyframes hcage{50%{color:var(--holdink)}}
+.holdbox.empty{border-style:dashed;border-color:rgba(107,124,58,.5);background:rgba(107,124,58,.05);box-shadow:none}
+.holdbox.empty .hz,.holdbox.empty::after{opacity:.25}
+.holdbox.empty .zhead b{color:var(--olive2)}
+.holdbox .tok.s-hold .ring::before{content:"";position:absolute;inset:0;border-radius:50%;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0 9px,rgba(11,14,12,.55) 9px 11px)}
+.tok.s-hold .plate{background:rgba(11,14,12,.8);border:1px solid rgba(224,122,95,.35);border-radius:2px;padding:2px 4px;color:#e6c49c}
+/* FOB */
+.cp{background:radial-gradient(circle at 50% 60%,rgba(107,124,58,.18),rgba(107,124,58,.05) 70%);border-color:#4a5a30}
+.cp::after{content:"";position:absolute;inset:4px;border:1px dashed rgba(107,124,58,.35);border-radius:3px;pointer-events:none}
+/* callsign + designator */
+.cs .ds{display:block;font-size:7.5px;letter-spacing:.14em;color:var(--dim);font-weight:400;margin-top:1px;text-align:center}
+.tok.s-ao .cs .ds{color:rgba(232,163,23,.75)}
+.tok.s-ao .plate .mk .tp{float:right;color:var(--tan)}
+/* ORBAT roster */
+.orbat{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 10px 6px}
+.orbat .zhead{margin-bottom:6px}
+.orb{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px}
+.orow{appearance:none;display:flex;align-items:center;gap:7px;min-height:40px;padding:4px 6px;background:#0d110e;border:1px solid var(--line);border-left:3px solid var(--line2);border-radius:3px;color:var(--ink);cursor:pointer;text-align:left;min-width:0}
+.orow img,.orow .ini{width:26px;height:26px;border-radius:50%;object-fit:cover;flex:0 0 auto;background:var(--idle);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:var(--tan)}
+.orow .nm{font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;line-height:1.1}
+.orow .zn{font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.orow .tx{min-width:0;flex:1}
+.orow .ct{font-family:var(--mono);font-size:9px;font-variant-numeric:tabular-nums;color:var(--dim);white-space:nowrap}
+.orow .ct b{font-weight:800}
+.orow.z-ao{border-left-color:var(--amber)}.orow.z-ao .nm{color:var(--amber)}.orow.z-ao img{box-shadow:0 0 0 2px var(--amber)}
+.orow.z-hold{border-left-color:var(--holdink)}.orow.z-hold .zn{color:var(--holdink)}.orow.z-hold img{box-shadow:0 0 0 2px var(--hold)}
+.orow.z-ready{border-left-color:var(--olive)}
+.orow.z-cp{border-left-color:var(--tan)}
+.orow.z-idle{opacity:.7}.orow.z-idle img{filter:grayscale(.7) brightness(.75)}
+.ft{padding-top:2px}
+@media(min-width:900px){
+  .wrap{max-width:1180px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr);grid-template-areas:"top top" "chrome chrome" "intel intel" "stage side" "ft ft";gap:12px 14px;align-items:start}
+  .top{grid-area:top}.chrome{grid-area:chrome}.intel{grid-area:intel}.stage{grid-area:stage}.ft{grid-area:ft}
+  .sidecol{grid-area:side;display:flex;flex-direction:column;gap:10px}
+  .ao{min-height:300px}#zAO{min-height:210px}
+  .tok.s-ao{width:140px}.tok.s-ao .plate{font-size:11px}
+  #zREADY{min-height:130px}
+  #sheet{align-items:center}#sheet .pn{border-radius:10px;border-bottom:1px solid var(--line)}
+}
+@media(max-width:899px){.sidecol{display:contents}}
+@media (prefers-reduced-motion:reduce){.holdbox .zhead b{animation:none!important}.sweep,.tok .bod,.ring::after,.wire::before{animation:none!important}:root{--fly:400ms}}
 </style>
 </head>
-<body>
+<body class="sx-pad">
 <div id="gate"><form id="gf" autocomplete="off">
+  <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+  <div class="sx-gate-art"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="22"/><circle class="a" cx="27" cy="27" r="4"/><path d="M27 1v12M27 41v12M1 27h12M41 27h12"/></svg></div>
   <div class="brand">MW4 <span class="sl">//</span> COMMAND</div>
   <div class="cls">Restricted · Task Force Kinsora · Eyes only · feed encrypted</div>
   <label for="pw">Auth code
@@ -276,47 +360,58 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
   <div class="err" id="gerr"></div>
 </form></div>
 
-<div id="app"><div class="wrap">
+<div id="app">
+<div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · THEATER</span><span class="clk" id="clk">—</span></div>
+<div class="wrap">
   <div class="top">
-    <div class="brand">MW4 <span class="sl">//</span> COMMAND <span class="sl">·</span> TF141</div>
+    <div><div class="kick"><span class="sx-rec"></span>Live theater · CMD + KAL</div><div class="brand">MW4 <span class="sl">//</span> COMMAND <span class="sl">·</span> TF141</div></div>
     <div class="asof"><span class="dot" id="dot"></span><span id="upd">—</span><button class="snd" id="snd" type="button" aria-label="Toggle sound" title="Sound">🔊</button></div>
   </div>
   <div class="chrome">
-    <div class="act"><span class="l">ACT</span><span class="n" id="nAct">0</span></div>
-    <div class="hld"><span class="l">HOLD</span><span class="n" id="nHold">0</span></div>
-    <div class="q"><span class="l">QUEUE</span><span class="n" id="nQ">0</span></div>
-    <div class="shp"><span class="l">SHIPPED</span><span class="n" id="nShip">0</span></div>
+    <div class="act"><span class="l">ACT</span><span class="n" id="nAct">0</span><i class="bar"><b id="bAct"></b></i></div>
+    <div class="hld"><span class="l">HOLD</span><span class="n" id="nHold">0</span><i class="bar"><b id="bHold"></b></i></div>
+    <div class="q"><span class="l">QUEUE</span><span class="n" id="nQ">0</span><i class="bar"><b id="bQ"></b></i></div>
+    <div class="shp"><span class="l">SHIPPED</span><span class="n" id="nShip">0</span><i class="bar"><b id="bShip"></b></i></div>
   </div>
   <div class="intel" id="intel"></div>
 
   <section class="stage" id="stage">
     <span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span>
+    <div class="sx-ruler"></div>
     <div class="ao">
       <div class="sweep"></div>
-      <div class="zhead"><b>AO · Across the wire</b><span id="aoc">0 DEPLOYED</span></div>
+      <div class="zhead"><b><span class="sec">SEC A</span>AO · Across the wire</b><span id="aoc">0 DEPLOYED</span></div>
+      <div class="xy" id="xy">LAT 33.3152 N<br>LON 44.3661 E</div>
       <div class="grid">GRID 38S MB 4471<br>OBJ · KINSORA</div>
       <div class="cmp"></div>
       <div class="quiet" id="quiet">AO QUIET · NO OPERATORS DEPLOYED</div>
       <div class="zone" id="zAO"></div>
     </div>
     <div class="wire" id="wire">
-      <span class="side up">▲ ACROSS · FIELD</span><span class="side dn">▼ THIS SIDE · BASE</span>
+      <span class="side up">▲ ACROSS · FIELD</span><span class="side dn">▼ THIS SIDE · BASE</span><span class="side hx up" id="heat" title="Wire heat: crossings in the last hour">HEAT <i></i><i></i><i></i></span>
       <span class="chev l"><span>›</span><span>›</span><span>›</span></span>
       <span class="lbl">—— CROSSING THE WIRE ——</span>
       <span class="chev r"><span>‹</span><span>‹</span><span>‹</span></span>
     </div>
     <div class="holdbox" id="holdbox">
       <span class="hz"></span>
-      <div class="zhead"><b>Hold box · Awaiting Hunter</b><span id="hdc">0 STALLED</span></div>
+      <div class="zhead"><b><svg class="lockic" viewBox="0 0 12 12"><rect x="2" y="5.5" width="8" height="5.5"/><path d="M3.8 5.5V3.8a2.2 2.2 0 0 1 4.4 0v1.7"/></svg><span class="sec">SEC B</span>HOLD cage · Awaiting Hunter</b><span id="hdc">0 STALLED</span></div>
       <div class="zone" id="zHOLD"></div>
     </div>
     <div class="fob">
-      <div class="zhead"><b>FOB · Ready room</b><span><button class="drill" id="drill" type="button">▶ DRILL</button></span></div>
+      <div class="zhead"><b><span class="sec">SEC C</span>FOB · Ready room</b><span><button class="drill" id="drill" type="button">▶ DRILL</button></span></div>
       <div class="fobgrid">
         <div class="cp"><div class="zone" id="zCP"></div></div>
         <div class="zone" id="zREADY"></div>
       </div>
     </div>
+  </section>
+
+  <div class="sidecol">
+  <section class="orbat" id="orbatbox">
+    <span class="sx-brk tl"></span><span class="sx-brk br"></span>
+    <div class="zhead"><b>ORBAT · Operator callsigns</b><span id="orbc">11 OPS</span></div>
+    <div class="orb" id="orb"></div>
   </section>
 
   <div class="ticker"><span class="tl">AAR</span><div class="vp"><div class="rail" id="rail"></div></div></div>
@@ -332,12 +427,20 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
       <div id="feed"></div>
     </div>
   </details>
+  </div>
 
   <div class="ft">
     <div class="boards"><a id="cmdLink" target="_blank" rel="noopener">CMD BOARD ↗</a><a id="kalLink" target="_blank" rel="noopener">KAL BOARD ↗</a></div>
     <div><span id="stale"></span>AUTO-REFRESH · POLLS 20S · <span id="ref">—</span> · <a href="hub/">HUB</a> · <a href="social/">SOCIAL</a> · <a href="#" id="lock">LOCK</a></div>
   </div>
-</div></div>
+</div>
+<div class="sx-dock"><nav>
+  <a href="hub/"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
+  <a class="on" href="./"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
+  <a href="social/"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
+  <a class="lk" href="#" id="dlock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>LOCK</a>
+</nav></div>
+</div>
 
 <div id="edge"></div>
 <div id="sheet"><div class="pn" id="sheetp"></div></div>
@@ -353,6 +456,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
   const POLL_MS = 20000, STALE_MS = 30 * 60 * 1000, FLY_MS = 1200, STEP_MS = FLY_MS + 1100;
   const OPS = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
   const LIST = { doing: { tag: 'ACT', tone: 'act', rank: 0 }, waiting: { tag: 'HOLD', tone: 'hold', rank: 1 }, backlog: { tag: 'QUEUE', tone: 'queue', rank: 2 }, done: { tag: 'DONE', tone: 'done', rank: 3 } };
+  const DES = Object.fromEntries(OPS.map((o, i) => [o, o === 'Price' ? 'BRAVO-6' : '141-' + String(i).padStart(2, '0')]));
   const ZLABEL = { ao: 'DEPLOYED · ACROSS THE WIRE', hold: 'HOLD · AWAITING HUNTER', ready: 'FOB · QUEUED', idle: 'FOB · STANDING BY', cp: 'FOB · COMMAND POST' };
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -450,6 +554,10 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     } catch (err) { $('gerr').textContent = '✕ DECRYPT FAILED · ' + String(err.message || err).toUpperCase().slice(0, 40); }
   });
   $('lock').addEventListener('click', (e) => { e.preventDefault(); relock(); });
+  $('dlock').addEventListener('click', (e) => { e.preventDefault(); relock(); });
+  const clk = () => { $('clk').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) + ' PT'; };
+  clk(); setInterval(clk, 1000);
+  if (window.matchMedia && matchMedia('(min-width:900px)').matches) $('log').open = true;
   document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
     tab = b.dataset.tab; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b)); renderFeed();
   }));
@@ -530,7 +638,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     el.className = 'tok'; el.dataset.op = op;
     const ini = op.slice(0, 2).toUpperCase();
     el.innerHTML = `<span class="flash"></span><div class="bod"><div class="ring"><img src="avatars/${op.toLowerCase()}.png" alt="${esc(op)}" onerror="this.outerHTML='<div class=&quot;ini&quot;>${ini}</div>'"><span class="badge"></span><span class="hb"></span></div>
-      <div class="cs">${esc(op)}${op === 'Price' ? '<span class="rk">CPT</span>' : ''}</div><div class="plate"></div><span class="rtbtag"></span></div>`;
+      <div class="cs">${esc(op)}${op === 'Price' ? '<span class="rk">CPT</span>' : ''}<span class="ds">${DES[op] || ''}</span></div><div class="plate"></div><span class="rtbtag"></span></div>`;
     el.addEventListener('click', () => openSheet(op));
     return el;
   }
@@ -544,7 +652,9 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
       if (m.waiting.length) h = 'H' + m.waiting.length;
       const lines = m.doing.slice(0, 2).map((c) => `<span class="ln" title="${esc(c.name || c.short)}">${esc(c.short)}</span>`);
       if (m.doing.length > 2) lines.push(`<span class="ln">+${m.doing.length - 2} more</span>`);
-      p = `<span class="mk">${m.doing[0] && m.doing[0].drill ? 'SIM · ' : ''}MISSION</span>` + lines.join('');
+      const dep = feedEvents.filter((e) => e.op === m.op && e.kind === 'deploy').map((e) => Date.parse(e.t)).sort((a, c) => c - a)[0];
+      const tp = dep && !(m.doing[0] && m.doing[0].drill) ? `<span class="tp">T+${agoShort(Date.now() - dep)}</span>` : '';
+      p = `<span class="mk">${m.doing[0] && m.doing[0].drill ? 'SIM · ' : ''}MISSION${tp}</span>` + lines.join('');
     } else if (m.zone === 'hold') {
       b = 'HOLD' + (m.waiting.length > 1 ? ' ×' + m.waiting.length : '');
       p = esc(m.waiting[0] ? m.waiting[0].short : 'Awaiting Hunter');
@@ -705,6 +815,8 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     const nAct = by('doing').length, nHold = by('waiting').length, nQ = by('backlog').length;
     const nShip = (cc.doneToday || 0) + (kc.doneToday || 0);
     $('nAct').textContent = nAct; $('nHold').textContent = nHold; $('nQ').textContent = nQ; $('nShip').textContent = nShip;
+    const tot = Math.max(1, nAct + nHold + nQ + nShip);
+    [['bAct', nAct], ['bHold', nHold], ['bQ', nQ], ['bShip', nShip]].forEach(([id, v]) => { $(id).style.width = Math.round((v / tot) * 100) + '%'; });
     $('cmdLink').href = safeUrl(C.boardUrl); $('kalLink').href = safeUrl(K.boardUrl);
 
     const g = d.glance || {};
@@ -718,6 +830,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     $('tDone').textContent = by('done').length || nShip || '';
     $('logc').textContent = `${nAct + nHold + nQ} OPEN · CMD + KAL`;
     renderFeed();
+    renderOrbat(); heat();
   }
 
   function newFeedEvents() {
@@ -774,6 +887,30 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     prevZones = Object.fromEntries(OPS.map((op) => [op, M[op].zone]));
     if (!drill) try { localStorage.setItem(ZKEY, JSON.stringify({ at: Date.now(), z: prevZones })); } catch (_) { /* private mode */ }
   }
+
+
+  // ---------- ORBAT roster + wire heat ----------
+  const ZN = { ao: 'DEPLOYED · AO', hold: 'HOLD CAGE', ready: 'FOB · QUEUED', idle: 'STANDING BY', cp: 'CMD POST' };
+  function renderOrbat() {
+    const M = model(), rank = { ao: 0, hold: 1, cp: 2, ready: 3, idle: 4 };
+    const list = [...OPS].sort((a, b) => rank[M[a].zone] - rank[M[b].zone] || OPS.indexOf(a) - OPS.indexOf(b));
+    const nOut = list.filter((o) => M[o].zone === 'ao').length;
+    $('orbc').textContent = `${OPS.length} OPS · ${nOut} OUT`;
+    $('orb').innerHTML = list.map((op) => {
+      const m = M[op], ini = op.slice(0, 2).toUpperCase();
+      const ct = [m.doing.length ? `<b style="color:var(--amber)">A${m.doing.length}</b>` : '', m.waiting.length ? `<b style="color:var(--holdink)">H${m.waiting.length}</b>` : '', m.backlog.length ? `Q${m.backlog.length}` : ''].filter(Boolean).join(' ');
+      const sub = m.zone === 'ao' ? (m.doing[0]?.short || '') : m.zone === 'hold' ? (m.waiting[0]?.short || '') : ZN[m.zone];
+      return `<button class="orow z-${m.zone}" type="button" data-op="${esc(op)}"><img src="avatars/${op.toLowerCase()}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op)}</div><div class="zn">${esc(sub)}</div></span><span class="ct">${ct}</span></button>`;
+    }).join('');
+    $('orb').querySelectorAll('.orow').forEach((b) => b.addEventListener('click', () => openSheet(b.dataset.op)));
+  }
+  function heat() {
+    const n = feedEvents.filter((e) => (e.kind === 'deploy' || e.kind === 'rtb') && Date.now() - Date.parse(e.t) < 3600 * 1000).length;
+    const h = n === 0 ? 0 : n <= 2 ? 1 : n <= 5 ? 2 : 3, w = $('wire');
+    w.classList.remove('h0', 'h1', 'h2', 'h3'); w.classList.add('h' + h);
+    $('heat').title = `Wire heat: ${n} crossing${n === 1 ? '' : 's'} in the last hour`;
+  }
+  setInterval(() => { if (lastData) heat(); }, 60000);
 
   // ---------- drill: show a full out-and-back run on demand ----------
   $('drill').addEventListener('click', () => {

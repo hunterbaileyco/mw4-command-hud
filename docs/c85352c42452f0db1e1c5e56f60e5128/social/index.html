@@ -9,68 +9,102 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0B0E0C">
 <link rel="apple-touch-icon" href="../icon.svg">
+<link rel="stylesheet" href="../suite.css">
 <title>Kinsora social — published metrics</title>
 <style>
-:root{--bg:#0B0E0C;--panel:#121612;--line:#2A3328;--tan:#C5A572;--olive:#6B7C3A;--amber:#E8A317;--holdink:#E07A5F;--ink:#E8E2D6;--dim:#8a8676;
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 var(--sans);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
-body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,rgba(107,124,58,.10),transparent 60%),var(--bg)}
-a{color:inherit;text-decoration:none}button{font:inherit}
-.wrap{max-width:720px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 10px) 10px calc(env(safe-area-inset-bottom) + 24px);display:flex;flex-direction:column;gap:10px}
-.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.brand{font-family:var(--mono);color:var(--tan);font-size:11px;text-align:center;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+body{min-height:100vh;background:
+  linear-gradient(rgba(107,124,58,.05) 1px,transparent 1px) 0 0/28px 28px,
+  linear-gradient(90deg,rgba(107,124,58,.05) 1px,transparent 1px) 0 0/28px 28px,
+  radial-gradient(ellipse at 50% -10%,rgba(107,124,58,.12),transparent 60%),var(--bg)}
+a{color:inherit;text-decoration:none}button,input,select{font:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 10px 24px;display:flex;flex-direction:column;gap:10px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.top .kick{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;color:var(--olive2);text-transform:uppercase;margin-bottom:2px}
+.brand{font-family:var(--mono);color:var(--tan);font-size:13px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+@media(min-width:900px){.top .brand{font-size:16px}}
 .brand .sl{color:var(--olive)}
-.back{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--tan);border:1px solid #3a4636;padding:4px 8px;border-radius:2px}
-.asof{font-family:var(--mono);color:var(--dim);font-size:10px;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--olive);box-shadow:0 0 6px var(--olive)}
+.asof{font-family:var(--mono);color:var(--dim);font-size:9px;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px;text-align:right}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--olive);box-shadow:0 0 6px var(--olive);flex:0 0 auto}
 .dot.stale{background:var(--holdink);box-shadow:0 0 6px var(--holdink)}
-h1{margin:2px 0 0;font-size:17px;font-weight:650;letter-spacing:.01em}
+h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.01em}
 .sub{color:var(--dim);font-size:12px}
+.warn{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--holdink);text-transform:uppercase;border:1px solid rgba(224,122,95,.35);border-left:3px solid var(--holdink);background:rgba(139,58,42,.08);padding:5px 8px;border-radius:3px}
+.warn:empty{display:none}
 .pn{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px}
-.pn .brk{position:absolute;width:12px;height:12px;border-color:var(--tan);border-style:solid;opacity:.6;pointer-events:none}
-.brk.tl{top:-1px;left:-1px;border-width:2px 0 0 2px}.brk.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
-.zh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
-.zh b{color:var(--tan)}.zh b::before{content:"▌";color:var(--olive);margin-right:5px}
+.pn::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:6px;background:repeating-linear-gradient(0deg,rgba(0,0,0,.10) 0 1px,transparent 1px 3px)}
+.zh{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.zh b{color:var(--tan);display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zh .sec{font-size:8px;letter-spacing:.14em;color:#0B0E0C;background:var(--coyote);padding:1px 4px;border-radius:1px;margin-right:6px;font-weight:800}
+.pn>*:not(.sx-brk){position:relative;z-index:2}
+/* channel switcher */
 .all{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-@media(min-width:560px){.all{grid-template-columns:repeat(4,1fr)}}
-.tile{appearance:none;text-align:left;background:#0d110e;border:1px solid var(--line);border-radius:4px;padding:8px;color:var(--ink);cursor:pointer}
-.tile.on{border-color:var(--amber);box-shadow:0 0 0 1px rgba(232,163,23,.5),0 0 14px rgba(232,163,23,.15)}
-.tile .l{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
-.tile .n{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--amber);font-variant-numeric:tabular-nums;margin:2px 0}
-.tile .d{font-size:11px;color:var(--dim)}
-.seg{display:flex;border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#0d110e}
-.seg button{flex:1;appearance:none;background:transparent;border:0;border-right:1px solid var(--line);color:var(--dim);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:8px 4px;cursor:pointer}
-.seg button:last-child{border-right:0}
-.seg button.on{background:var(--olive);color:#0B0E0C;font-weight:700}
-.kv{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+@media(min-width:720px){.all{grid-template-columns:repeat(4,1fr)}}
+.tile{position:relative;appearance:none;text-align:left;background:#0d110e;border:1px solid var(--line);border-radius:5px;padding:8px 8px 6px;color:var(--ink);cursor:pointer;min-height:104px;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+.tile .pf{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .pf .g{flex:0 0 auto;font-weight:800;color:#0B0E0C;background:var(--tan);border-radius:2px;padding:0 4px;font-size:8px}
+.tile .n{font-family:var(--mono);font-size:21px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums;line-height:1.1}
+.tile .n small{font-size:8.5px;letter-spacing:.14em;color:var(--dim);font-weight:400;margin-left:4px}
+.tile .d{font-size:10.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile svg{display:block;width:100%;height:24px;margin-top:auto}
+.tile.on{border-color:var(--amber);background:linear-gradient(rgba(232,163,23,.08),#0d110e 70%);box-shadow:0 0 0 1px rgba(232,163,23,.5),0 0 16px rgba(232,163,23,.15)}
+.tile.on::before{content:"◆ ACTIVE";position:absolute;top:6px;right:6px;font-family:var(--mono);font-size:7.5px;letter-spacing:.14em;color:var(--amber)}
+.tile.on .pf .g{background:var(--amber)}
+/* range + mode segs */
+.ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:#0d110e;border:1px solid var(--line);border-radius:5px;padding:3px;gap:3px;flex:1;min-width:220px}
+.seg button{appearance:none;border:1px solid transparent;background:transparent;color:var(--dim);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:9px 4px;border-radius:3px;cursor:pointer;white-space:nowrap;min-height:36px}
+.seg button.on{background:var(--line);color:var(--tan);box-shadow:inset 0 -2px 0 var(--amber)}
+/* KPI plates */
+.kv{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-top:8px}
 @media(min-width:560px){.kv{grid-template-columns:repeat(3,1fr)}}
-.kv>div{border:1px solid var(--line);border-radius:3px;padding:6px 8px;background:#0d110e}
-.kv .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
-.kv .v{font-family:var(--mono);font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
+@media(min-width:900px){.kv{grid-template-columns:repeat(5,1fr)}}
+.kv>div{border:1px solid var(--line);border-left:2px solid var(--line2);border-radius:3px;padding:6px 8px;background:#0d110e;min-width:0}
+.kv .l{font-family:var(--mono);font-size:8px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kv .v{font-family:var(--mono);font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kv .v.s{font-size:12px;font-weight:700;padding-top:2px}
 .kv .v.a{color:var(--amber)}.kv .v.t{color:var(--tan)}
-.kv .wide{grid-column:1/-1}.kv .wide .v{font-family:var(--sans);font-size:13px;font-weight:500}
+.kv>div.ka{border-left-color:var(--amber)}.kv>div.kt{border-left-color:var(--tan)}
+.kv .wide{grid-column:1/-1;border-left-color:var(--olive2)}.kv .wide .v{font-family:var(--sans);font-size:13px;font-weight:500;white-space:normal}
 .cap{color:var(--dim);font-size:11.5px;margin:6px 0 0}
-.chart{width:100%;height:170px;display:block;margin-top:8px}
+/* chart */
+.cw{position:relative;margin-top:8px;border:1px solid var(--line);border-radius:4px;background:
+  linear-gradient(rgba(107,124,58,.07) 1px,transparent 1px) 0 0/100% 25%,#0b0f0c;overflow:hidden}
+.chart{width:100%;height:190px;display:block;touch-action:pan-y}
+@media(min-width:900px){.chart{height:240px}}
 .chart text{font-family:var(--mono);font-size:9px;fill:var(--dim)}
-.rows{display:flex;flex-direction:column;gap:6px;margin-top:4px}
-.post{display:block;border:1px solid var(--line);border-left:3px solid var(--olive);border-radius:3px;padding:7px 8px;background:#0d110e}
+.tip{position:absolute;top:6px;pointer-events:none;background:rgba(11,14,12,.94);border:1px solid rgba(232,163,23,.6);border-radius:2px;padding:3px 6px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink);white-space:nowrap;display:none;transform:translateX(-50%);z-index:4}
+.tip b{color:var(--amber)}
+.xh{position:absolute;top:0;bottom:0;width:1px;background:rgba(232,163,23,.6);pointer-events:none;display:none;z-index:3}
+/* post log */
+.tools{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap}
+.tools input{flex:1;min-width:140px;height:36px;background:#0d110e;border:1px solid var(--line2);border-radius:3px;color:var(--ink);padding:0 10px;font-size:14px;outline:none}
+.tools input:focus{border-color:var(--olive)}
+.tools select{height:36px;background:#0d110e;color:var(--tan);border:1px solid var(--line2);border-radius:3px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:0 6px}
+.rows{display:grid;grid-template-columns:1fr;gap:6px;margin-top:4px}
+@media(min-width:900px){.rows{grid-template-columns:1fr 1fr}}
+.post{position:relative;display:grid;grid-template-columns:30px 1fr;gap:0 8px;border:1px solid var(--line);border-left:3px solid var(--olive);border-radius:3px;padding:7px 8px;background:#0d110e;overflow:hidden}
+.post:active{border-color:var(--amber)}
 .post.x{border-left-color:var(--holdink)}
-.post .h{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--dim)}
-.post .h .src{color:var(--tan)}.post.x .h .src{color:var(--holdink)}
+.post .rk{grid-row:1/4;align-self:center;font-family:var(--mono);font-size:11px;font-weight:800;color:var(--coyote);text-align:center}
+.post .h{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;color:var(--dim)}
+.post .h .src{color:var(--tan);white-space:nowrap}.post.x .h .src{color:var(--holdink)}
 .post .hk{margin:3px 0 4px;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.post .m{display:flex;gap:12px;font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink);flex-wrap:wrap}
+.post .m{display:flex;gap:10px;font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums;color:var(--ink);flex-wrap:wrap}
 .post .m b{color:var(--amber)}
-.post .m span i{font-style:normal;color:var(--dim);font-size:9px;letter-spacing:.1em;margin-right:3px}
-.sort{display:flex;gap:6px;align-items:center}
-.sort select{background:#0d110e;color:var(--tan);border:1px solid #3a4636;border-radius:2px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;padding:3px 4px}
-.more{appearance:none;width:100%;margin-top:6px;background:transparent;border:1px solid #3a4636;color:var(--tan);font-family:var(--mono);font-size:10px;letter-spacing:.14em;padding:8px;border-radius:2px;cursor:pointer}
-details{font-size:12px;color:var(--dim)}details summary{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--tan);cursor:pointer}
+.post .m span i{font-style:normal;color:var(--dim);font-size:8.5px;letter-spacing:.1em;margin-right:3px}
+.post .vb{position:absolute;left:0;bottom:0;height:2px;background:linear-gradient(90deg,var(--amber),rgba(232,163,23,.3));box-shadow:0 0 6px rgba(232,163,23,.5)}
+.more{appearance:none;width:100%;margin-top:8px;min-height:42px;background:transparent;border:1px solid var(--line2);color:var(--tan);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.16em;padding:8px;border-radius:3px;cursor:pointer}
+details{font-size:12px;color:var(--dim)}details summary{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--tan);cursor:pointer;min-height:24px;display:flex;align-items:center}
 details li{margin:4px 0}
-.warn{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--holdink);text-transform:uppercase}
-.foot{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);text-align:center;text-transform:uppercase}
+.foot{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);text-align:center;text-transform:uppercase;line-height:1.8}
+.foot a{color:var(--tan);border-bottom:1px dotted var(--tan)}
+@media(min-width:900px){.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px;align-items:start}.two>.pn{height:100%}}
+.two{display:flex;flex-direction:column;gap:10px}
+@media(min-width:900px){.two{display:grid}}
 #gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;background:var(--bg)}
-#gate form{width:min(340px,100%);display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px}
+#gate form{position:relative;width:min(340px,100%);display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;box-shadow:0 0 40px rgba(107,124,58,.12)}
 #gate .brand{font-size:14px;text-align:center}
 #gate .cls{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-align:center;text-transform:uppercase}
 #gate label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--tan);text-transform:uppercase}
@@ -78,11 +112,15 @@ details li{margin:4px 0}
 #gate input:focus{border-color:var(--olive);box-shadow:0 0 0 1px var(--olive)}
 #gate button{background:var(--olive);color:#0B0E0C;border:0;border-radius:2px;padding:12px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.2em;cursor:pointer}
 #gate .err{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--holdink);min-height:16px;text-align:center}
+#gate .foot{display:block}
+#gate.shake form{animation:sh .3s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 #app{display:none}
 </style>
 </head>
-<body>
+<body class="sx-pad">
 <div id="gate"><form id="gf" autocomplete="off">
+  <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+  <div class="sx-gate-art"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="22"/><path d="M12 38h30M16 38v-6M23 38V22M30 38v-9M37 38V16" class="a"/></svg></div>
   <div class="brand">MW4 <span class="sl">//</span> SOCIAL</div>
   <div class="cls">Task Force Kinsora · Jae lane · feed encrypted</div>
   <label for="pw">Auth code<input id="pw" type="password" placeholder="••••••••" autocomplete="current-password" autofocus></label>
@@ -91,49 +129,69 @@ details li{margin:4px 0}
   <a class="foot" href="../hub/">◂ Back to hub</a>
 </form></div>
 
-<div id="app"><div class="wrap">
+<div id="app">
+<div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · SIGINT · JAE</span><span class="clk" id="clk">—</span></div>
+<div class="wrap">
   <div class="top">
-    <a class="back" href="../hub/">◂ HUB</a>
-    <div class="brand">MW4 <span class="sl">//</span> SOCIAL <span class="sl">·</span> JAE</div>
+    <div><div class="kick">◆ SIGINT · published posts</div><div class="brand">MW4 <span class="sl">//</span> SOCIAL <span class="sl">·</span> JAE</div></div>
     <div class="asof"><span class="dot" id="dot"></span><span id="asof">—</span></div>
   </div>
   <div><h1>Kinsora social — published metrics</h1><div class="sub" id="sub"></div></div>
   <div class="warn" id="stale"></div>
 
-  <section class="pn"><span class="brk tl"></span><span class="brk br"></span>
-    <div class="zh"><b>All channels</b><span>tap to switch</span></div>
+  <section class="pn"><span class="sx-brk tl"></span><span class="sx-brk br"></span>
+    <div class="zh"><b><span class="sec">CH</span>Channel select</b><span>tap a channel</span></div>
     <div class="all" id="all"></div>
   </section>
 
-  <section class="pn"><span class="brk tl"></span><span class="brk br"></span>
+  <section class="pn"><span class="sx-brk tl"></span><span class="sx-brk br"></span>
     <div class="zh"><b id="chname">Channel</b><span id="chplat"></span></div>
-    <div class="seg" id="range">
-      <button data-r="all" class="on">Since 1st post</button><button data-r="30">30 days</button><button data-r="7">7 days</button>
+    <div class="ctl">
+      <div class="seg" id="range" role="tablist" aria-label="Range">
+        <button data-r="all" class="on" type="button">Since 1st post</button><button data-r="30" type="button">30D</button><button data-r="7" type="button">7D</button>
+      </div>
     </div>
-    <div class="kv" id="kv" style="margin-top:8px"></div>
+    <div class="kv" id="kv"></div>
   </section>
 
-  <section class="pn"><span class="brk tl"></span><span class="brk br"></span>
+  <div class="two">
+  <section class="pn"><span class="sx-brk tl"></span><span class="sx-brk br"></span>
     <div class="zh"><b id="charttitle">Trend</b><span id="chartsrc"></span></div>
-    <div class="seg" id="mode"></div>
-    <svg class="chart" id="chart" viewBox="0 0 600 170" preserveAspectRatio="none"></svg>
+    <div class="ctl"><div class="seg" id="mode"></div></div>
+    <div class="cw" id="cw"><svg class="chart" id="chart" viewBox="0 0 600 190" preserveAspectRatio="none"></svg><div class="xh" id="xh"></div><div class="tip" id="tip"></div></div>
     <p class="cap" id="chartcap"></p>
   </section>
 
-  <section class="pn"><span class="brk tl"></span><span class="brk br"></span>
-    <div class="zh"><b id="tbltitle">Every published post</b>
-      <span class="sort">SORT <select id="sort"><option value="new">Newest</option><option value="views">Top views</option><option value="likes">Top likes</option></select></span></div>
+  <section class="pn"><span class="sx-brk tl"></span><span class="sx-brk br"></span>
+    <div class="zh"><b>Top posts · this range</b><span>by views</span></div>
+    <div class="rows" id="top3" style="grid-template-columns:1fr"></div>
+  </section>
+  </div>
+
+  <section class="pn"><span class="sx-brk tl"></span><span class="sx-brk br"></span>
+    <div class="zh"><b id="tbltitle">Every published post</b><span id="tblcount"></span></div>
+    <div class="tools">
+      <input id="q" type="search" placeholder="Filter captions…" aria-label="Filter captions" autocomplete="off">
+      <select id="sort" aria-label="Sort"><option value="new">NEWEST</option><option value="views">TOP VIEWS</option><option value="likes">TOP LIKES</option></select>
+    </div>
     <div class="rows" id="rows"></div>
     <button class="more" id="more" type="button">SHOW MORE</button>
     <p class="cap" id="tblcap"></p>
   </section>
 
-  <section class="pn"><span class="brk tl"></span><span class="brk br"></span>
-    <details><summary>Data notes &amp; gaps</summary><ul id="notes"></ul></details>
+  <section class="pn"><span class="sx-brk tl"></span><span class="sx-brk br"></span>
+    <details><summary>▸ Data notes &amp; gaps</summary><ul id="notes"></ul></details>
   </section>
   <div class="foot" id="foot"></div>
-  <div class="foot"><a href="../">MW4 COMMAND HUD</a> · <a href="#" id="lock">LOCK</a></div>
-</div></div>
+  <div class="foot"><a href="../hub/">HUB</a> · <a href="../">MW4 COMMAND HUD</a> · <a href="#" id="lock">LOCK</a></div>
+</div>
+<div class="sx-dock"><nav>
+  <a href="../hub/"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
+  <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
+  <a class="on" href="./"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
+  <a class="lk" href="#" id="dlock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>LOCK</a>
+</nav></div>
+</div>
 
 <script>
 (() => {
@@ -148,6 +206,8 @@ details li{margin:4px 0}
   const te = new TextEncoder();
   const b64 = { enc: (u) => btoa(String.fromCharCode(...new Uint8Array(u))), dec: (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0)) };
   const sha256 = async (t) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode(t)))].map((x) => x.toString(16).padStart(2, '0')).join('');
+  const clk = () => { $('clk').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) + ' PT'; };
+  clk(); setInterval(clk, 1000);
   let aesKey = null, keyMeta = null;
   async function deriveFrom(code, env) {
     const km = await crypto.subtle.importKey('raw', te.encode(code), 'PBKDF2', false, ['deriveBits']);
@@ -181,12 +241,13 @@ details li{margin:4px 0}
     e.preventDefault();
     const code = $('pw').value; $('pw').value = '';
     const h = await sha256(code);
-    if (h !== HASH) { $('gerr').textContent = '✕ ACCESS DENIED'; return; }
+    if (h !== HASH) { $('gerr').textContent = '✕ ACCESS DENIED'; const g = $('gate'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); return; }
     $('gerr').textContent = 'DECRYPTING…';
     try { const env = await fetchEnv(); await deriveFrom(code, env); const d = await openEnv(env); sessionStorage.setItem(KEY, h); $('gerr').textContent = ''; start(d); }
     catch (err) { $('gerr').textContent = '✕ DECRYPT FAILED · ' + String(err.message || err).toUpperCase().slice(0, 40); }
   });
   $('lock').addEventListener('click', (e) => { e.preventDefault(); relock(); });
+  $('dlock').addEventListener('click', (e) => { e.preventDefault(); relock(); });
   if (sessionStorage.getItem(KEY) === HASH) restoreKey().then(async (ok) => {
     if (!ok) return relock();
     try { start(await openEnv(await fetchEnv())); } catch (err) { relock('RE-ENTER CODE'); }
@@ -194,12 +255,15 @@ details li{margin:4px 0}
 
   // ---------- render ----------
   // post row: [ch, date, slot, hook, views, likes, comments, shares, saves, src(P|W|X), url]
+  // Every number shown is read from the feed; the page only sums, sorts and filters.
   const fmt = (v) => (v == null ? '—' : Number(v).toLocaleString('en-US'));
+  const fmtK = (v) => v == null ? '—' : v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e4 ? Math.round(v / 1e3) + 'K' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : String(v);
   const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const fmtDay = (iso) => { const [, m, d] = iso.split('-').map(Number); return MON[m - 1] + ' ' + d; };
   const daysBefore = (iso, n) => new Date(new Date(iso + 'T12:00:00Z').getTime() - n * 86400000).toISOString().slice(0, 10);
   const sum = (rows, i) => rows.reduce((a, r) => a + (r[i] ?? 0), 0);
-  let D = null, ch = 'tt_kco', range = 'all', mode = 'calendar', sort = 'new', limit = 25;
+  const GLYPH = { tt_kco: 'TT', tt_wk: 'TT', ig: 'IG', pin: 'PIN' };
+  let D = null, ch = 'tt_kco', range = 'all', mode = 'calendar', sort = 'new', limit = 24, q = '';
 
   function start(d) {
     D = d; $('gate').style.display = 'none'; $('app').style.display = 'block';
@@ -215,17 +279,33 @@ details li{margin:4px 0}
     $('foot').textContent = 'Sources · ' + D.sources.join(' · ');
     render();
   }
+  // tiny sparkline from the channel's own series (calendar) or per-post views by day posted
+  function spark(key) {
+    const s = D.series[key];
+    let pts = s ? s.points.map((p) => p[1]) : null;
+    if (!pts || !pts.length) {
+      const m = new Map(); D.posts.filter((r) => r[0] === key && r[4] != null).forEach((r) => m.set(r[1], (m.get(r[1]) || 0) + r[4]));
+      pts = [...m.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map((p) => p[1]);
+    }
+    pts = pts.slice(-45);
+    if (pts.length < 1) return '<svg viewBox="0 0 100 24"></svg>';
+    const mx = Math.max(1, ...pts), x = (i) => (i * 100) / (pts.length - 1), y = (v) => 22 - (v / mx) * 20;
+    if (pts.length < 8) { const bw = 100 / pts.length; return `<svg viewBox="0 0 100 24" preserveAspectRatio="none">${pts.map((v, i) => `<rect x="${(i * bw + bw * 0.2).toFixed(1)}" y="${y(v).toFixed(1)}" width="${(bw * 0.6).toFixed(1)}" height="${(24 - y(v)).toFixed(1)}" fill="#E8A317" opacity=".7"/>`).join('')}</svg>`; }
+    const line = pts.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+    return `<svg viewBox="0 0 100 24" preserveAspectRatio="none"><polygon points="0,24 ${line} 100,24" fill="rgba(232,163,23,.12)"/><polyline points="${line}" fill="none" stroke="#E8A317" stroke-width="1.2" vector-effect="non-scaling-stroke"/></svg>`;
+  }
   function render() {
     const C = D.channels, meta = C.find((c) => c.key === ch);
     const today = D.asOfDay;
-    // all channel tiles
     $('all').innerHTML = C.map((c) => {
       const rs = D.posts.filter((r) => r[0] === c.key);
       const first = rs.reduce((a, r) => (r[1] < a ? r[1] : a), '9999');
-      return `<button class="tile${c.key === ch ? ' on' : ''}" data-ch="${c.key}" type="button"><div class="l">${esc(c.label)}</div>
-        <div class="n">${fmt(sum(rs, 4))}</div><div class="d">${esc(c.reach.toLowerCase())}${c.key === 'pin' ? ' (90d)' : ''} · ${rs.length} posts since ${first === '9999' ? '—' : fmtDay(first)}</div></button>`;
+      return `<button class="tile${c.key === ch ? ' on' : ''}" data-ch="${c.key}" type="button" aria-pressed="${c.key === ch}">
+        <div class="pf"><span class="g">${GLYPH[c.key] || esc(c.short)}</span>${esc(c.handle || c.label)}</div>
+        <div class="n" title="${fmt(sum(rs, 4))}">${fmtK(sum(rs, 4))}<small>${esc(c.reach.toUpperCase())}${c.key === 'pin' ? ' · 90D' : ''}</small></div>
+        <div class="d">${rs.length} posts since ${first === '9999' ? '—' : fmtDay(first)}${c.queue ? ' · +' + c.queue + ' queued' : ''}</div>${spark(c.key)}</button>`;
     }).join('');
-    $('all').querySelectorAll('.tile').forEach((b) => b.onclick = () => { ch = b.dataset.ch; limit = 25; render(); });
+    $('all').querySelectorAll('.tile').forEach((b) => b.onclick = () => { ch = b.dataset.ch; limit = 24; render(); });
 
     const all = D.posts.filter((r) => r[0] === ch);
     const firstPost = all.reduce((a, r) => (r[1] < a ? r[1] : a), '9999');
@@ -234,88 +314,118 @@ details li{margin:4px 0}
     const withData = rows.filter((r) => r[4] != null);
     const top = [...withData].sort((a, b) => b[4] - a[4])[0];
     const pin = ch === 'pin';
-    $('chname').textContent = meta.label;
+    $('chname').innerHTML = `<span class="sec">${esc(GLYPH[ch] || meta.short)}</span>${esc(meta.label)}`;
     $('chplat').textContent = meta.platform + ' · ' + meta.handle;
     const rlabel = range === 'all' ? 'since first post' : 'last ' + range + ' days';
     $('kv').innerHTML = [
-      ['Posts · ' + rlabel, `${rows.length}${meta.queue ? ` <span style="color:var(--dim);font-size:11px">+${meta.queue} queued</span>` : ''}`, 't'],
+      ['Posts · ' + rlabel, `${rows.length}${meta.queue ? ` <span style="color:var(--dim);font-size:10px">+${meta.queue} Q</span>` : ''}`, 't'],
       [meta.reach + (pin ? ' (90d)' : ''), fmt(sum(rows, 4)), 'a'],
+      ['Avg ' + meta.reach.toLowerCase() + '/post', withData.length ? fmt(Math.round(sum(withData, 4) / withData.length)) : '—', 'a'],
       [pin ? 'Reactions' : 'Likes', fmt(sum(rows, 5))],
       ['Comments', fmt(sum(rows, 6))],
       [pin ? 'Clicks (90d)' : 'Shares', fmt(sum(rows, 7))],
       ['Saves', fmt(sum(rows, 8))],
-      ['Avg ' + meta.reach.toLowerCase() + '/post', withData.length ? fmt(Math.round(sum(withData, 4) / withData.length)) : '—'],
-      ['Latest post (PT)', rows.length ? esc(rows[0][2]) : '—'],
-      ['First post (PT)', esc(meta.firstPost || '—')],
-    ].map(([l, v, c]) => `<div><div class="l">${l}</div><div class="v ${c || ''}">${v}</div></div>`).join('') +
+      ['Latest post (PT)', rows.length ? esc(rows[0][2]) : '—', 's'],
+      ['First post (PT)', esc(meta.firstPost || '—'), 's'],
+    ].map(([l, v, c]) => `<div class="${c && c !== 's' ? 'k' + c : ''}"><div class="l">${l}</div><div class="v ${c || ''}">${v}</div></div>`).join('') +
       (top ? `<div class="wide"><div class="l">Top post · ${rlabel}</div><div class="v"><b style="color:var(--amber);font-family:var(--mono)">${fmt(top[4])}</b> · ${esc(top[3])}</div></div>` : '');
 
     // chart
     const ser = D.series[ch];
-    const modes = [...(ser ? [['calendar', 'Daily (calendar)']] : []), ['posted', 'By day posted']];
+    const modes = [...(ser ? [['calendar', 'Daily · calendar']] : []), ['posted', 'By day posted']];
     if (!modes.some((m) => m[0] === mode)) mode = modes[0][0];
     $('mode').innerHTML = modes.map(([v, l]) => `<button data-m="${v}" class="${v === mode ? 'on' : ''}" type="button">${l}</button>`).join('');
     $('mode').querySelectorAll('button').forEach((b) => b.onclick = () => { mode = b.dataset.m; render(); });
     let pts;
     if (mode === 'calendar') {
       pts = ser.points.filter(([d]) => d >= cutoff).map(([d, v]) => [d, v]);
-      $('charttitle').textContent = 'Daily ' + meta.reach.toLowerCase();
+      $('charttitle').innerHTML = '<span class="sec">TRND</span>Daily ' + esc(meta.reach.toLowerCase());
       $('chartsrc').textContent = ser.source.split(' ').slice(0, 2).join(' ');
       $('chartcap').textContent = meta.calendarNote;
     } else {
       const m = new Map(); rows.filter((r) => r[4] != null).forEach((r) => m.set(r[1], (m.get(r[1]) || 0) + r[4]));
       pts = [...m.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
-      $('charttitle').textContent = meta.reach + ' by day posted';
+      $('charttitle').innerHTML = '<span class="sec">TRND</span>' + esc(meta.reach) + ' by day posted';
       $('chartsrc').textContent = 'per-post lifetime';
       $('chartcap').textContent = meta.postedNote;
     }
     drawChart(pts, mode === 'posted');
 
+    // top 3 in range
+    const t3 = [...withData].sort((a, b) => b[4] - a[4]).slice(0, 3), mxv = Math.max(1, ...withData.map((r) => r[4]));
+    $('top3').innerHTML = t3.map((r, i) => postHtml(r, i + 1, mxv, pin)).join('') || '<div class="cap">No posts with analytics in this range.</div>';
+
     // posts
-    $('tbltitle').textContent = 'Every published post · ' + rows.length;
-    const sorted = sort === 'new' ? rows : [...rows].sort((a, b) => ((sort === 'views' ? b[4] : b[5]) ?? -1) - ((sort === 'views' ? a[4] : a[5]) ?? -1));
-    $('rows').innerHTML = sorted.slice(0, limit).map((r) => {
-      const u = safeUrl(r[10]), tag = u ? 'a' : 'div';
-      const src = r[9] === 'X' ? 'POSTIZ · NO ANALYTICS' : r[9] === 'P' ? 'POSTIZ' : 'WINDSOR';
-      const m = pin
-        ? [['IMPR', r[4], 1], ['REACT', r[5]], ['CMT', r[6]], ['CLK', r[7]], ['SAVE', r[8]]]
-        : [['VIEWS', r[4], 1], ['LIKE', r[5]], ['CMT', r[6]], ['SHR', r[7]], ['SAVE', r[8]]];
-      return `<${tag} class="post${r[9] === 'X' ? ' x' : ''}"${u ? ` href="${esc(u)}" target="_blank" rel="noopener noreferrer"` : ''}>
-        <div class="h"><span>${esc(r[2])}</span><span class="src">${src}</span></div>
-        <div class="hk">${esc(r[3] || '(no caption)')}</div>
-        <div class="m">${m.map(([l, v, b]) => `<span><i>${l}</i>${b ? `<b>${fmt(v)}</b>` : fmt(v)}</span>`).join('')}</div></${tag}>`;
-    }).join('') || '<div class="cap">No posts went up in this range.</div>';
+    const ql = q.trim().toLowerCase();
+    const filt = ql ? rows.filter((r) => String(r[3] || '').toLowerCase().includes(ql)) : rows;
+    $('tbltitle').innerHTML = '<span class="sec">LOG</span>Every published post';
+    $('tblcount').textContent = (ql ? filt.length + ' / ' : '') + rows.length + ' POSTS';
+    const sorted = sort === 'new' ? filt : [...filt].sort((a, b) => ((sort === 'views' ? b[4] : b[5]) ?? -1) - ((sort === 'views' ? a[4] : a[5]) ?? -1));
+    $('rows').innerHTML = sorted.slice(0, limit).map((r, i) => postHtml(r, sort === 'new' ? '' : i + 1, mxv, pin)).join('') || `<div class="cap">${ql ? 'No captions match that filter.' : 'No posts went up in this range.'}</div>`;
     $('more').style.display = sorted.length > limit ? '' : 'none';
-    $('more').textContent = `SHOW MORE (${sorted.length - Math.min(limit, sorted.length)} left)`;
+    $('more').textContent = `SHOW MORE · ${sorted.length - Math.min(limit, sorted.length)} LEFT`;
     $('tblcap').textContent = pin
-      ? 'Impressions, clicks and saves are 90-day totals from Windsor; reactions and comments are lifetime. Tap a post to open it.'
-      : 'Postiz numbers where Postiz published the post, Windsor lifetime stats for everything else. A dash means no analytics. Tap a post to open it.';
+      ? 'Impressions, clicks and saves are 90-day totals from Windsor; reactions and comments are lifetime. The amber bar under each post is its share of the top post in this range. Tap a post to open it.'
+      : 'Postiz numbers where Postiz published the post, Windsor lifetime stats for everything else. A dash means no analytics. The amber bar under each post is its share of the top post in this range. Tap a post to open it.';
   }
+  function postHtml(r, rank, mxv, pin) {
+    const u = safeUrl(r[10]), tag = u ? 'a' : 'div';
+    const src = r[9] === 'X' ? 'POSTIZ · NO ANALYTICS' : r[9] === 'P' ? 'POSTIZ' : 'WINDSOR';
+    const m = pin
+      ? [['IMPR', r[4], 1], ['REACT', r[5]], ['CMT', r[6]], ['CLK', r[7]], ['SAVE', r[8]]]
+      : [['VIEWS', r[4], 1], ['LIKE', r[5]], ['CMT', r[6]], ['SHR', r[7]], ['SAVE', r[8]]];
+    const w = r[4] != null ? Math.max(1, Math.round((r[4] / mxv) * 100)) : 0;
+    return `<${tag} class="post${r[9] === 'X' ? ' x' : ''}"${u ? ` href="${esc(u)}" target="_blank" rel="noopener noreferrer"` : ''}>
+      <span class="rk">${rank ? '#' + rank : '◆'}</span>
+      <div class="h"><span>${esc(r[2])}</span><span class="src">${src}${u ? ' ↗' : ''}</span></div>
+      <div class="hk">${esc(r[3] || '(no caption)')}</div>
+      <div class="m">${m.map(([l, v, b]) => `<span><i>${l}</i>${b ? `<b>${fmt(v)}</b>` : fmt(v)}</span>`).join('')}</div>
+      ${w ? `<span class="vb" style="width:${w}%"></span>` : ''}</${tag}>`;
+  }
+  let CH = null; // chart geometry for the crosshair
   function drawChart(pts, bars) {
-    const svg = $('chart'), W = 600, H = 170, P = { l: 4, r: 4, t: 14, b: 18 };
+    const svg = $('chart'), W = 600, H = 190, P = { l: 4, r: 4, t: 16, b: 18 };
+    CH = null; $('tip').style.display = 'none'; $('xh').style.display = 'none';
     if (!pts.length) { svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle">NO DATA IN THIS RANGE</text>`; return; }
     const mx = Math.max(1, ...pts.map((p) => p[1]));
     const x = (i) => P.l + (pts.length === 1 ? (W - P.l - P.r) / 2 : (i * (W - P.l - P.r)) / (pts.length - 1));
     const y = (v) => H - P.b - (v / mx) * (H - P.t - P.b);
-    let g = '';
-    for (let k = 1; k <= 3; k++) g += `<line x1="0" x2="${W}" y1="${y((mx * k) / 3)}" y2="${y((mx * k) / 3)}" stroke="rgba(107,124,58,.18)"/>`;
-    g += `<text x="${W - 2}" y="${P.t - 3}" text-anchor="end">MAX ${fmt(mx)}</text>`;
+    let g = '<defs><linearGradient id="fa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8A317" stop-opacity=".32"/><stop offset="1" stop-color="#E8A317" stop-opacity="0"/></linearGradient></defs>';
+    for (let k = 1; k <= 3; k++) g += `<line x1="0" x2="${W}" y1="${y((mx * k) / 3)}" y2="${y((mx * k) / 3)}" stroke="rgba(107,124,58,.22)" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/>`;
+    g += `<line x1="0" x2="${W}" y1="${H - P.b}" y2="${H - P.b}" stroke="rgba(197,165,114,.35)" vector-effect="non-scaling-stroke"/>`;
+    g += `<text x="${W - 2}" y="${P.t - 4}" text-anchor="end">MAX ${fmt(mx)}</text>`;
+    const pk = pts.reduce((b, p, i) => (p[1] > pts[b][1] ? i : b), 0);
     if (bars) {
       const bw = Math.max(2, ((W - P.l - P.r) / pts.length) * 0.7);
-      g += pts.map((p, i) => `<rect x="${x(i) - bw / 2}" y="${y(p[1])}" width="${bw}" height="${H - P.b - y(p[1])}" fill="#E8A317" opacity=".85"><title>${fmtDay(p[0])}: ${fmt(p[1])}</title></rect>`).join('');
+      g += pts.map((p, i) => `<rect x="${x(i) - bw / 2}" y="${y(p[1])}" width="${bw}" height="${H - P.b - y(p[1])}" fill="${i === pk ? '#F5C04A' : '#E8A317'}" opacity="${i === pk ? 1 : .78}"><title>${fmtDay(p[0])}: ${fmt(p[1])}</title></rect>`).join('');
     } else {
       const line = pts.map((p, i) => `${x(i).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ');
-      g += `<polygon points="${x(0)},${H - P.b} ${line} ${x(pts.length - 1)},${H - P.b}" fill="rgba(232,163,23,.10)"/>`;
-      g += `<polyline points="${line}" fill="none" stroke="#E8A317" stroke-width="1.6" vector-effect="non-scaling-stroke"/>`;
+      g += `<polygon points="${x(0)},${H - P.b} ${line} ${x(pts.length - 1)},${H - P.b}" fill="url(#fa)"/>`;
+      g += `<polyline points="${line}" fill="none" stroke="#E8A317" stroke-width="1.8" vector-effect="non-scaling-stroke"/>`;
     }
     g += `<text x="2" y="${H - 4}">${fmtDay(pts[0][0])}</text><text x="${W - 2}" y="${H - 4}" text-anchor="end">${fmtDay(pts[pts.length - 1][0])}</text>`;
+    if (pts.length > 4) { const mid = Math.floor(pts.length / 2); g += `<text x="${x(mid)}" y="${H - 4}" text-anchor="middle">${fmtDay(pts[mid][0])}</text>`; }
     const total = pts.reduce((a, p) => a + p[1], 0);
-    g += `<text x="2" y="${P.t - 3}">TOTAL ${fmt(total)}</text>`;
+    g += `<text x="2" y="${P.t - 4}">TOTAL ${fmt(total)} · PEAK ${fmtDay(pts[pk][0])}</text>`;
     svg.innerHTML = g;
+    CH = { pts, x, W };
   }
-  $('range').querySelectorAll('button').forEach((b) => b.onclick = () => { range = b.dataset.r; limit = 25; $('range').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); render(); });
+  function hover(ev) {
+    if (!CH) return;
+    const r = $('cw').getBoundingClientRect(), cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const vx = (cx / r.width) * CH.W; let bi = 0, bd = Infinity;
+    CH.pts.forEach((p, i) => { const d = Math.abs(CH.x(i) - vx); if (d < bd) { bd = d; bi = i; } });
+    const px = (CH.x(bi) / CH.W) * r.width, p = CH.pts[bi];
+    $('xh').style.display = 'block'; $('xh').style.left = px + 'px';
+    const tip = $('tip'); tip.style.display = 'block'; tip.innerHTML = `${fmtDay(p[0])} · <b>${fmt(p[1])}</b>`;
+    tip.style.left = Math.min(r.width - tip.offsetWidth / 2 - 4, Math.max(tip.offsetWidth / 2 + 4, px)) + 'px';
+  }
+  const unhover = () => { $('tip').style.display = 'none'; $('xh').style.display = 'none'; };
+  $('cw').addEventListener('pointermove', hover); $('cw').addEventListener('pointerdown', hover); $('cw').addEventListener('pointerleave', unhover);
+  $('range').querySelectorAll('button').forEach((b) => b.onclick = () => { range = b.dataset.r; limit = 24; $('range').querySelectorAll('button').forEach((x) => x.classList.toggle('on', x === b)); render(); });
   $('sort').onchange = (e) => { sort = e.target.value; render(); };
-  $('more').onclick = () => { limit += 50; render(); };
+  $('q').oninput = (e) => { q = e.target.value; limit = 24; render(); };
+  $('more').onclick = () => { limit += 48; render(); };
 })();
 </script>
 </body>

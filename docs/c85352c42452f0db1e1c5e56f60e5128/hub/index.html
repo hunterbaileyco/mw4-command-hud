@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="../suite.css">
 <script src="../brand-icons.js"></script>
 <script src="../action-panel.js"></script>
+<script src="../ledger/model.js"></script>
 <title>MW4 // COMMAND SUITE</title>
 <style>
 *{box-sizing:border-box}
@@ -167,8 +168,8 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
         <span class="go">OPEN ▸</span>
       </div>
       <div class="d">Contribution is the hero: Shopify revenue minus product cost minus Meta, TikTok, and Google spend. Mercury cash sits beside it.</div>
-      <div class="chips"><span>CONTRIB</span><span>COGS</span><span>PAID LANES</span><span>TREASURY</span><span id="lgChip">SAMPLE</span></div>
-      <div class="hint" id="lgHint">SAMPLE · not a live feed</div>
+      <div class="chips"><span>CONTRIB</span><span>COGS</span><span>PAID LANES</span><span>TREASURY</span><span id="lgChip">…</span></div>
+      <div class="hint" id="lgHint">▒ Syncing ledger…</div>
       <div class="stats">
         <div><div class="l">CM MTD</div><div class="n a" id="lgCm">—</div></div>
         <div><div class="l">CM%</div><div class="n a" id="lgPct">—</div></div>
@@ -252,6 +253,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     let ok = false;
     try { hud(await get('status')); ok = true; } catch (err) { $('hudHint').innerHTML = '<span class="w">⚠ HUD FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; down(String(err.message || err).toUpperCase()); }
     try { soc(await get('social')); } catch (err) { $('socHint').innerHTML = '<span class="w">⚠ SOCIAL FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
+    try { ledger(await get('ledger')); } catch (_) { ledger(null); }
     if (ok) { $('ilk').classList.add('live'); $('ist').textContent = 'INTEL LIVE'; }
   }
   $('sync2').addEventListener('click', (e) => { e.preventDefault(); pull(); });
@@ -338,21 +340,20 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     const asOf = new Date((d.asOfDay || '1970-01-01') + 'T23:59:59-07:00').getTime(), stale = Date.now() - asOf > 36 * 3600 * 1000;
     $('socHint').innerHTML = `${stale ? '<span class="w">⚠ SNAPSHOT</span>' : '<b>SNAPSHOT</b>'} ${esc(d.generatedAt || '')} · ${total} posts · views / impressions`;
   }
+  function ledger(d) {
+    const L = window.MW4Ledger;
+    if (!L) return;
+    const live = !!(d && d.source === 'live');
+    const m = L.derive(live ? d : L.SAMPLE);
+    $('lgCm').textContent = L.format.moneyK(m.mtd.contrib);
+    $('lgPct').textContent = m.mtd.cm.toFixed(1) + '%';
+    $('lgSpend').textContent = L.format.moneyK(m.mtd.spend);
+    $('lgCash').textContent = L.format.moneyK(m.mercury.balance);
+    $('lgChip').textContent = live ? 'LIVE' : 'SAMPLE';
+    $('lgHint').textContent = live ? ('LIVE · ' + L.format.asOf(m.asOf)) : 'SAMPLE · not a live feed';
+  }
   paintChannels(FALLBACK_CH);
   pull(); setInterval(pull, 30000);
-})();
-</script>
-<script src="../ledger/model.js"></script>
-<script>
-(() => {
-  const L = window.MW4Ledger;
-  if (!L) return;
-  const m = L.derive(L.SAMPLE);
-  const $ = (id) => document.getElementById(id);
-  $('lgCm').textContent = L.format.moneyK(m.mtd.contrib);
-  $('lgPct').textContent = m.mtd.cm.toFixed(1) + '%';
-  $('lgSpend').textContent = L.format.moneyK(m.mtd.spend);
-  $('lgCash').textContent = L.format.moneyK(m.mercury.balance);
 })();
 </script>
 </body>

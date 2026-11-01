@@ -6,7 +6,7 @@ import { createRequire } from 'node:module';
 import { buildLedger } from './ledger-live.mjs';
 
 const require = createRequire(import.meta.url);
-const { derive } = require('../docs/c85352c42452f0db1e1c5e56f60e5128/ledger/model.js');
+const { SAMPLE, derive } = require('../docs/c85352c42452f0db1e1c5e56f60e5128/ledger/model.js');
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 
@@ -96,6 +96,25 @@ test('a missing unit cost counts as zero and is flagged on the loadout', () => {
   assert.equal(model.cogs.gapCount, 1);
   assert.equal(model.cogs.top[0].gap, true);
   assert.equal(model.cogs.top[0].cost, null);
+});
+
+test('hub ledger tile fetches the live feed and keeps SAMPLE as the fallback', () => {
+  const src = fs.readFileSync(path.join(root, 'docs/c85352c42452f0db1e1c5e56f60e5128/hub/index.html'), 'utf8');
+  const pullFn = src.slice(src.indexOf('async function pull()'), src.indexOf(" $('sync2')"));
+  assert.match(pullFn, /get\('ledger'\)/);
+  assert.match(pullFn, /ledger\(null\)/);
+  assert.match(pullFn, /get\('social'\)/);
+  assert.match(src, /setInterval\(pull, 30000\)/);
+  assert.match(src, /d && d\.source === 'live'/);
+  assert.match(src, /L\.derive\(live \? d : L\.SAMPLE\)/);
+  assert.match(src, /\$\('lgChip'\)\.textContent = live \? 'LIVE' : 'SAMPLE'/);
+  assert.doesNotMatch(src, /const m = L\.derive\(L\.SAMPLE\)/);
+  const raw = buildLedger(pull);
+  const live = derive(raw);
+  const sample = derive(SAMPLE);
+  assert.equal(raw.source, 'live');
+  assert.notEqual(live.mercury.balance, sample.mercury.balance);
+  assert.equal(live.mtd.contrib, raw.windows.mtd.rev - raw.windows.mtd.cogs - raw.windows.mtd.spend);
 });
 
 test('the strip painter follows the period chip instead of windows.today', () => {

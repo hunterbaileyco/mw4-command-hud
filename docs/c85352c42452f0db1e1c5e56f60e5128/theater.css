@@ -35,10 +35,12 @@ body.sx-pad .wrap{
 .zone{align-items:flex-start}
 #zAO,#zSTAND,#zHOLD{align-items:stretch}
 
-/* AO — 2-up on Duo, full mission, callsign loudest, ring over the plate */
+/* AO — 2-up on Duo, full mission, callsign loudest.
+   The ring sits clear of the plate: the plate's top rule is the 141 / T+ status line
+   and must not cross the portrait. */
 .tok.s-ao{width:calc(50% - 6px);max-width:100%}
-.tok.s-ao .ring{width:62px;height:62px;margin-bottom:-24px;background:conic-gradient(var(--amber),#7a5a10,var(--amber));box-shadow:0 0 16px rgba(232,163,23,.5)}
-.tok.s-ao .pl{padding:30px 9px 10px;background:linear-gradient(180deg,rgba(232,163,23,.16),rgba(11,14,12,.88) 46%);border:1px solid rgba(232,163,23,.45);box-shadow:0 12px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(232,163,23,.3)}
+.tok.s-ao .ring{position:relative;z-index:2;width:62px;height:62px;margin-bottom:4px;background:conic-gradient(var(--amber),#7a5a10,var(--amber));box-shadow:0 0 16px rgba(232,163,23,.5)}
+.tok.s-ao .pl{padding:8px 9px 10px;background:linear-gradient(180deg,rgba(232,163,23,.16),rgba(11,14,12,.88) 46%);border:1px solid rgba(232,163,23,.45);box-shadow:0 12px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(232,163,23,.3)}
 .tok.s-ao .pl::before{content:"";position:absolute;left:-1px;top:16px;bottom:12px;width:2px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
 .tok.s-ao .cs{font-size:15px;letter-spacing:.14em;color:var(--amber);text-shadow:0 0 12px rgba(232,163,23,.35)}
 .tok.s-ao .dsr{justify-content:space-between;color:rgba(232,163,23,.8)}
@@ -214,6 +216,10 @@ body.sx-pad .wrap{
 .rt{flex:0 0 72px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;text-decoration:none;color:inherit}
 .rt .ring{width:40px;height:40px;margin-bottom:-14px;z-index:2;border-radius:50%;padding:2px;background:var(--line)}
 .rt .ring img,.rt .ring .ini{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;background:var(--idle)}
+/* Callsign photos are framed high in the square. Clip inside the ring padding so the
+   face sits in the circle and the dark lower third does not read as empty space. */
+.rt .face{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden}
+.rt .face img{width:100%;height:100%;border-radius:0;object-fit:cover;object-position:center top;transform:scale(1.35);transform-origin:center top}
 .rt .ring .ini{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:800;color:var(--tan)}
 .rt .pl{width:100%;padding:16px 2px 6px;text-align:center;border-radius:3px;background:#0d110e;border:1px solid var(--line2);border-bottom:2px solid var(--zc,var(--line2))}
 .rt .cs{font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.1em}

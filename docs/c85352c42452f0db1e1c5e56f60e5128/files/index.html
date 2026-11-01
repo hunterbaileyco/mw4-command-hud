@@ -139,7 +139,7 @@ a{color:inherit}
       const ini = f.off ? 'JK' : '';
       const ring = f.off
         ? '<span class="ring"><span class="ini">JK</span></span>'
-        : `<span class="ring"><img src="../avatars/${esc(f.id)}.png" alt=""></span>`;
+        : `<span class="ring"><span class="face"><img src="../avatars/${esc(f.id)}.png" alt=""></span></span>`;
       return `<a class="rt z-${z}" href="#${esc(f.id)}" data-id="${esc(f.id)}" aria-selected="${f.id === shown}">${ring}<span class="pl"><div class="cs">${esc(f.name.split(' ')[0].toUpperCase())}</div><div class="ds">${esc(f.des)}</div><div class="zn">${esc(z === 'cp' ? 'CMD' : z === 'off' ? 'OFF' : z.toUpperCase())}</div></span></a>`;
     }).join('');
     const sel = document.querySelector('.rt[aria-selected="true"]');

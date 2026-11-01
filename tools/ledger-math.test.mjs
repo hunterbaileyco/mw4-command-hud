@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { SAMPLE, derive, format, THIN_ROAS } = require('../docs/c85352c42452f0db1e1c5e56f60e5128/ledger/model.js');
+const { SAMPLE, derive, format, THIN_ROAS, stripMetrics } = require('../docs/c85352c42452f0db1e1c5e56f60e5128/ledger/model.js');
 
 const model = derive(SAMPLE);
 const mtd = model.mtd;
@@ -105,6 +105,45 @@ test('runway is Mercury balance divided by absolute 30-day net burn', () => {
   const funded = derive({ ...SAMPLE, mercury: { ...SAMPLE.mercury, netBurn30d: 500 } });
   assert.equal(funded.runway.label, 'NO BURN');
   assert.equal(funded.runway.months, null);
+});
+
+test('top strip CM REV and SPEND follow the selected window', () => {
+  const todayStrip = stripMetrics(model, 'today');
+  const d7Strip = stripMetrics(model, 'd7');
+  const mtdStrip = stripMetrics(model, 'mtd');
+  assert.equal(todayStrip.rev, today.rev);
+  assert.equal(todayStrip.spend, today.spend);
+  assert.equal(todayStrip.contrib, today.contrib);
+  assert.equal(todayStrip.label, 'TODAY');
+  assert.equal(d7Strip.rev, d7.rev);
+  assert.equal(d7Strip.spend, d7.spend);
+  assert.equal(d7Strip.contrib, d7.contrib);
+  assert.equal(mtdStrip.rev, mtd.rev);
+  assert.equal(mtdStrip.contrib, mtd.contrib);
+  assert.notEqual(todayStrip.rev, d7Strip.rev);
+  assert.notEqual(d7Strip.spend, mtdStrip.spend);
+  assert.equal(todayStrip.cash, model.mercury.balance);
+  assert.equal(d7Strip.cash, model.mercury.balance);
+  assert.equal(mtdStrip.cash, model.mercury.balance);
+});
+
+test('zero revenue is not painted as 100% spend', () => {
+  const loss = derive({
+    source: 'live',
+    month: { name: 'NOV', day: 1, days: 30, priorName: 'OCT' },
+    windows: {
+      today: { id: 'today', label: 'TODAY', rev: 0, cogs: 0, spend: 10, orders: 0 },
+      mtd: { id: 'mtd', label: 'MTD', rev: 100, cogs: 20, spend: 200, orders: 2 }
+    },
+    mercury: { balance: 50, ops: 50, reserve: 0, netBurn30d: -10 }
+  });
+  assert.equal(loss.source, 'live');
+  assert.equal(loss.windows.today.contrib, -10);
+  assert.equal(loss.windows.today.spendPct, 0);
+  assert.equal(loss.windows.today.cogsPct, 0);
+  assert.equal(loss.windows.mtd.contrib, 100 - 20 - 200);
+  assert.ok(loss.windows.mtd.spendPct > 100);
+  assert.ok(loss.windows.mtd.cm < 0);
 });
 
 test('daily rounds cover the sample month and flag the thin day', () => {

@@ -1,18 +1,20 @@
 /* MW4 // LEDGER feed contract.
-   A live GET /api/feed?f=ledger may later return this same shape with source:"live".
-   Until Shopify revenue/orders/COGS, ad spend, and Mercury cash are wired, the page
-   loads SAMPLE below (source:"sample") and labels every figure SAMPLE.
+   GET /api/feed?f=ledger decrypts ledger/feed.json (AES-GCM). When that payload
+   has source:"live", the page uses it and drops the SAMPLE badges. SAMPLE below
+   is the fallback only when that feed is missing or not live.
 
    Locked math (do not fold extra costs in here):
    - contribution = rev − cogs − spend
    - rev is Shopify net sales (discounts and refunds already netted; shipping and tax out)
    - cogs is Shopify cost-per-item × units; a SKU with no cost counts as $0 (see cogs.gapCount)
-   - spend is Meta + TikTok + Google only
+   - spend is connected ad lanes only (a slot lane is not added)
    - shipping, payment fees, Shopify apps, and 3PL are NOT subtracted
    - breakeven ROAS = 1 / gross margin, gross margin = 1 − cogs/rev
    - lane after-COGS $ = attributed rev × gross margin − spend
    - runway months = Mercury balance ÷ |last-30-day net burn| (no burn → not a month count)
-   Platform-reported lane revenue over-counts. It is not added into REV. */
+   Platform-reported lane revenue over-counts. It is not added into REV.
+   The top strip reads the selected window for CM / REV / SPEND. CASH is the
+   Mercury balance, a stock, so it does not change with TODAY / 7D / MTD. */
 (function (root, factory) {
   const api = factory();
   if (typeof module === 'object' && module.exports) module.exports = api;
@@ -124,7 +126,8 @@
     const gm = rev > 0 ? 1 - cogs / rev : 0;
     const cm = pct1(contrib, rev);
     const cogsPct = pct1(cogs, rev);
-    const spendPct = round1(100 - cogsPct - cm);
+    // Residual keeps a profitable window on 100. Zero revenue is not "all spend".
+    const spendPct = rev > 0 ? round1(100 - cogsPct - cm) : 0;
     const orders = num(w.orders);
     const roas = spend > 0 ? rev / spend : null;
     const day = month && month.day ? month.day : 0;
@@ -247,7 +250,7 @@
     const refunds = num(raw && raw.refunds);
     const gross = num(raw && raw.grossSales);
     const daily = (raw && raw.dailyCm) || [];
-    const dailyMax = daily.reduce(function (m, v) { return Math.max(m, num(v)); }, 0);
+    const dailyMax = daily.reduce(function (m, v) { return Math.max(m, Math.abs(num(v))); }, 0);
     const dailyAvg = daily.length ? daily.reduce(function (s, v) { return s + num(v); }, 0) / daily.length : 0;
     return {
       source: src,
@@ -264,6 +267,7 @@
         skuCount: num(cogs.skuCount),
         gapCount: num(cogs.gapCount),
         gapRev: num(cogs.gapRev),
+        span: cogs.span || 'MTD',
         top: top
       },
       aov: mtd.orders > 0 ? mtd.rev / mtd.orders : 0,
@@ -278,11 +282,31 @@
       } : { balance: 0, ops: 0, reserve: 0, netBurn30d: 0 },
       runway: runway,
       daily: daily.map(function (v, i) {
-        return { day: i + 1, cm: num(v), height: dailyMax > 0 ? num(v) / dailyMax : 0 };
+        return { day: i + 1, cm: num(v), height: dailyMax > 0 ? Math.abs(num(v)) / dailyMax : 0 };
       }),
       dailyAvg: dailyAvg,
       dailyNote: (raw && raw.dailyNote) || null,
       log: (raw && raw.log) || []
+    };
+  }
+
+  // CM, REV, and SPEND follow the selected period. CASH is Mercury on hand.
+  function stripMetrics(model, winId) {
+    const windows = model && model.windows;
+    const view = (windows && (windows[winId] || model.mtd)) || null;
+    const cash = model && model.mercury ? num(model.mercury.balance) : 0;
+    if (!view) {
+      return { id: winId || '', label: '', contrib: 0, rev: 0, orders: 0, spend: 0, roas: null, cash: cash };
+    }
+    return {
+      id: view.id,
+      label: view.label,
+      contrib: view.contrib,
+      rev: view.rev,
+      orders: view.orders,
+      spend: view.spend,
+      roas: view.roas,
+      cash: cash
     };
   }
 
@@ -300,6 +324,7 @@
     THIN_ROAS: THIN_ROAS,
     SCALE_MAX: SCALE_MAX,
     derive: derive,
+    stripMetrics: stripMetrics,
     format: {
       moneyFull: moneyFull,
       moneyK: moneyK,

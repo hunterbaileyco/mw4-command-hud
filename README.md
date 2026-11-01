@@ -32,16 +32,18 @@ Developers: edit `scriptable/src/*`, run `node tools/build-scriptable.mjs`, merg
 - HUD: ORBAT roster, wire-heat meter (crossings in the last hour), HOLD cage, sector-coded zones, counter meters, T+ since deploy on AO plates, two-column desktop layout.
 - Social: channel tiles with sparklines, segmented range/mode pickers, chart crosshair, top-3 posts, caption filter, view-share bars.
 - Hub: inline unlock; once unlocked it decrypts status.json + social/metrics.json in the browser for live counts and a 6 h SITREP. Nothing readable is published.
-- LEDGER (`docs/<token>/ledger/`): sales / spend / contribution. Hero is REV − COGS − SPEND. Sample figures ship in `ledger/model.js` (`source: "sample"`) until a live `GET /api/feed?f=ledger` payload with `source: "live"` exists. Shipping, payment fees, and app costs are not subtracted. COGS gaps count as $0 and stay flagged. Runway is Mercury balance ÷ |30-day net burn|.
+- LEDGER (`docs/<token>/ledger/`): sales / spend / contribution. Hero is REV − COGS − SPEND. A live `GET /api/feed?f=ledger` payload with `source: "live"` drops the MOCK/SAMPLE badges. `ledger/model.js` SAMPLE is the fallback only when that envelope is missing or not live. Shipping, payment fees, and app costs are not subtracted. COGS gaps count as $0 and stay flagged. Runway is Mercury balance ÷ |30-day net burn|. The top strip CM / REV / SPEND follow the TODAY / 7D / MTD chip. CASH stays the Mercury balance (on hand), which is not a period flow.
 
 ## LEDGER feed
-`ledger/model.js` is the contract. A later live mapper should emit the same raw shape (windows, lanes, cogs.top, mercury, log) and set `source` to `"live"`. The page derives contribution, CM%, breakeven ROAS, after-COGS dollars, and runway. It does not invent those from the view. Pinterest stays a held slot. Soap stays a dashed placeholder until the paid handoff.
+`ledger/model.js` is the contract. `tools/ledger-live.mjs` maps a normalized Shopify + ads + Mercury pull into that shape and sets `source` to `"live"`. `tools/build-ledger.mjs` encrypts it (AES-256-GCM, salt reused from `status.json`) and writes `ledger/feed.json`. The repo holds the envelope only — never the cleartext books. `/api/feed?f=ledger` decrypts with `MW4_LEDGER_PASS` when that env var is set, otherwise `MW4_FEED_PASS`. The page derives contribution, CM%, breakeven ROAS, after-COGS dollars, and runway.
+
+Connected on the current envelope: Shopify net sales, orders, and unit-cost COGS; Meta (Kinsora Redemption; Main has no spend in the window); Mercury checking + savings. Google Ads, TikTok Ads, and Pinterest Ads are slots until those accounts are connected, and they are not added into SPEND. Platform-reported lane revenue is not added into REV. Soap stays a dashed placeholder. Rebuild the envelope to refresh the numbers; the page polls the feed every 60s.
 
 ## Access (no second code on Vercel)
 - The Vercel deployment is behind Vercel Authentication. The HUD, Social and Hub pages have **no unlock form**: they fetch
-  `GET /api/feed?f=status` / `?f=social` (`docs/api/feed.js`, a Vercel function), which decrypts the committed envelopes
+  `GET /api/feed?f=status` / `?f=social` / `?f=ledger` (`docs/api/feed.js`, a Vercel function), which decrypts the committed envelopes
   server-side with the `MW4_FEED_PASS` project env var and returns JSON with `Cache-Control: no-store`.
-- The repo still only holds AES-256-GCM envelopes for the ops and social feeds — `status.json` and `social/metrics.json` are
-  unchanged and keep being written encrypted by `build-status.mjs` / `build-social.mjs`. LEDGER sample dollars in `ledger/model.js` are invented figures labeled SAMPLE, not the books.
+- The repo still only holds AES-256-GCM envelopes for the ops, social, and ledger feeds — `status.json`, `social/metrics.json`,
+  and `ledger/feed.json` are written encrypted by `build-status.mjs` / `build-social.mjs` / `build-ledger.mjs`. LEDGER sample dollars in `ledger/model.js` are invented figures labeled SAMPLE, used only when the live envelope is absent.
 - Scriptable widgets fetch the encrypted `status.json` from Vercel and still decrypt on-device with the Keychain auth code (AES-GCM is unchanged). `STATUS_URL` in `scriptable/src/common.js` is the Vercel `status.json` URL plus the Deployment Protection bypass query param. Widgets do not call `/api/feed` (that cleartext endpoint stays SSO-gated). Phone install is the two loaders above; do not re-paste the full scripts after a merge.
 - `api/feed.js` at the repo root is a shim that only matters if the Vercel Root Directory is the repo root.

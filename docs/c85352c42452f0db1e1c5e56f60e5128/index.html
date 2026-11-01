@@ -243,19 +243,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 .ft .st{color:var(--holdink);font-weight:700}
 .boards{display:flex;justify-content:center;gap:10px;margin-bottom:2px}
 
-/* gate */
-#gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;background:var(--bg)}
-#gate form{position:relative;box-shadow:0 0 40px rgba(107,124,58,.12);width:min(340px,100%);display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px}
-#gate .brand{font-size:14px;text-align:center}
-#gate .cls{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-align:center;text-transform:uppercase}
-#gate label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--tan);text-transform:uppercase}
-#gate input{width:100%;margin-top:6px;background:#0B0E0C;border:1px solid var(--line);border-radius:2px;color:var(--ink);padding:12px;font-family:var(--mono);font-size:16px;letter-spacing:.2em;text-align:center;outline:none}
-#gate input:focus{border-color:var(--olive);box-shadow:0 0 0 1px var(--olive)}
-#gate button{background:var(--olive);color:#0B0E0C;border:0;border-radius:2px;padding:12px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.2em;cursor:pointer}
-#gate .err{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--holdink);min-height:16px;text-align:center}
-#gate.shake form{animation:sh .3s}
-@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-#app{display:none}
+#app{display:block}
 #edge{position:fixed;inset:0;pointer-events:none;z-index:45;opacity:0}
 #edge.rtb{box-shadow:inset 0 0 0 3px #9bb05a,inset 0 0 70px 18px rgba(155,176,90,.7);animation:edge 1.2s ease-out}
 #edge.dep{box-shadow:inset 0 0 0 2px var(--amber),inset 0 0 50px 10px rgba(232,163,23,.45);animation:edge .9s ease-out}
@@ -348,17 +336,6 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 </style>
 </head>
 <body class="sx-pad">
-<div id="gate"><form id="gf" autocomplete="off">
-  <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
-  <div class="sx-gate-art"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="22"/><circle class="a" cx="27" cy="27" r="4"/><path d="M27 1v12M27 41v12M1 27h12M41 27h12"/></svg></div>
-  <div class="brand">MW4 <span class="sl">//</span> COMMAND</div>
-  <div class="cls">Restricted · Task Force Kinsora · Eyes only · feed encrypted</div>
-  <label for="pw">Auth code
-    <input id="pw" type="password" placeholder="••••••••" autocomplete="current-password" autofocus>
-  </label>
-  <button type="submit">▶ UNLOCK</button>
-  <div class="err" id="gerr"></div>
-</form></div>
 
 <div id="app">
 <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · THEATER</span><span class="clk" id="clk">—</span></div>
@@ -431,14 +408,14 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 
   <div class="ft">
     <div class="boards"><a id="cmdLink" target="_blank" rel="noopener">CMD BOARD ↗</a><a id="kalLink" target="_blank" rel="noopener">KAL BOARD ↗</a></div>
-    <div><span id="stale"></span>AUTO-REFRESH · POLLS 20S · <span id="ref">—</span> · <a href="hub/">HUB</a> · <a href="social/">SOCIAL</a> · <a href="#" id="lock">LOCK</a></div>
+    <div><span id="stale"></span>AUTO-REFRESH · POLLS 20S · <span id="ref">—</span> · <a href="hub/">HUB</a> · <a href="social/">SOCIAL</a> · <a href="#" id="fsync">SYNC</a></div>
   </div>
 </div>
 <div class="sx-dock"><nav>
   <a href="hub/"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
   <a class="on" href="./"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
   <a href="social/"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
-  <a class="lk" href="#" id="dlock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>LOCK</a>
+  <a href="#" id="dsync"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>SYNC</a>
 </nav></div>
 </div>
 
@@ -448,11 +425,10 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 <script>
 (() => {
   'use strict';
-  // Feed is an encrypted envelope {v,alg:"AES-GCM",kdf:"PBKDF2-SHA256",iter,salt,iv,ct}. The auth code is
-  // checked against HASH, then stretched with PBKDF2-SHA256(salt, iter) into an AES-256-GCM key (Web Crypto).
-  // The raw key (not the code) is kept in sessionStorage so a reload in the same tab stays unlocked.
-  const HASH = '0b488216b0f3fff7076b1a9af7ed5abb84e17176fde44fddba9138b0ab08fcc9';
-  const KEY = 'mw4hud.unlock', KKEY = 'mw4hud.k', ZKEY = 'mw4hud.zones', EKEY = 'mw4hud.lastEvent', SKEY = 'mw4hud.sound';
+  // Feed: GET /api/feed?f=status — a Vercel function behind Vercel Authentication decrypts the committed AES-GCM
+  // status.json server-side and returns the cleartext model, so after Vercel sign-in there is no second code.
+  // On GitHub Pages /api/feed doesn't exist (404) and the page shows LINK DOWN: Pages only ever serves ciphertext.
+  const ZKEY = 'mw4hud.zones', EKEY = 'mw4hud.lastEvent', SKEY = 'mw4hud.sound';
   const POLL_MS = 20000, STALE_MS = 30 * 60 * 1000, FLY_MS = 1200, STEP_MS = FLY_MS + 1100;
   const OPS = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
   const LIST = { doing: { tag: 'ACT', tone: 'act', rank: 0 }, waiting: { tag: 'HOLD', tone: 'hold', rank: 1 }, backlog: { tag: 'QUEUE', tone: 'queue', rank: 2 }, done: { tag: 'DONE', tone: 'done', rank: 3 } };
@@ -461,41 +437,17 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const safeUrl = (u) => /^https:\/\/trello\.com\//.test(u || '') ? u : '#';
-  const te = new TextEncoder();
-  const b64 = { enc: (u) => btoa(String.fromCharCode(...new Uint8Array(u))), dec: (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0)) };
-  async function sha256(t) {
-    const b = await crypto.subtle.digest('SHA-256', te.encode(t));
-    return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('');
-  }
-  let aesKey = null, keyMeta = null;   // CryptoKey + {salt, iter} it was derived for
-  async function deriveFrom(code, env) {
-    const km = await crypto.subtle.importKey('raw', te.encode(code), 'PBKDF2', false, ['deriveBits']);
-    const raw = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: b64.dec(env.salt), iterations: env.iter }, km, 256);
-    keyMeta = { salt: env.salt, iter: env.iter };
-    aesKey = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
-    try { sessionStorage.setItem(KKEY, JSON.stringify({ ...keyMeta, k: b64.enc(raw) })); } catch (_) { /* private mode */ }
-  }
-  async function restoreKey() {
-    try {
-      const s = JSON.parse(sessionStorage.getItem(KKEY) || 'null'); if (!s) return false;
-      aesKey = await crypto.subtle.importKey('raw', b64.dec(s.k), 'AES-GCM', false, ['decrypt']); keyMeta = { salt: s.salt, iter: s.iter }; return true;
-    } catch (_) { return false; }
-  }
   async function fetchEnv() {
-    const r = await fetch('./status.json?t=' + Date.now(), { cache: 'no-store' });
+    let r;
+    try { r = await fetch('/api/feed?f=status&t=' + Date.now(), { cache: 'no-store', credentials: 'same-origin', redirect: 'manual' }); }
+    catch (_) { throw new Error('OFFLINE'); }
+    if (r.type === 'opaqueredirect' || r.status === 401 || r.status === 403) throw new Error('VERCEL SESSION EXPIRED · RELOAD TO SIGN IN');
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return r.json();
   }
-  async function openEnv(env) {
-    if (!env || !env.ct) return env; // legacy cleartext feed
-    if (!aesKey) throw new Error('NO KEY');
-    if (keyMeta && (keyMeta.salt !== env.salt || keyMeta.iter !== env.iter)) { relock('KEY ROTATED · RE-ENTER CODE'); throw new Error('KEY ROTATED'); }
-    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(env.iv) }, aesKey, b64.dec(env.ct));
-    return JSON.parse(new TextDecoder().decode(pt));
-  }
-  function relock(msg) {
-    sessionStorage.removeItem(KEY); sessionStorage.removeItem(KKEY); aesKey = null;
-    if (started) location.reload(); else { $('gate').style.display = ''; $('gerr').textContent = msg || ''; }
+  async function openEnv(d) {
+    if (!d || d.ct || d.error) throw new Error(d && d.error ? String(d.error).toUpperCase().slice(0, 40) : 'FEED NOT READABLE');
+    return d;
   }
 
   // ---------- sound (Web Audio, no files) ----------
@@ -536,25 +488,11 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 
   function unlock() {
     if (started) return; started = true;
-    $('gate').style.display = 'none'; $('app').style.display = 'block';
     load(); setInterval(load, POLL_MS);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (pending) { const d = pending; pending = null; render(d); } load(); } });
   }
-  $('gf').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const code = $('pw').value; $('pw').value = '';
-    if (soundOn) audio(); // user gesture: unlock audio on iOS
-    const h = await sha256(code);
-    if (h !== HASH) { $('gerr').textContent = '✕ ACCESS DENIED'; const g = $('gate'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); return; }
-    $('gerr').textContent = 'DECRYPTING…';
-    try {
-      const env = await fetchEnv();
-      if (env.ct) { await deriveFrom(code, env); await openEnv(env); }
-      sessionStorage.setItem(KEY, h); $('gerr').textContent = ''; unlock();
-    } catch (err) { $('gerr').textContent = '✕ DECRYPT FAILED · ' + String(err.message || err).toUpperCase().slice(0, 40); }
-  });
-  $('lock').addEventListener('click', (e) => { e.preventDefault(); relock(); });
-  $('dlock').addEventListener('click', (e) => { e.preventDefault(); relock(); });
+  $('fsync').addEventListener('click', (e) => { e.preventDefault(); load(); });
+  $('dsync').addEventListener('click', (e) => { e.preventDefault(); load(); });
   const clk = () => { $('clk').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) + ' PT'; };
   clk(); setInterval(clk, 1000);
   if (window.matchMedia && matchMedia('(min-width:900px)').matches) $('log').open = true;
@@ -562,7 +500,6 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     tab = b.dataset.tab; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b)); renderFeed();
   }));
   $('sheet').addEventListener('click', (e) => { if (e.target.id === 'sheet' || e.target.closest('.x')) $('sheet').classList.remove('on'); });
-  if (sessionStorage.getItem(KEY) === HASH) restoreKey().then((ok) => { if (ok) unlock(); else relock(); });
 
   const ago = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'just now' : m < 60 ? m + 'm ago' : Math.floor(m / 60) + 'h ' + (m % 60) + 'm ago'; };
   const agoShort = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'NOW' : m < 60 ? m + 'M' : Math.floor(m / 60) + 'H'; };
@@ -598,7 +535,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
       const d = await openEnv(await fetchEnv()); lastData = d; lastFetch = Date.now();
       if (document.hidden && prevZones) pending = d; else render(d); // hold deltas until Hunter is looking
       tick();
-    } catch (err) { $('ref').innerHTML = '<span class="st">LINK DOWN · ' + esc(err.message) + '</span>'; }
+    } catch (err) { $('ref').innerHTML = '<a href="" class="st" onclick="location.reload();return false">LINK DOWN · ' + esc(err.message) + '</a>'; if (!lastData) $('quiet').textContent = 'LINK DOWN · ' + err.message; }
   }
 
   const chip = (tag, tone) => `<span class="chip ${tone}">${tag}</span>`;
@@ -944,6 +881,8 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
     $('feed').innerHTML = list.length ? list.map(cardHtml).join('')
       : `<div class="empty">${tab === 'done' ? 'No recent ships on feed yet' : tab === 'hold' ? 'Nothing on Hunter · all clear' : 'No missions'}</div>`;
   }
+  try { sessionStorage.removeItem('mw4hud.unlock'); sessionStorage.removeItem('mw4hud.k'); } catch (_) { /* old unlock state */ }
+  unlock();
 })();
 </script>
 </body>

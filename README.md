@@ -18,3 +18,14 @@ Static, phone-first status page served from `docs/` on GitHub Pages.
 - HUD: ORBAT roster, wire-heat meter (crossings in the last hour), HOLD cage, sector-coded zones, counter meters, T+ since deploy on AO plates, two-column desktop layout.
 - Social: channel tiles with sparklines, segmented range/mode pickers, chart crosshair, top-3 posts, caption filter, view-share bars.
 - Hub: inline unlock; once unlocked it decrypts status.json + social/metrics.json in the browser for live counts and a 6 h SITREP. Nothing readable is published.
+
+## Access (no second code on Vercel)
+- The Vercel deployment is behind Vercel Authentication. The HUD, Social and Hub pages have **no unlock form**: they fetch
+  `GET /api/feed?f=status` / `?f=social` (`docs/api/feed.js`, a Vercel function), which decrypts the committed envelopes
+  server-side with the `MW4_FEED_PASS` project env var and returns JSON with `Cache-Control: no-store`.
+- The repo (and GitHub Pages) still only hold the AES-256-GCM envelopes — `status.json` and `social/metrics.json` are
+  unchanged and keep being written encrypted by `build-status.mjs` / `build-social.mjs`. On Pages `/api/feed` doesn't exist,
+  so the pages show LINK DOWN and nothing readable is served.
+- Scriptable widgets are unchanged: they still fetch the encrypted `status.json` and decrypt on-device with the Keychain code.
+  (If they ever move to Vercel, they'd need the protection-bypass header; the `/api/feed` cleartext endpoint is SSO-gated.)
+- `api/feed.js` at the repo root is a shim that only matters if the Vercel Root Directory is the repo root.

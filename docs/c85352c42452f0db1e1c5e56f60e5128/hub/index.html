@@ -30,14 +30,8 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .ilk.live .st i{background:var(--olive2);box-shadow:0 0 8px var(--olive2);animation:pulse 2s infinite}
 .ilk.live .st{color:var(--olive2)}
 @keyframes pulse{50%{opacity:.35}}
-.ilk form{display:flex;gap:6px;margin-left:auto;flex:1;justify-content:flex-end;min-width:0}
-.ilk input{min-width:0;width:100%;max-width:200px;height:34px;background:#0B0E0C;border:1px solid var(--line2);border-radius:3px;color:var(--ink);padding:0 10px;font-family:var(--mono);font-size:16px;letter-spacing:.2em;text-align:center;outline:none}
-.ilk input:focus{border-color:var(--olive);box-shadow:0 0 0 1px var(--olive)}
-.ilk button{height:34px;background:var(--olive);color:#0B0E0C;border:0;border-radius:3px;padding:0 12px;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.18em;cursor:pointer;white-space:nowrap}
-.ilk .err{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--holdink)}
 .ilk .sync{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;text-align:right}
-.ilk.live form{display:none}.ilk:not(.live) .sync{display:none}
-.ilk.shake{animation:sh .3s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
 /* tiles */
 .tiles{display:grid;grid-template-columns:1fr;gap:12px}
 @media(min-width:780px){.tiles{grid-template-columns:1.25fr 1fr}}
@@ -97,14 +91,9 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   </div>
 
   <div class="ilk" id="ilk">
-    <span class="st"><i></i><span id="ist">INTEL LOCKED</span></span>
-    <form id="uf" autocomplete="off">
-      <input id="pw" type="password" placeholder="AUTH CODE" aria-label="Auth code" autocomplete="current-password">
-      <button type="submit">▶ UNLOCK</button>
-    </form>
+    <span class="st"><i></i><span id="ist">SYNCING…</span></span>
     <span class="sync" id="isync">—</span>
   </div>
-  <div class="ilk-err mono" id="uerr" style="font-size:9px;color:var(--holdink);min-height:0"></div>
 
   <div class="tiles">
     <a class="tile hud" href="../">
@@ -117,7 +106,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
       </div>
       <div class="d">Live Trello theater: who's deployed across the wire, who's caged on HOLD waiting for Hunter, the FOB queue and today's ships.</div>
       <div class="chips"><span>AO</span><span>WIRE</span><span>HOLD CAGE</span><span>FOB</span><span>ORBAT</span><span>AAR</span><span>MISSION LOG</span></div>
-      <div class="hint" id="hudHint">▒ Unlock to light up live counts</div>
+      <div class="hint" id="hudHint">▒ Syncing live counts…</div>
       <div class="stats">
         <div><div class="l">ACT</div><div class="n a lk" id="hAct">▒▒</div></div>
         <div><div class="l">HOLD</div><div class="n h lk" id="hHold">▒▒</div></div>
@@ -136,7 +125,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
       </div>
       <div class="d">Every published post back to each channel's first: views, engagement, daily trend and a sortable post log.</div>
       <div class="chips"><span>TT @KINSORA.CO</span><span>TT @WEARKINSORA</span><span>IG @WEARKINSORA</span><span>PINTEREST</span></div>
-      <div class="hint" id="socHint">▒ Unlock to see snapshot totals</div>
+      <div class="hint" id="socHint">▒ Syncing snapshot totals…</div>
       <div class="stats" id="socStats">
         <div><div class="l">TT KCO</div><div class="n a lk">▒▒</div></div>
         <div><div class="l">TT WK</div><div class="n a lk">▒▒</div></div>
@@ -149,7 +138,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   <section class="sit">
     <span class="sx-brk tl"></span><span class="sx-brk br"></span>
     <div class="hd"><b>SITREP · Last 6h</b><span id="sitc">—</span></div>
-    <div id="sit"><div class="lockd">▒▒▒ Intel encrypted · unlock above ▒▒▒</div></div>
+    <div id="sit"><div class="lockd">▒▒▒ Syncing intel… ▒▒▒</div></div>
   </section>
 
   <div class="links">
@@ -157,77 +146,50 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     <a id="kalLink" class="off" target="_blank" rel="noopener">KAL BOARD <span>↗</span></a>
   </div>
 
-  <div class="foot">Feeds are AES-256-GCM encrypted · decrypted on this device only · one code opens every board<br><a href="#" id="lock2" style="color:var(--tan);border-bottom:1px dotted var(--tan)">LOCK THIS TAB</a></div>
+  <div class="foot">Access via Vercel sign-in · feeds decrypted server-side · auto-sync 30s<br><a href="#" id="sync2" style="color:var(--tan);border-bottom:1px dotted var(--tan)">SYNC NOW</a></div>
 </div>
 
 <div class="sx-dock"><nav>
   <a class="on" href="./"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
   <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
   <a href="../social/"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
-  <a class="lk" href="#" id="lock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>LOCK</a>
+  <a href="#" id="dsync"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>SYNC</a>
 </nav></div>
 
 <script>
 (() => {
   'use strict';
-  // Same key scheme as the HUD + Social boards: the auth code is checked against HASH, stretched with
-  // PBKDF2-SHA256 into an AES-256-GCM key, and the raw key (never the code) lives in sessionStorage for this tab.
-  // The hub only decrypts in the browser to show counts; nothing readable is published.
-  const HASH = '0b488216b0f3fff7076b1a9af7ed5abb84e17176fde44fddba9138b0ab08fcc9';
-  const KEY = 'mw4hud.unlock', KKEY = 'mw4hud.k';
+  // Live hints come from /api/feed (Vercel function behind Vercel Authentication; decrypts the committed AES-GCM feeds
+  // server-side). No second code after Vercel sign-in. On GitHub Pages there is no /api, so tiles show LINK DOWN.
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const safeUrl = (u) => /^https:\/\/trello\.com\//.test(u || '') ? u : '';
-  const te = new TextEncoder();
-  const b64 = { enc: (u) => btoa(String.fromCharCode(...new Uint8Array(u))), dec: (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0)) };
-  const sha256 = async (t) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode(t)))].map((x) => x.toString(16).padStart(2, '0')).join('');
   const fmtK = (v) => v == null ? '—' : v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e4 ? Math.round(v / 1e3) + 'K' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : String(v);
   const PT = (d, o) => new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', ...o }).format(d);
   const agoShort = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'NOW' : m < 60 ? m + 'M' : Math.floor(m / 60) + 'H'; };
   const clock = () => { $('clk').textContent = PT(new Date(), { second: '2-digit' }) + ' PT'; };
   clock(); setInterval(clock, 1000);
+  try { sessionStorage.removeItem('mw4hud.unlock'); sessionStorage.removeItem('mw4hud.k'); } catch (_) { /* old unlock state */ }
 
-  let aesKey = null, keyMeta = null;
-  async function restoreKey() {
-    try {
-      if (sessionStorage.getItem(KEY) !== HASH) return false;
-      const s = JSON.parse(sessionStorage.getItem(KKEY) || 'null'); if (!s) return false;
-      aesKey = await crypto.subtle.importKey('raw', b64.dec(s.k), 'AES-GCM', false, ['decrypt']); keyMeta = { salt: s.salt, iter: s.iter }; return true;
-    } catch (_) { return false; }
+  async function get(f) {
+    let r;
+    try { r = await fetch('/api/feed?f=' + f + '&t=' + Date.now(), { cache: 'no-store', credentials: 'same-origin', redirect: 'manual' }); }
+    catch (_) { throw new Error('OFFLINE'); }
+    if (r.type === 'opaqueredirect' || r.status === 401 || r.status === 403) throw new Error('VERCEL SESSION EXPIRED · RELOAD');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    if (!d || d.ct || d.error) throw new Error(d && d.error ? String(d.error).slice(0, 40) : 'FEED NOT READABLE');
+    return d;
   }
-  async function deriveFrom(code, env) {
-    const km = await crypto.subtle.importKey('raw', te.encode(code), 'PBKDF2', false, ['deriveBits']);
-    const raw = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: b64.dec(env.salt), iterations: env.iter }, km, 256);
-    keyMeta = { salt: env.salt, iter: env.iter };
-    aesKey = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
-    try { sessionStorage.setItem(KKEY, JSON.stringify({ ...keyMeta, k: b64.enc(raw) })); } catch (_) { /* private mode */ }
-  }
-  const get = async (p) => { const r = await fetch(p + '?t=' + Date.now(), { cache: 'no-store' }); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); };
-  async function open(env) {
-    if (!env || !env.ct || !aesKey) throw new Error('NO KEY');
-    if (keyMeta && (keyMeta.salt !== env.salt || keyMeta.iter !== env.iter)) throw new Error('KEY ROTATED');
-    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(env.iv) }, aesKey, b64.dec(env.ct));
-    return JSON.parse(new TextDecoder().decode(pt));
-  }
-  function lock() { sessionStorage.removeItem(KEY); sessionStorage.removeItem(KKEY); location.reload(); }
-  $('lock').addEventListener('click', (e) => { e.preventDefault(); lock(); });
-  $('lock2').addEventListener('click', (e) => { e.preventDefault(); lock(); });
-
-  $('uf').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const code = $('pw').value; $('pw').value = '';
-    if (await sha256(code) !== HASH) { $('uerr').textContent = '✕ ACCESS DENIED'; const g = $('ilk'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); return; }
-    $('uerr').textContent = 'DECRYPTING…';
-    try { const env = await get('../status.json'); await deriveFrom(code, env); await open(env); sessionStorage.setItem(KEY, HASH); $('uerr').textContent = ''; live(); }
-    catch (err) { $('uerr').textContent = '✕ DECRYPT FAILED · ' + String(err.message || err).toUpperCase().slice(0, 40); }
-  });
-
-  let timer = null;
-  function live() { $('ilk').classList.add('live'); $('ist').textContent = 'INTEL LIVE'; pull(); if (!timer) timer = setInterval(pull, 30000); }
+  const down = (msg) => { $('ilk').classList.remove('live'); $('ist').textContent = 'LINK DOWN'; $('isync').innerHTML = '<a href="" onclick="location.reload();return false" style="color:var(--holdink)">' + esc(msg) + ' ↻</a>'; $('isync').style.display = 'block'; };
   async function pull() {
-    try { hud(await open(await get('../status.json'))); } catch (err) { $('hudHint').innerHTML = '<span class="w">⚠ HUD FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
-    try { soc(await open(await get('../social/metrics.json'))); } catch (err) { $('socHint').innerHTML = '<span class="w">⚠ SOCIAL FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
+    let ok = false;
+    try { hud(await get('status')); ok = true; } catch (err) { $('hudHint').innerHTML = '<span class="w">⚠ HUD FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; down(String(err.message || err).toUpperCase()); }
+    try { soc(await get('social')); } catch (err) { $('socHint').innerHTML = '<span class="w">⚠ SOCIAL FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
+    if (ok) { $('ilk').classList.add('live'); $('ist').textContent = 'INTEL LIVE'; }
   }
+  $('dsync').addEventListener('click', (e) => { e.preventDefault(); pull(); });
+  $('sync2').addEventListener('click', (e) => { e.preventDefault(); pull(); });
   function setN(id, v) { const el = $(id); el.textContent = v; el.classList.remove('lk'); }
   function hud(d) {
     const C = d.command || {}, K = d.kal || {}, cc = C.counts || {}, kc = K.counts || {};
@@ -260,7 +222,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     const asOf = new Date((d.asOfDay || '1970-01-01') + 'T23:59:59-07:00').getTime(), stale = Date.now() - asOf > 36 * 3600 * 1000;
     $('socHint').innerHTML = `${stale ? '<span class="w">⚠ SNAPSHOT</span>' : '<b>SNAPSHOT</b>'} ${esc(d.generatedAt || '')} · ${total} posts · views / impressions`;
   }
-  restoreKey().then((ok) => { if (ok) live(); });
+  pull(); setInterval(pull, 30000);
 })();
 </script>
 </body>

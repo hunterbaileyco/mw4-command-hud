@@ -103,31 +103,12 @@ details li{margin:4px 0}
 @media(min-width:900px){.two{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px;align-items:start}.two>.pn{height:100%}}
 .two{display:flex;flex-direction:column;gap:10px}
 @media(min-width:900px){.two{display:grid}}
-#gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;background:var(--bg)}
-#gate form{position:relative;width:min(340px,100%);display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;box-shadow:0 0 40px rgba(107,124,58,.12)}
-#gate .brand{font-size:14px;text-align:center}
-#gate .cls{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-align:center;text-transform:uppercase}
-#gate label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--tan);text-transform:uppercase}
-#gate input{width:100%;margin-top:6px;background:#0B0E0C;border:1px solid var(--line);border-radius:2px;color:var(--ink);padding:12px;font-family:var(--mono);font-size:16px;letter-spacing:.2em;text-align:center;outline:none}
-#gate input:focus{border-color:var(--olive);box-shadow:0 0 0 1px var(--olive)}
-#gate button{background:var(--olive);color:#0B0E0C;border:0;border-radius:2px;padding:12px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.2em;cursor:pointer}
-#gate .err{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--holdink);min-height:16px;text-align:center}
-#gate .foot{display:block}
-#gate.shake form{animation:sh .3s}@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-#app{display:none}
+#app{display:block}
+.down{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--holdink);text-transform:uppercase;text-align:center;padding:30px 10px;border:1px dashed rgba(224,122,95,.4);border-radius:6px}
+.down a{color:var(--tan);border-bottom:1px dotted var(--tan)}
 </style>
 </head>
 <body class="sx-pad">
-<div id="gate"><form id="gf" autocomplete="off">
-  <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
-  <div class="sx-gate-art"><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="22"/><path d="M12 38h30M16 38v-6M23 38V22M30 38v-9M37 38V16" class="a"/></svg></div>
-  <div class="brand">MW4 <span class="sl">//</span> SOCIAL</div>
-  <div class="cls">Task Force Kinsora · Jae lane · feed encrypted</div>
-  <label for="pw">Auth code<input id="pw" type="password" placeholder="••••••••" autocomplete="current-password" autofocus></label>
-  <button type="submit">▶ UNLOCK</button>
-  <div class="err" id="gerr"></div>
-  <a class="foot" href="../hub/">◂ Back to hub</a>
-</form></div>
 
 <div id="app">
 <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · SIGINT · JAE</span><span class="clk" id="clk">—</span></div>
@@ -183,75 +164,48 @@ details li{margin:4px 0}
     <details><summary>▸ Data notes &amp; gaps</summary><ul id="notes"></ul></details>
   </section>
   <div class="foot" id="foot"></div>
-  <div class="foot"><a href="../hub/">HUB</a> · <a href="../">MW4 COMMAND HUD</a> · <a href="#" id="lock">LOCK</a></div>
+  <div class="foot"><a href="../hub/">HUB</a> · <a href="../">MW4 COMMAND HUD</a> · <a href="#" id="lock">SYNC</a></div>
 </div>
 <div class="sx-dock"><nav>
   <a href="../hub/"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
   <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
   <a class="on" href="./"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
-  <a class="lk" href="#" id="dlock"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>LOCK</a>
+  <a href="#" id="dsync"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>SYNC</a>
 </nav></div>
 </div>
 
 <script>
 (() => {
   'use strict';
-  // Same encryption + session key as the MW4 HUD (one auth code opens both; unlocking either keeps this tab unlocked).
-  const HASH = '0b488216b0f3fff7076b1a9af7ed5abb84e17176fde44fddba9138b0ab08fcc9';
-  const KEY = 'mw4hud.unlock', KKEY = 'mw4hud.k';
+  // Feed: GET /api/feed?f=social — a Vercel function behind Vercel Authentication decrypts the committed AES-GCM
+  // social/metrics.json server-side. No second code after Vercel sign-in; GitHub Pages has no /api, so it shows LINK DOWN.
   const STALE_MS = 36 * 3600 * 1000;
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const safeUrl = (u) => /^https:\/\/(www\.)?(tiktok\.com|instagram\.com|pinterest\.com|pin\.it)\//.test(u || '') ? u : '';
-  const te = new TextEncoder();
-  const b64 = { enc: (u) => btoa(String.fromCharCode(...new Uint8Array(u))), dec: (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0)) };
-  const sha256 = async (t) => [...new Uint8Array(await crypto.subtle.digest('SHA-256', te.encode(t)))].map((x) => x.toString(16).padStart(2, '0')).join('');
   const clk = () => { $('clk').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) + ' PT'; };
   clk(); setInterval(clk, 1000);
-  let aesKey = null, keyMeta = null;
-  async function deriveFrom(code, env) {
-    const km = await crypto.subtle.importKey('raw', te.encode(code), 'PBKDF2', false, ['deriveBits']);
-    const raw = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: b64.dec(env.salt), iterations: env.iter }, km, 256);
-    keyMeta = { salt: env.salt, iter: env.iter };
-    aesKey = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
-    try { sessionStorage.setItem(KKEY, JSON.stringify({ ...keyMeta, k: b64.enc(raw) })); } catch (_) { /* private mode */ }
-  }
-  async function restoreKey() {
-    try {
-      const s = JSON.parse(sessionStorage.getItem(KKEY) || 'null'); if (!s) return false;
-      aesKey = await crypto.subtle.importKey('raw', b64.dec(s.k), 'AES-GCM', false, ['decrypt']); keyMeta = { salt: s.salt, iter: s.iter }; return true;
-    } catch (_) { return false; }
-  }
-  async function fetchEnv() {
-    const r = await fetch('./metrics.json?t=' + Date.now(), { cache: 'no-store' });
+  async function feed() {
+    let r;
+    try { r = await fetch('/api/feed?f=social&t=' + Date.now(), { cache: 'no-store', credentials: 'same-origin', redirect: 'manual' }); }
+    catch (_) { throw new Error('OFFLINE'); }
+    if (r.type === 'opaqueredirect' || r.status === 401 || r.status === 403) throw new Error('VERCEL SESSION EXPIRED · RELOAD TO SIGN IN');
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
+    const d = await r.json();
+    if (!d || d.ct || d.error || !Array.isArray(d.channels)) throw new Error(d && d.error ? String(d.error).toUpperCase().slice(0, 40) : 'FEED NOT READABLE');
+    return d;
   }
-  async function openEnv(env) {
-    if (!aesKey) throw new Error('NO KEY');
-    if (keyMeta && (keyMeta.salt !== env.salt || keyMeta.iter !== env.iter)) throw new Error('KEY ROTATED');
-    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(env.iv) }, aesKey, b64.dec(env.ct));
-    return JSON.parse(new TextDecoder().decode(pt));
+  async function boot() {
+    $('asof').textContent = 'SYNCING…';
+    try { start(await feed()); }
+    catch (err) {
+      $('asof').textContent = 'LINK DOWN'; $('dot').classList.add('stale');
+      $('sub').innerHTML = `<div class="down">⚠ LINK DOWN · ${esc(err.message)}<br><br><a href="" onclick="location.reload();return false">RELOAD</a></div>`;
+    }
   }
-  function relock(msg) {
-    sessionStorage.removeItem(KEY); sessionStorage.removeItem(KKEY); aesKey = null;
-    $('app').style.display = 'none'; $('gate').style.display = ''; $('gerr').textContent = msg || '';
-  }
-  $('gf').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const code = $('pw').value; $('pw').value = '';
-    const h = await sha256(code);
-    if (h !== HASH) { $('gerr').textContent = '✕ ACCESS DENIED'; const g = $('gate'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); return; }
-    $('gerr').textContent = 'DECRYPTING…';
-    try { const env = await fetchEnv(); await deriveFrom(code, env); const d = await openEnv(env); sessionStorage.setItem(KEY, h); $('gerr').textContent = ''; start(d); }
-    catch (err) { $('gerr').textContent = '✕ DECRYPT FAILED · ' + String(err.message || err).toUpperCase().slice(0, 40); }
-  });
-  $('lock').addEventListener('click', (e) => { e.preventDefault(); relock(); });
-  $('dlock').addEventListener('click', (e) => { e.preventDefault(); relock(); });
-  if (sessionStorage.getItem(KEY) === HASH) restoreKey().then(async (ok) => {
-    if (!ok) return relock();
-    try { start(await openEnv(await fetchEnv())); } catch (err) { relock('RE-ENTER CODE'); }
-  });
+  $('lock').addEventListener('click', (e) => { e.preventDefault(); boot(); });
+  $('dsync').addEventListener('click', (e) => { e.preventDefault(); boot(); });
+  try { sessionStorage.removeItem('mw4hud.unlock'); sessionStorage.removeItem('mw4hud.k'); } catch (_) { /* old unlock state */ }
 
   // ---------- render ----------
   // post row: [ch, date, slot, hook, views, likes, comments, shares, saves, src(P|W|X), url]
@@ -266,7 +220,7 @@ details li{margin:4px 0}
   let D = null, ch = 'tt_kco', range = 'all', mode = 'calendar', sort = 'new', limit = 24, q = '';
 
   function start(d) {
-    D = d; $('gate').style.display = 'none'; $('app').style.display = 'block';
+    D = d;
     if (!D.channels.some((c) => c.key === ch)) ch = D.channels[0].key;
     const gen = D.generatedAt || '';
     $('asof').textContent = 'PULLED ' + gen;
@@ -426,6 +380,7 @@ details li{margin:4px 0}
   $('sort').onchange = (e) => { sort = e.target.value; render(); };
   $('q').oninput = (e) => { q = e.target.value; limit = 24; render(); };
   $('more').onclick = () => { limit += 48; render(); };
+  boot();
 })();
 </script>
 </body>

@@ -41,7 +41,7 @@
       ],
       not: 'Not a Kinsora store lane. Doesn’t pull squad cards; Price doesn’t dispatch it.',
       from: [lab('OWN SIGNALS'), lab('RISK LIMITS')],
-      to: [lab('KAL BOARD')],
+      to: [lab('TRADING BOARD')],
       map: 'Trading',
     },
     {
@@ -317,7 +317,12 @@
     return (end || []).map((e) => e.id).filter(Boolean);
   }
 
+  /* Feed key for the trading board stays KAL. Plates and chips say TRADING. */
+  function boardTag(code) {
+    return code === 'KAL' ? 'TRADING' : (code || '');
+  }
+
   return {
-    OPS, DES, FILES, BY_ID, missionText, slugOf, routeOrbat, crossings, interiorHits, flowPersonIds,
+    OPS, DES, FILES, BY_ID, missionText, slugOf, routeOrbat, crossings, interiorHits, flowPersonIds, boardTag,
   };
 });

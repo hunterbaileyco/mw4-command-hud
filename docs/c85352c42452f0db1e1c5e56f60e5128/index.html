@@ -421,7 +421,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · THEATER</span><span class="clk" id="clk">—</span></div>
 <div class="wrap">
   <div class="top">
-    <div><div class="kick"><span class="sx-rec"></span>TF141 · Operator theater · CMD + KAL</div><div class="brand">MW4 <span class="sl">//</span> COMMAND</div><div class="mastsub">AO DOING · <span class="h">HOLD = WAITING</span> · FOB QUEUE · DONE</div></div>
+    <div><div class="kick"><span class="sx-rec"></span>TF141 · Operator theater · CMD + TRADING</div><div class="brand">MW4 <span class="sl">//</span> COMMAND</div><div class="mastsub">AO DOING · <span class="h">HOLD = WAITING</span> · FOB QUEUE · DONE</div></div>
     <div class="asof"><span class="dot" id="dot"></span><span id="upd">—</span><button class="snd" id="snd" type="button" aria-label="Toggle sound" title="Sound">🔊</button></div>
   </div>
   <div class="chrome">
@@ -479,7 +479,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   <div class="ticker"><span class="tl">AAR</span><div class="vp"><div class="rail" id="rail"></div></div></div>
 
   <details class="log" id="log">
-    <summary>MISSION LOG<span class="r" id="logc">CMD + KAL</span></summary>
+    <summary>MISSION LOG<span class="r" id="logc">CMD + TRADING</span></summary>
     <div class="logb">
       <div class="seg" role="tablist">
         <button data-tab="doing" class="on">DOING<span class="c" id="tDo"></span></button>
@@ -493,7 +493,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   </div>
 
   <div class="ft">
-    <div class="boards"><a id="cmdLink" target="_blank" rel="noopener">CMD BOARD ↗</a><a id="kalLink" target="_blank" rel="noopener">KAL BOARD ↗</a></div>
+    <div class="boards"><a id="cmdLink" target="_blank" rel="noopener">CMD BOARD ↗</a><a id="kalLink" target="_blank" rel="noopener">TRADING BOARD ↗</a></div>
     <div><span id="stale"></span>AUTO-REFRESH · POLLS 20S · <span id="ref">—</span> · <a href="hub/">HUB</a> · <a href="ledger/">LEDGER</a> · <a href="orbat/">ORBAT</a> · <a href="files/">FILES</a> · <a href="social/">SOCIAL</a> · <a href="#" id="fsync">SYNC</a></div>
   </div>
 </div>
@@ -951,7 +951,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   function render(d) {
     const C = d.command || {}, K = d.kal || {};
     cards = [];
-    for (const [board, B, fb] of [['CMD', C, ''], ['KAL', K, 'Kal']]) {
+    for (const [board, B, fb] of [['CMD', C, ''], ['KAL', K, 'Ghost']]) {
       const L = B.lists || {};
       for (const k of Object.keys(LIST)) for (const c of L[k] || []) {
         const lane = laneOf(c, fb);
@@ -989,7 +989,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     if (playing || queue.length) stageDirty = true; else stageUpdate();
     $('tDo').textContent = finiteCards.length; $('tHold').textContent = nHold; $('tQ').textContent = nQ;
     $('tDone').textContent = by('done').length || nShip || '';
-    $('logc').textContent = `${nAct + nStand + nHold + nQ} OPEN · CMD + KAL`;
+    $('logc').textContent = `${nAct + nStand + nHold + nQ} OPEN · CMD + TRADING`;
     renderFeed();
     renderOrbat(); heat();
     maybeHash();
@@ -1133,7 +1133,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const tag = tone === 'stand' ? 'STND' : LIST[c.list].tag;
     const extra = standing && tone !== 'stand' ? chip('STND', 'stand') : '';
     return `<a class="card ${tone}${standing && tone !== 'stand' ? ' stand' : ''}" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener" title="${esc(c.name || '')}">
-      ${av}<div class="ch">${chip(tag, tone)}${extra}<span class="btag ${c.board === 'KAL' ? 'kal' : ''}">${c.board}</span><span class="ln">${esc(op || c.lane || '—')}</span><span class="go">↗</span></div>
+      ${av}<div class="ch">${chip(tag, tone)}${extra}<span class="btag ${c.board === 'KAL' ? 'kal' : ''}">${esc(window.MW4Roster.boardTag(c.board))}</span><span class="ln">${esc(op || c.lane || '—')}</span><span class="go">↗</span></div>
       <div class="ct">${esc(fullMission(c))}</div></a>`;
   };
 

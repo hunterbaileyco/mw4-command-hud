@@ -142,7 +142,8 @@ a{color:inherit}
       const ring = f.id === 'ju'
         ? '<span class="ring"><span class="ini">JK</span></span>'
         : `<span class="ring"><span class="face"><img src="../avatars/${esc(f.id)}.png" alt=""></span></span>`;
-      return `<a class="rt z-${z}" href="#${esc(f.id)}" data-id="${esc(f.id)}" aria-selected="${f.id === shown}">${ring}<span class="pl"><div class="cs">${esc(f.name.split(' ')[0].toUpperCase())}</div><div class="ds">${esc(f.des)}</div><div class="zn">${esc(z === 'cp' ? 'CMD' : z === 'off' ? 'OFF' : z.toUpperCase())}</div></span></a>`;
+      const zl = z === 'cp' ? 'CMD' : z === 'off' ? 'OFF' : z === 'kal' ? 'TRADING' : z.toUpperCase();
+      return `<a class="rt z-${z}" href="#${esc(f.id)}" data-id="${esc(f.id)}" aria-selected="${f.id === shown}">${ring}<span class="pl"><div class="cs">${esc(f.name.split(' ')[0].toUpperCase())}</div><div class="ds">${esc(f.des)}</div><div class="zn">${esc(zl)}</div></span></a>`;
     }).join('');
     const sel = document.querySelector('.rt[aria-selected="true"]');
     if (sel && sel.parentElement && window.matchMedia('(max-width:899px)').matches) {
@@ -168,7 +169,7 @@ a{color:inherit}
         <div>
           <div class="lbl">CALLSIGN</div>
           <div class="big">${esc(f.name.toUpperCase())}</div>
-          <div class="meta">${esc(f.des)} · ${esc(f.unit)} · BOARD ${esc(f.board)}</div>
+          <div class="meta">${esc(f.des)} · ${esc(f.unit)} · BOARD ${esc(R.boardTag(f.board))}</div>
           <div class="now"><i></i>${esc(nowLine(f))}</div>
           ${feedBlock(f)}
           <div class="stampbig">${esc(f.stamp)}</div>
@@ -186,7 +187,7 @@ a{color:inherit}
           <div class="fcol"><span class="fl">TO</span>${f.to.map(chip).join('')}</div>
         </div>
       </section>
-      <div class="dfoot">REF · BOARD ${esc(f.board)} · <a href="../orbat/">◂ ORBAT MAP</a> · <a href="../">◂ THEATER</a></div>`;
+      <div class="dfoot">REF · BOARD ${esc(R.boardTag(f.board))} · <a href="../orbat/">◂ ORBAT MAP</a> · <a href="../">◂ THEATER</a></div>`;
     renderRail();
     history.replaceState(null, '', '#' + f.id);
   }
@@ -209,7 +210,7 @@ a{color:inherit}
       const d = await r.json();
       if (!d || d.ct) return;
       const cards = [];
-      for (const [B, fb] of [[d.command, ''], [d.kal, 'Kal']]) {
+      for (const [B, fb] of [[d.command, ''], [d.kal, 'Ghost']]) {
         const L = (B && B.lists) || {};
         for (const k of ['doing', 'waiting', 'backlog', 'done']) for (const c of L[k] || []) cards.push({ ...c, list: k, lane: c.lane || fb });
       }

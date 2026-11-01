@@ -194,7 +194,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     <a href="../orbat/">ORBAT MAP <span>▸</span></a>
     <a href="../files/">OPERATOR FILES <span>▸</span></a>
     <a id="cmdLink" class="off" target="_blank" rel="noopener">CMD BOARD <span>↗</span></a>
-    <a id="kalLink" class="off" target="_blank" rel="noopener">KAL BOARD <span>↗</span></a>
+    <a id="kalLink" class="off" target="_blank" rel="noopener">TRADING BOARD <span>↗</span></a>
   </div>
 
   <div class="foot">Access via Vercel sign-in · feeds decrypted server-side · auto-sync 30s<br><a href="#" id="sync2" style="color:var(--tan);border-bottom:1px dotted var(--tan)">SYNC NOW</a></div>
@@ -279,12 +279,14 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     $('sitc').textContent = ev.length + ' CROSSINGS · ' + (d.alerts || []).length + ' ALERTS';
     paintWire(d);
   }
+  const slugOf = (op) => op === 'Ju Kwon' ? 'ju' : String(op || '').toLowerCase();
+  const iniOf = (op) => op === 'Ju Kwon' ? 'JK' : String(op || '').slice(0, 2).toUpperCase();
   function doingRows(d) {
-    const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
+    const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Ju Kwon', 'Dunn', 'Soap', 'Gaz', 'Kal'];
     const canon = (lane) => OPSH.find((o) => o.toLowerCase() === String(lane || '').toLowerCase()) || lane || 'TF141';
     const rows = [];
     for (const [board, B] of [['CMD', d.command], ['KAL', d.kal]]) {
-      for (const c of (((B || {}).lists || {}).doing) || []) rows.push({ ...c, board, lane: canon(c.lane || (board === 'KAL' ? 'Kal' : '')), list: 'doing' });
+      for (const c of (((B || {}).lists || {}).doing) || []) rows.push({ ...c, board, lane: canon(c.lane || (board === 'KAL' ? 'Ghost' : '')), list: 'doing' });
     }
     return rows;
   }
@@ -301,20 +303,20 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
       else standOps.push([op, cs]);
     }
     const btn = (op, cs, stn) => {
-      const ini = String(op).slice(0, 2).toUpperCase();
+      const ini = iniOf(op);
       const line = (stn ? cs.filter(stand) : cs.filter((c) => !stand(c)))[0] || cs[0];
-      return `<button type="button" class="wop${stn ? ' stn' : ''}" data-op="${esc(op)}"><img src="../avatars/${esc(op.toLowerCase())}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(line.short || line.name || '')}</i></span></button>`;
+      return `<button type="button" class="wop${stn ? ' stn' : ''}" data-op="${esc(op)}" data-file="${esc(slugOf(op))}"><img src="../avatars/${esc(slugOf(op))}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(line.short || line.name || '')}</i></span></button>`;
     };
     const host = $('wireRow');
     const parts = [];
     parts.push(finiteOps.length ? finiteOps.map(([op, cs]) => btn(op, cs, false)).join('') : '<div class="lockd">AO QUIET · NO FINITE MISSIONS</div>');
     if (standOps.length) parts.push('<div class="wlab stn">Standing · always on</div>' + standOps.map(([op, cs]) => btn(op, cs, true)).join(''));
     host.innerHTML = parts.join('');
-    host.querySelectorAll('.wop').forEach((b) => b.addEventListener('click', () => { location.href = '../files/#' + String(b.dataset.op || '').toLowerCase(); }));
+    host.querySelectorAll('.wop').forEach((b) => b.addEventListener('click', () => { location.href = '../files/#' + String(b.dataset.file || '').toLowerCase(); }));
   }
   function openAct(op, rows) {
     const mine = rows.filter((c) => String(c.lane || '') === op);
-    $('actp').innerHTML = window.MW4Action ? MW4Action.html({ op, avatar: '../avatars/' + op.toLowerCase() + '.png', cards: mine, des: MW4Action.designator(op) }) : '';
+    $('actp').innerHTML = window.MW4Action ? MW4Action.html({ op, avatar: '../avatars/' + (op === 'Ju Kwon' ? 'ju' : op.toLowerCase()) + '.png', cards: mine, des: MW4Action.designator(op) }) : '';
     $('act').classList.add('on');
   }
   $('act').addEventListener('click', (e) => { if (e.target.id === 'act' || e.target.closest('.x')) $('act').classList.remove('on'); });

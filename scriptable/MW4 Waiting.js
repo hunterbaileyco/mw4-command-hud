@@ -4,15 +4,15 @@
 /*
  * MW4 Waiting — Scriptable widget (small / medium / large). HOLD cage: "Waiting on Hunter" cards (Command, then Kal) under a hazard rail.
  *
- * INSTALL (2 minutes, once per phone)
- *  1. App Store → install "Scriptable" (free).
- *  2. Scriptable → tap + → paste this WHOLE file → tap the title → rename to "Waiting" (or "MW4 Waiting" — either works).
- *  3. Tap ▶ once. A prompt asks for the AUTH CODE (the same code you type on the HUD).
- *     It is checked, then saved in the iOS Keychain (Keychain.set "mw4hud.authcode"); the widget never asks again.
- *  4. Home Screen → long-press → + → Scriptable → pick a size → Add → long-press it → Edit Widget →
- *     Script: "Waiting" (whatever you named it). Tapping the widget opens the live HUD.
- *  If the widget shows "AUTH NEEDED": open Scriptable and run this script once (step 3).
- *  Changed code? Set RESET = true below, run once, enter the new code, set RESET back to false.
+ * PHONE: do not paste this file. Paste scriptable/MW4 Waiting Loader.js once, over the
+ * existing "Waiting" script, and keep the name "Waiting" so the Home Screen widget
+ * stays attached. The loader downloads this file from GitHub Raw on every run.
+ * Edit scriptable/src/*, run node tools/build-scriptable.mjs, merge to main.
+ * No re-paste. Run the loader once in the app if the widget says AUTH NEEDED.
+ *
+ * AUTH CODE is checked, then saved in the iOS Keychain (Keychain.set "mw4hud.authcode").
+ * New auth code? Set RESET = true below, rebuild, merge, run the loader once, enter the
+ * new code, set RESET back to false, rebuild, merge.
  *
  * HOW IT WORKS: status.json is encrypted (AES-256-GCM, key = PBKDF2-SHA256(auth code, salt, iter)).
  * Scriptable has no Web Crypto, so a small pure-JS PBKDF2 + AES-GCM (MW4C below) decrypts on the phone.

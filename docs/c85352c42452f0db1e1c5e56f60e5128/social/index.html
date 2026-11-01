@@ -176,8 +176,8 @@ details li{margin:4px 0}
 <div class="sx-dock"><nav>
   <a href="../hub/"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
   <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
-  <a class="on" href="./"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-5M10 20V10M14 20v-7M18 20V5"/></svg>SOCIAL</a>
-  <a href="#" id="dsync"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>SYNC</a>
+  <a href="../orbat/"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v3.5M12 11H6.5V16.5M12 11h5.5V16.5"/></svg>ORBAT</a>
+  <a href="../files/"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8 13h8M8 17h5"/></svg>FILES</a>
 </nav></div>
 </div>
 
@@ -211,7 +211,6 @@ details li{margin:4px 0}
     }
   }
   $('lock').addEventListener('click', (e) => { e.preventDefault(); boot(); });
-  $('dsync').addEventListener('click', (e) => { e.preventDefault(); boot(); });
   try { sessionStorage.removeItem('mw4hud.unlock'); sessionStorage.removeItem('mw4hud.k'); } catch (_) { /* old unlock state */ }
 
   // ---------- render ----------

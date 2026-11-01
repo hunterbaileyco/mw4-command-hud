@@ -217,6 +217,10 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 .chip{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;padding:2px 6px;border-radius:2px;line-height:1.2;white-space:nowrap}
 .chip.act{background:var(--amber);color:#0B0E0C}.chip.hold{background:var(--hold);color:var(--tan)}
 .chip.queue{background:var(--line);color:var(--tan)}.chip.done{background:var(--olive);color:#0B0E0C}
+.chip.stand{background:transparent;color:#9bb05a;border:1px solid rgba(155,176,90,.75)}
+.logh{display:flex;justify-content:space-between;align-items:baseline;margin:2px 0 6px;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--amber)}
+.logh.stand{color:#9bb05a;margin-top:12px;padding-top:8px;border-top:1px solid rgba(155,176,90,.35)}
+.logh span{color:var(--dim);font-weight:500}
 .btag{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);padding:1px 4px;border-radius:2px}
 .btag.kal{color:var(--tan);border-color:#4a4330}
 .card{display:flex;flex-direction:column;gap:4px;padding:9px 0;border-bottom:1px solid var(--line)}
@@ -345,6 +349,24 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 .chrome .n{grid-area:n;font-size:22px;line-height:.85;justify-self:end}
 .chrome .bar{grid-area:b;margin-top:5px;height:3px}
 .chrome .act{box-shadow:inset 0 2px 0 var(--amber)}
+.chrome .act .sub.onstn{color:#9bb05a}
+.ti .k.stn{color:#9bb05a}
+.flash.stn{background:#6B7C3A;color:#0B0E0C}
+.standbay{position:relative;margin:0 10px 8px;padding:8px 8px 10px;border:1px solid rgba(155,176,90,.42);border-radius:3px;background:rgba(107,124,58,.08);z-index:2}
+.standbay[hidden]{display:none}
+.standbay .zt,.standbay #stc{color:#9bb05a}
+@media(max-width:899px){.standbay .zw{display:none}}
+.standbay .sec{background:#9bb05a;color:#0B0E0C}
+.tok.s-stand{width:118px;padding:6px 5px;border-radius:4px;background:linear-gradient(180deg,rgba(107,124,58,.18),rgba(11,14,12,.84));border:1px solid rgba(155,176,90,.45)}
+.tok.s-stand .ring{width:52px;height:52px;background:conic-gradient(#9bb05a,#3d4a22,#9bb05a)}
+.tok.s-stand .cs{color:#9bb05a}
+.tok.s-stand .badge{background:#9bb05a;color:#0B0E0C}
+.tok.s-stand .plate{display:block;color:var(--ink);background:rgba(11,14,12,.85);border:1px solid rgba(155,176,90,.4);border-left:2px solid #9bb05a;border-radius:2px;padding:3px 5px;text-align:left;font-size:10.5px}
+.tok.s-stand .plate .mk{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:#9bb05a;display:block}
+.tok.s-stand .plate .ln{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tok.s-ao .plate .mk .stn{color:#9bb05a;margin-left:6px;font-weight:800}
+.orow.z-stand{border-left-color:#9bb05a}
+.orow.z-stand .nm{color:#9bb05a}
 .chrome .hld{box-shadow:inset 0 2px 0 var(--holdink)}
 .chrome .q{box-shadow:inset 0 2px 0 var(--tan)}
 .chrome .shp{box-shadow:inset 0 2px 0 var(--olive2)}
@@ -371,6 +393,7 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 .card .av{grid-row:1 / span 2;width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(197,165,114,.45);background:var(--idle)}
 span.av.ini{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:800;color:var(--tan);width:32px;height:32px;border-radius:50%;border:1px solid var(--line2);background:var(--idle)}
 .card.act{border-left-color:var(--amber)}
+.card.stand{border-left-color:#9bb05a}
 .card.hold{border-left-color:var(--holdink)}
 .card.queue{border-left-color:var(--coyote)}
 .card.done{border-left-color:var(--olive)}
@@ -381,6 +404,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 @media(min-width:900px){
   .top .brand{font-size:26px}
   .tok.s-ao{width:156px}
+  .tok.s-stand{width:148px}
   .chrome .n{font-size:28px}
   .chrome .sub{font-size:8px}
   .mastsub{font-size:9px}
@@ -397,7 +421,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     <div class="asof"><span class="dot" id="dot"></span><span id="upd">—</span><button class="snd" id="snd" type="button" aria-label="Toggle sound" title="Sound">🔊</button></div>
   </div>
   <div class="chrome">
-    <div class="act"><span class="l">DOING</span><span class="sub">ACT · WIRE</span><span class="n" id="nAct">0</span><i class="bar"><b id="bAct"></b></i></div>
+    <div class="act"><span class="l">DOING</span><span class="sub" id="subAct">ACT · WIRE</span><span class="n" id="nAct">0</span><i class="bar"><b id="bAct"></b></i></div>
     <div class="hld"><span class="l">WAITING</span><span class="sub">HOLD · HUNTER</span><span class="n" id="nHold">0</span><i class="bar"><b id="bHold"></b></i></div>
     <div class="q"><span class="l">QUEUE</span><span class="sub">FOB · READY</span><span class="n" id="nQ">0</span><i class="bar"><b id="bQ"></b></i></div>
     <div class="shp"><span class="l">DONE</span><span class="sub">SHIPPED · TODAY</span><span class="n" id="nShip">0</span><i class="bar"><b id="bShip"></b></i></div>
@@ -415,6 +439,10 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       <div class="cmp"></div>
       <div class="quiet" id="quiet">AO QUIET · NO OPERATORS DEPLOYED</div>
       <div class="zone" id="zAO"></div>
+    </div>
+    <div class="standbay" id="standbay" hidden>
+      <div class="zhead"><b><span class="sec">STN</span><span class="zt">STANDING</span><span class="zw">Always on · not a finite mission</span></b><span id="stc">0 ON STATION</span></div>
+      <div class="zone" id="zSTAND"></div>
     </div>
     <div class="wire" id="wire">
       <span class="side up">▲ ACROSS · FIELD</span><span class="side dn">▼ THIS SIDE · BASE</span><span class="side hx up" id="heat" title="Wire heat: crossings in the last hour">HEAT <i></i><i></i><i></i></span>
@@ -486,7 +514,8 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   const OPS = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
   const LIST = { doing: { tag: 'ACT', tone: 'act', rank: 0 }, waiting: { tag: 'HOLD', tone: 'hold', rank: 1 }, backlog: { tag: 'QUEUE', tone: 'queue', rank: 2 }, done: { tag: 'DONE', tone: 'done', rank: 3 } };
   const DES = Object.fromEntries(OPS.map((o, i) => [o, o === 'Price' ? 'BRAVO-6' : '141-' + String(i).padStart(2, '0')]));
-  const ZLABEL = { ao: 'DEPLOYED · ACROSS THE WIRE', hold: 'HOLD · AWAITING HUNTER', ready: 'FOB · QUEUED', idle: 'FOB · STANDING BY', cp: 'FOB · COMMAND POST' };
+  const ZLABEL = { ao: 'DEPLOYED · ACROSS THE WIRE', hold: 'HOLD · AWAITING HUNTER', ready: 'FOB · QUEUED', idle: 'FOB · STANDING BY', cp: 'FOB · COMMAND POST', stand: 'STANDING · ALWAYS ON' };
+  const isStanding = (c) => !!(window.MW4Action && MW4Action.isStanding(c));
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const safeUrl = (u) => /^https:\/\/trello\.com\//.test(u || '') ? u : '#';
@@ -607,12 +636,18 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       const mine = cards.filter((c) => c.lane === op);
       const g = (k) => mine.filter((c) => c.list === k);
       const doing = g('doing'), waiting = g('waiting'), backlog = g('backlog'), done = g('done');
-      let zone = doing.length ? 'ao' : op === 'Price' ? 'cp' : waiting.length ? 'hold' : backlog.length ? 'ready' : 'idle';
-      out[op] = { op, zone, doing, waiting, backlog, done };
+      const finite = doing.filter((c) => !isStanding(c));
+      const standing = doing.filter(isStanding);
+      let zone = finite.length ? 'ao' : op === 'Price' ? 'cp' : waiting.length ? 'hold' : standing.length ? 'stand' : backlog.length ? 'ready' : 'idle';
+      out[op] = { op, zone, doing, finite, standing, waiting, backlog, done };
     }
     if (drill && out[drill.op]) {
       const m = out[drill.op];
-      if (drill.phase === 'out') { m.zone = 'ao'; m.doing = [{ short: 'TRAINING DRILL · kill-house run', drill: true }, ...m.doing]; }
+      if (drill.phase === 'out') {
+        m.zone = 'ao';
+        m.doing = [{ short: 'TRAINING DRILL · kill-house run', drill: true }, ...m.doing];
+        m.finite = m.doing.filter((c) => !isStanding(c));
+      }
     }
     return out;
   }
@@ -645,13 +680,22 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const badge = el.querySelector('.badge'), hb = el.querySelector('.hb'), plate = el.querySelector('.plate'), rtb = el.querySelector('.rtbtag');
     let b = '', h = '', p = '';
     if (m.zone === 'ao') {
-      if (m.doing.length > 1) b = '×' + m.doing.length;
+      const finite = m.finite || m.doing.filter((c) => !isStanding(c));
+      const standing = m.standing || m.doing.filter(isStanding);
+      if (finite.length > 1) b = '×' + finite.length;
       if (m.waiting.length) h = 'H' + m.waiting.length;
-      const lines = m.doing.slice(0, 2).map((c) => `<span class="ln" title="${esc(c.name || c.short)}">${esc(c.short)}</span>`);
-      if (m.doing.length > 2) lines.push(`<span class="ln">+${m.doing.length - 2} more</span>`);
-      const dep = feedEvents.filter((e) => e.op === m.op && e.kind === 'deploy').map((e) => Date.parse(e.t)).sort((a, c) => c - a)[0];
-      const tp = dep && !(m.doing[0] && m.doing[0].drill) ? `<span class="tp">T+${agoShort(Date.now() - dep)}</span>` : '';
-      p = `<span class="mk">${m.doing[0] && m.doing[0].drill ? 'SIM · ' : ''}MISSION${tp}</span>` + lines.join('');
+      const lines = finite.slice(0, 2).map((c) => `<span class="ln" title="${esc(c.name || c.short)}">${esc(c.short)}</span>`);
+      if (finite.length > 2) lines.push(`<span class="ln">+${finite.length - 2} more</span>`);
+      const dep = feedEvents.filter((e) => e.op === m.op && e.kind === 'deploy' && !standingEvent(e)).map((e) => Date.parse(e.t)).sort((a, c) => c - a)[0];
+      const tp = dep && !(finite[0] && finite[0].drill) ? `<span class="tp">T+${agoShort(Date.now() - dep)}</span>` : '';
+      const stn = standing.length ? `<span class="stn">· ${standing.length} STN</span>` : '';
+      p = `<span class="mk">${finite[0] && finite[0].drill ? 'SIM · ' : ''}MISSION${tp}${stn}</span>` + lines.join('');
+    } else if (m.zone === 'stand') {
+      const standing = m.standing || m.doing.filter(isStanding);
+      if (standing.length > 1) b = '×' + standing.length;
+      const lines = standing.slice(0, 2).map((c) => `<span class="ln" title="${esc(c.name || c.short)}">${esc(c.short)}</span>`);
+      if (standing.length > 2) lines.push(`<span class="ln">+${standing.length - 2} more</span>`);
+      p = '<span class="mk">ALWAYS ON</span>' + lines.join('');
     } else if (m.zone === 'hold') {
       b = 'HOLD' + (m.waiting.length > 1 ? ' ×' + m.waiting.length : '');
       p = esc(m.waiting[0] ? m.waiting[0].short : 'Awaiting Hunter');
@@ -676,14 +720,14 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   }
   function edge(kind) { const e = $('edge'); e.className = ''; void e.offsetWidth; e.className = kind; }
 
-  const ZEL = { ao: 'zAO', hold: 'zHOLD', ready: 'zREADY', idle: 'zREADY', cp: 'zCP' };
+  const ZEL = { ao: 'zAO', hold: 'zHOLD', ready: 'zREADY', idle: 'zREADY', cp: 'zCP', stand: 'zSTAND' };
   const SIDE = (z) => (z === 'ao' ? 'field' : 'base');
 
   // returns 'out' | 'back' | '' (direction of any wire crossing)
   function renderStage(M, animate, snap = []) {
     const first = {};
     if (animate) for (const op of OPS) if (toks[op] && toks[op].isConnected && !snap.includes(op)) first[op] = toks[op].getBoundingClientRect();
-    const order = { zAO: [], zHOLD: [], zREADY: [], zCP: [] };
+    const order = { zAO: [], zHOLD: [], zREADY: [], zCP: [], zSTAND: [] };
     for (const op of OPS) order[ZEL[M[op].zone]].push(op);
     order.zHOLD.sort((a, b) => M[b].waiting.length - M[a].waiting.length);
     order.zREADY.sort((a, b) => (M[a].zone === 'idle') - (M[b].zone === 'idle'));
@@ -695,9 +739,10 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
         z.appendChild(toks[op]);
       }
     }
-    const nAO = order.zAO.length, nH = order.zHOLD.length;
+    const nAO = order.zAO.length, nH = order.zHOLD.length, nS = order.zSTAND.length;
     $('aoc').textContent = nAO + ' DEPLOYED'; $('quiet').style.display = nAO ? 'none' : '';
     $('hdc').textContent = nH + ' STALLED'; $('holdbox').classList.toggle('empty', !nH);
+    $('standbay').hidden = !nS; $('stc').textContent = nS + ' ON STATION';
     const nReady = order.zREADY.filter((op) => M[op].zone === 'ready').length;
     const nIdle = order.zREADY.length - nReady;
     $('fobc').textContent = nReady + ' QUEUED · ' + nIdle + ' STANDBY';
@@ -733,7 +778,9 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       const lastDone = M[op].done.filter((c) => c.doneAt).sort((a, c) => c.doneAt.localeCompare(a.doneAt))[0];
       if (pz === 'ao' && nz === 'hold') { ev = { k: 'hld', tag: 'STALLED', txt: M[op].waiting[0]?.short || 'awaiting Hunter' }; flashTok(el, 'hld', 'HOLD'); blip('hold'); edge('hld'); }
       else if (pz === 'ao') { ev = { k: 'rtb', tag: 'RTB', txt: drill && drill.op === op ? 'Drill complete (sim)' : lastDone?.short || 'mission closed' }; flashTok(el, 'rtb', 'RTB ✓'); blip('rtb'); edge('rtb'); }
-      else if (nz === 'ao') { ev = { k: 'dep', tag: 'DEPLOY', txt: M[op].doing[0]?.short || '' }; flashTok(el, 'dep', '▲ DEPLOY'); blip('deploy'); edge('dep'); }
+      else if (nz === 'ao') { ev = { k: 'dep', tag: 'DEPLOY', txt: (M[op].finite || M[op].doing)[0]?.short || '' }; flashTok(el, 'dep', '▲ DEPLOY'); blip('deploy'); edge('dep'); }
+      else if (nz === 'stand') { ev = { k: 'stn', tag: 'STN', txt: (M[op].standing || [])[0]?.short || '' }; flashTok(el, 'stn', 'ON STATION'); }
+      else if (pz === 'stand') { ev = { k: 'stn', tag: 'STN OFF', txt: 'left station' }; flashTok(el, 'stn', 'STN OFF'); }
       else if (pz === 'hold') { ev = { k: 'rtb', tag: 'CLEARED', txt: 'released from hold' }; flashTok(el, 'clr', 'CLEARED'); blip('cleared'); }
       else if (nz === 'hold') { ev = { k: 'hld', tag: 'HOLD', txt: M[op].waiting[0]?.short || '' }; flashTok(el, 'hld', 'HOLD'); blip('hold'); }
       if (ev) events.unshift({ ...ev, op, at: Date.now(), isNew: true });
@@ -743,8 +790,18 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 
   // ---------- server event replay (Gap 3) ----------
   const baseZone = (op, M) => (op === 'Price' ? 'cp' : M[op].backlog.length ? 'ready' : 'idle');
+  function standingEvent(e) {
+    const card = cards.find((c) => c.id && e.card && c.id === e.card);
+    if (card) return isStanding(card);
+    return isStanding({ name: e.mission, short: e.mission });
+  }
   function legs(e, M) {
     const cur = M[e.op].zone;
+    if (standingEvent(e) && (e.kind === 'deploy' || e.kind === 'rtb')) {
+      if (cur === 'ao' || (M[e.op].finite || []).length) return [cur, cur];
+      if (e.kind === 'deploy') return [cur === 'stand' ? baseZone(e.op, M) : cur, 'stand'];
+      return ['stand', cur === 'stand' ? baseZone(e.op, M) : cur];
+    }
     if (e.kind === 'deploy') return [cur !== 'ao' ? cur : baseZone(e.op, M), 'ao'];
     if (e.kind === 'rtb') return ['ao', cur !== 'ao' ? cur : baseZone(e.op, M)];
     if (e.kind === 'hold') return [e.from === 'doing' ? 'ao' : cur !== 'hold' ? cur : baseZone(e.op, M), 'hold'];
@@ -763,9 +820,12 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       ov[e.op] = { zone: to, mission: e.mission };
       renderStage(withOv(model()), true);           // fly across the wire
       const el = toks[e.op];
-      const F = { deploy: ['dep', '▲ DEPLOY'], rtb: ['rtb', 'RTB ✓'], hold: ['hld', 'HOLD'], cleared: ['clr', 'CLEARED'] }[e.kind];
+      const standEv = standingEvent(e) && (e.kind === 'deploy' || e.kind === 'rtb');
+      const F = standEv
+        ? ['stn', e.kind === 'deploy' ? 'ON STATION' : 'STN OFF']
+        : { deploy: ['dep', '▲ DEPLOY'], rtb: ['rtb', 'RTB ✓'], hold: ['hld', 'HOLD'], cleared: ['clr', 'CLEARED'] }[e.kind];
       if (el && F) flashTok(el, F[0], F[1]);
-      blip(e.kind); edge({ deploy: 'dep', rtb: 'rtb', hold: 'hld' }[e.kind] || '');
+      if (!standEv) { blip(e.kind); edge({ deploy: 'dep', rtb: 'rtb', hold: 'hld' }[e.kind] || ''); }
       e.isNew = true; markSeen(e.t); renderTicker();
       setTimeout(() => { playing = false; playQueue(); }, STEP_MS);
     }, 120);
@@ -778,7 +838,8 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const rtbSeen = new Set();
     const fe = feedEvents.filter((e) => Date.now() - Date.parse(e.t) < 3 * 3600 * 1000 && e.t <= lastEventSeen).slice().reverse();
     for (const e of fe) {
-      const [k, tag] = EK[e.kind] || ['rtb', String(e.kind).toUpperCase()];
+      const standEv = standingEvent(e) && (e.kind === 'deploy' || e.kind === 'rtb');
+      const [k, tag] = standEv ? ['stn', 'STN'] : (EK[e.kind] || ['rtb', String(e.kind).toUpperCase()]);
       if (e.kind === 'rtb') rtbSeen.add(e.mission);
       items.push(`<span class="ti${e.isNew ? ' new' : ''}"><span class="k ${k}">${tag} · ${esc(String(e.op).toUpperCase())}</span>${esc(e.mission || '')}<span class="w">${agoShort(Date.now() - Date.parse(e.t))}</span></span>`);
     }
@@ -812,9 +873,13 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     }
     const by = (k) => cards.filter((c) => c.list === k);
     const cc = C.counts || {}, kc = K.counts || {};
-    const nAct = by('doing').length, nHold = by('waiting').length, nQ = by('backlog').length;
+    const nAct = by('doing').filter((c) => !isStanding(c)).length;
+    const nStand = by('doing').filter(isStanding).length;
+    const nHold = by('waiting').length, nQ = by('backlog').length;
     const nShip = (cc.doneToday || 0) + (kc.doneToday || 0);
     $('nAct').textContent = nAct; $('nHold').textContent = nHold; $('nQ').textContent = nQ; $('nShip').textContent = nShip;
+    $('subAct').textContent = nStand ? nStand + ' STANDING' : 'ACT · WIRE';
+    $('subAct').classList.toggle('onstn', nStand > 0);
     const tot = Math.max(1, nAct + nHold + nQ + nShip);
     [['bAct', nAct], ['bHold', nHold], ['bQ', nQ], ['bShip', nShip]].forEach(([id, v]) => { $(id).style.width = Math.round((v / tot) * 100) + '%'; });
     $('cmdLink').href = safeUrl(C.boardUrl); $('kalLink').href = safeUrl(K.boardUrl);
@@ -828,7 +893,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     if (playing || queue.length) stageDirty = true; else stageUpdate();
     $('tDo').textContent = nAct; $('tHold').textContent = nHold; $('tQ').textContent = nQ;
     $('tDone').textContent = by('done').length || nShip || '';
-    $('logc').textContent = `${nAct + nHold + nQ} OPEN · CMD + KAL`;
+    $('logc').textContent = `${nAct + nStand + nHold + nQ} OPEN · CMD + KAL`;
     renderFeed();
     renderOrbat(); heat();
     maybeHash();
@@ -908,22 +973,26 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 
 
   // ---------- ORBAT roster + wire heat ----------
-  const ZN = { ao: 'DEPLOYED · AO', hold: 'HOLD CAGE', ready: 'FOB · QUEUED', idle: 'STANDING BY', cp: 'CMD POST' };
+  const ZN = { ao: 'DEPLOYED · AO', hold: 'HOLD CAGE', ready: 'FOB · QUEUED', idle: 'STANDING BY', cp: 'CMD POST', stand: 'STANDING · ON STATION' };
   function renderOrbat() {
-    const M = model(), rank = { ao: 0, hold: 1, cp: 2, ready: 3, idle: 4 };
+    const M = model();
+    const rank = { ao: 0, hold: 1, stand: 2, cp: 3, ready: 4, idle: 5 };
     const list = [...OPS].sort((a, b) => rank[M[a].zone] - rank[M[b].zone] || OPS.indexOf(a) - OPS.indexOf(b));
     const nOut = list.filter((o) => M[o].zone === 'ao').length;
-    $('orbc').textContent = `${OPS.length} OPS · ${nOut} OUT`;
+    const nStn = list.filter((o) => (M[o].standing || []).length).length;
+    $('orbc').textContent = `${OPS.length} OPS · ${nOut} OUT` + (nStn ? ` · ${nStn} STN` : '');
     $('orb').innerHTML = list.map((op) => {
       const m = M[op], ini = op.slice(0, 2).toUpperCase();
-      const ct = [m.doing.length ? `<b style="color:var(--amber)">A${m.doing.length}</b>` : '', m.waiting.length ? `<b style="color:var(--holdink)">H${m.waiting.length}</b>` : '', m.backlog.length ? `Q${m.backlog.length}` : ''].filter(Boolean).join(' ');
-      const sub = m.zone === 'ao' ? (m.doing[0]?.short || '') : m.zone === 'hold' ? (m.waiting[0]?.short || '') : ZN[m.zone];
+      const finite = m.finite || m.doing.filter((c) => !isStanding(c));
+      const standing = m.standing || m.doing.filter(isStanding);
+      const ct = [finite.length ? `<b style="color:var(--amber)">A${finite.length}</b>` : '', standing.length ? `<b style="color:#9bb05a">S${standing.length}</b>` : '', m.waiting.length ? `<b style="color:var(--holdink)">H${m.waiting.length}</b>` : '', m.backlog.length ? `Q${m.backlog.length}` : ''].filter(Boolean).join(' ');
+      const sub = m.zone === 'ao' ? (finite[0]?.short || '') : m.zone === 'stand' ? (standing[0]?.short || 'Always on') : m.zone === 'hold' ? (m.waiting[0]?.short || '') : ZN[m.zone];
       return `<button class="orow z-${m.zone}" type="button" data-op="${esc(op)}"><img src="avatars/${op.toLowerCase()}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op)} <i>${esc(DES[op] || '')}</i></div><div class="zn">${esc(sub)}</div></span><span class="ct">${ct}</span></button>`;
     }).join('');
     $('orb').querySelectorAll('.orow').forEach((b) => b.addEventListener('click', () => openSheet(b.dataset.op)));
   }
   function heat() {
-    const n = feedEvents.filter((e) => (e.kind === 'deploy' || e.kind === 'rtb') && Date.now() - Date.parse(e.t) < 3600 * 1000).length;
+    const n = feedEvents.filter((e) => (e.kind === 'deploy' || e.kind === 'rtb') && !standingEvent(e) && Date.now() - Date.parse(e.t) < 3600 * 1000).length;
     const h = n === 0 ? 0 : n <= 2 ? 1 : n <= 5 ? 2 : 3, w = $('wire');
     w.classList.remove('h0', 'h1', 'h2', 'h3'); w.classList.add('h' + h);
     $('heat').title = `Wire heat: ${n} crossing${n === 1 ? '' : 's'} in the last hour`;
@@ -943,8 +1012,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 
   function openSheet(op) {
     const mine = cards.filter((c) => c.lane === op).sort((a, b) => LIST[a.list].rank - LIST[b.list].rank);
-    const live = lastData ? model()[op] : null;
-    const doing = live && live.zone === 'ao' ? live.doing : [];
+    const doing = mine.filter((c) => c.list === 'doing');
     if (doing.length && window.MW4Action) {
       $('sheetp').innerHTML = MW4Action.html({
         op, des: DES[op], avatar: `avatars/${op.toLowerCase()}.png`,
@@ -965,19 +1033,37 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const av = op
       ? `<img class="av" data-open="${esc(op)}" src="avatars/${op.toLowerCase()}.png" alt="${esc(op)}" onerror="this.outerHTML='<span class=&quot;av ini&quot; data-open=&quot;${esc(op)}&quot;>${ini}</span>'">`
       : `<span class="av ini">${esc(ini)}</span>`;
-    return `<a class="card ${LIST[c.list].tone}" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener" title="${esc(c.name || '')}">
-      ${av}<div class="ch">${chip(LIST[c.list].tag, LIST[c.list].tone)}<span class="btag ${c.board === 'KAL' ? 'kal' : ''}">${c.board}</span><span class="ln">${esc(op || c.lane || '—')}</span><span class="go">↗</span></div>
+    const standing = isStanding(c);
+    const tone = c.list === 'doing' && standing ? 'stand' : LIST[c.list].tone;
+    const tag = tone === 'stand' ? 'STND' : LIST[c.list].tag;
+    const extra = standing && tone !== 'stand' ? chip('STND', 'stand') : '';
+    return `<a class="card ${tone}${standing && tone !== 'stand' ? ' stand' : ''}" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener" title="${esc(c.name || '')}">
+      ${av}<div class="ch">${chip(tag, tone)}${extra}<span class="btag ${c.board === 'KAL' ? 'kal' : ''}">${c.board}</span><span class="ln">${esc(op || c.lane || '—')}</span><span class="go">↗</span></div>
       <div class="ct">${esc(c.short)}</div></a>`;
   };
 
   function renderFeed() {
+    const head = (label, n, stand) => `<div class="logh${stand ? ' stand' : ''}">${label}<span>${n}</span></div>`;
+    if (tab === 'doing') {
+      const finite = cards.filter((c) => c.list === 'doing' && !isStanding(c)).sort((a, b) => a.lane.localeCompare(b.lane));
+      const standing = cards.filter((c) => c.list === 'doing' && isStanding(c)).sort((a, b) => a.lane.localeCompare(b.lane));
+      const parts = [];
+      parts.push(head('Doing · finite', finite.length, false));
+      parts.push(finite.length ? finite.map(cardHtml).join('') : '<div class="empty">No finite missions across the wire</div>');
+      if (standing.length) {
+        parts.push(head('Standing · always on', standing.length, true));
+        parts.push(standing.map(cardHtml).join(''));
+      }
+      $('feed').innerHTML = parts.join('');
+      return;
+    }
     let list;
     if (tab === 'hold') list = cards.filter((c) => c.list === 'waiting');
     else if (tab === 'done') list = cards.filter((c) => c.list === 'done');
     else if (tab === 'queue') list = cards.filter((c) => c.list === 'backlog');
-    else list = cards.filter((c) => c.list === 'doing');
+    else list = [];
     if (tab !== 'done') list = [...list].sort((a, b) => a.lane.localeCompare(b.lane));
-    const empty = { doing: 'No one across the wire', hold: 'Nothing on Hunter · all clear', queue: 'FOB queue empty', done: 'No recent ships on feed yet' };
+    const empty = { hold: 'Nothing on Hunter · all clear', queue: 'FOB queue empty', done: 'No recent ships on feed yet' };
     $('feed').innerHTML = list.length ? list.map(cardHtml).join('')
       : `<div class="empty">${empty[tab] || 'No missions'}</div>`;
   }

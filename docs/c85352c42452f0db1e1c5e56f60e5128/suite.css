@@ -41,88 +41,35 @@ body.sx-pad .wrap{padding-bottom:calc(env(safe-area-inset-bottom) + var(--dockh)
 .sx-gate-art svg{width:54px;height:54px}
 .sx-gate-art svg *{fill:none;stroke:var(--tan);stroke-width:1.4}
 .sx-gate-art svg .a{stroke:var(--amber)}
-.mw4-mark{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;line-height:0;vertical-align:-2px}
-.mw4-mark svg{width:100%;height:100%;display:block;overflow:visible}
+.mw4-mark{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;line-height:0;vertical-align:middle;
+  border-radius:4px;background:linear-gradient(180deg,#F0E2C4 0%,#C5A572 100%);
+  box-shadow:inset 0 0 0 1px rgba(74,56,24,.55)}
+.mw4-mark svg{width:100%;height:100%;display:block;overflow:hidden}
 @media (prefers-reduced-motion:reduce){.sx-rec{animation:none}}
 
-/* In-action theater — operator Doing panel (HUD + hub) */
-.actx{display:flex;flex-direction:column;gap:10px}
-.actx-top{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--dim)}
-.actx-top .sec{font-size:8px;font-weight:800;letter-spacing:.14em;color:#0B0E0C;background:var(--amber);padding:1px 4px;border-radius:1px}
-.actx-top .mot{color:var(--amber);font-weight:800}
-.actx-top .x{margin-left:auto}
-.actx-stage{position:relative;height:178px;border:1px solid rgba(232,163,23,.45);border-radius:4px;overflow:hidden;background:
-  linear-gradient(rgba(107,124,58,.14) 1px,transparent 1px) 0 0/16px 16px,
-  linear-gradient(90deg,rgba(107,124,58,.14) 1px,transparent 1px) 0 0/16px 16px,
-  radial-gradient(ellipse at 30% 80%,rgba(232,163,23,.16),transparent 50%),
-  radial-gradient(ellipse at 80% 30%,rgba(224,122,95,.12),transparent 46%),#0c100d;
-  box-shadow:inset 0 0 0 1px rgba(197,165,114,.12),0 0 24px rgba(232,163,23,.12)}
-.actx-stage::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 1px,transparent 1px 3px)}
-.actx-fig{position:absolute;left:14px;bottom:18px;z-index:2;width:64px;animation:actbob 2.6s ease-in-out infinite}
-.actx-fig img,.actx-fig .ini{width:52px;height:52px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#1A1E1A;color:var(--tan);font-family:var(--mono);font-size:12px;box-shadow:0 0 0 2px var(--amber),0 0 16px rgba(232,163,23,.55)}
-.actx-fig .arm{position:absolute;left:40px;top:28px;width:34px;height:3px;background:var(--tan);transform-origin:left center;animation:actarm 1.3s ease-in-out infinite}
-.actx-fig .rig{position:absolute;left:68px;top:18px;width:16px;height:12px;border:1.5px solid var(--amber);border-radius:1px;box-shadow:0 0 8px rgba(232,163,23,.7)}
-.actx-prop{position:absolute;left:108px;right:12px;top:14px;bottom:14px;z-index:2}
-.actx-prop .slate{position:absolute;left:0;right:0;bottom:0;font-family:var(--mono);font-size:9px;letter-spacing:.04em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:rgba(11,14,12,.78);border:1px solid rgba(232,163,23,.35);padding:3px 6px}
-.actx-prop.shoot .vf{position:absolute;left:8px;top:0;width:72%;height:62%;border:1px solid rgba(232,163,23,.7);border-radius:2px;box-shadow:inset 0 0 0 8px rgba(232,163,23,.06)}
-.actx-prop.shoot .vf::before,.actx-prop.shoot .vf::after{content:"";position:absolute;background:var(--amber)}
-.actx-prop.shoot .vf::before{left:50%;top:-4px;bottom:-4px;width:1px}
-.actx-prop.shoot .vf::after{top:50%;left:-4px;right:-4px;height:1px}
-.actx-prop.shoot .rec{position:absolute;right:4px;top:2px;font-style:normal;font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.14em;color:#0B0E0C;background:var(--holdink);padding:1px 4px;animation:actrec 1s steps(2) infinite}
-.actx-prop.shoot b{position:absolute;top:8px;width:18px;height:28px;border:1px solid var(--tan);background:rgba(232,163,23,.15);animation:actframe 2.4s linear infinite}
-.actx-prop.shoot b:nth-of-type(1){left:14px;animation-delay:0s}
-.actx-prop.shoot b:nth-of-type(2){left:36px;animation-delay:.4s}
-.actx-prop.shoot b:nth-of-type(3){left:58px;animation-delay:.8s}
-.actx-prop.flow i{position:absolute;top:18px;width:14px;height:14px;border-radius:50%;border:2px solid var(--amber);background:rgba(232,163,23,.15)}
-.actx-prop.flow i:nth-child(1){left:6px;animation:actnode 1.8s ease-in-out infinite}
-.actx-prop.flow i:nth-child(2){left:46px;animation:actnode 1.8s ease-in-out infinite .35s}
-.actx-prop.flow i:nth-child(3){left:86px;animation:actnode 1.8s ease-in-out infinite .7s}
-.actx-prop.flow .bolt{position:absolute;top:24px;left:8px;height:2px;width:20px;background:var(--amber);box-shadow:0 0 8px var(--amber);animation:actbolt 1.8s linear infinite}
-.actx-prop.write span{display:block;height:6px;margin:6px 8px 0;background:rgba(197,165,114,.28);border-radius:1px;transform-origin:left;animation:acttype 2.2s ease-in-out infinite}
-.actx-prop.write span:nth-child(2){width:78%;animation-delay:.25s}
-.actx-prop.write span:nth-child(3){width:54%;animation-delay:.5s}
-.actx-prop.write em{position:absolute;left:10px;top:8px;width:2px;height:10px;background:var(--amber);animation:actrec .7s steps(1) infinite}
-.actx-prop.clear span{position:absolute;left:8px;right:36px;height:16px;border:1px solid rgba(197,165,114,.4);background:rgba(11,14,12,.65)}
-.actx-prop.clear span:nth-child(1){top:4px}
-.actx-prop.clear span:nth-child(2){top:24px}
-.actx-prop.clear span:nth-child(3){top:44px}
-.actx-prop.clear span::after{content:"";position:absolute;right:-26px;top:1px;width:12px;height:12px;border:2px solid var(--olive2);border-radius:1px;animation:actcheck 2.1s ease-in-out infinite}
-.actx-prop.clear span:nth-child(2)::after{animation-delay:.4s}
-.actx-prop.clear span:nth-child(3)::after{animation-delay:.8s}
-.actx-prop.creative b{position:absolute;top:4px;width:28%;height:58%;border:1px solid rgba(232,163,23,.55);background:linear-gradient(160deg,rgba(232,163,23,.35),rgba(107,124,58,.2));animation:actswap 2.8s ease-in-out infinite}
-.actx-prop.creative b:nth-child(1){left:0}
-.actx-prop.creative b:nth-child(2){left:34%;animation-delay:.3s}
-.actx-prop.creative b:nth-child(3){left:68%;animation-delay:.6s}
-.actx-prop.intel .ret{position:absolute;left:18px;top:4px;width:64px;height:64px;border:1px solid var(--amber);border-radius:50%;box-shadow:inset 0 0 0 10px rgba(232,163,23,.08)}
-.actx-prop.intel .sweep{position:absolute;left:49px;top:6px;width:2px;height:30px;background:var(--amber);transform-origin:bottom center;animation:actspin 2.4s linear infinite}
-.actx-prop.wire i{position:absolute;top:22px;font-style:normal;width:0;height:0;border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:8px solid var(--amber);animation:actchev 1.2s linear infinite;opacity:.35}
-.actx-prop.wire i:nth-child(1){left:8px}
-.actx-prop.wire i:nth-child(2){left:22px;animation-delay:.2s}
-.actx-prop.wire i:nth-child(3){left:36px;animation-delay:.4s}
-.actx-prop.wire .obj{position:absolute;right:18px;top:12px;width:14px;height:14px;background:var(--amber);transform:rotate(45deg);box-shadow:0 0 12px var(--amber);animation:actrec 1.4s ease-in-out infinite}
-.actx-read{display:flex;flex-direction:column;gap:3px;min-width:0}
-.actx-cs{font-family:var(--mono);font-size:16px;font-weight:800;letter-spacing:.16em;color:var(--amber)}
+/* Operator live feed — finite Doing, then standing. No scene stage. */
+.actx{display:flex;flex-direction:column;gap:12px}
+.actx-top{display:flex;align-items:center;gap:10px;min-width:0}
+.actx-face{width:40px;height:40px;border-radius:6px;object-fit:cover;flex:0 0 auto;background:#1A1E1A;box-shadow:0 0 0 1px rgba(197,165,114,.55)}
+.actx-face.ini{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;color:var(--tan)}
+.actx-id{min-width:0;flex:1}
+.actx-cs{font-family:var(--mono);font-size:15px;font-weight:800;letter-spacing:.14em;color:var(--ink);line-height:1.1}
 .actx-cs i{font-style:normal;color:var(--dim);font-size:11px;font-weight:500;margin-left:6px}
-.actx-st{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--olive2)}
-.actx-k{margin-top:6px;font-family:var(--mono);font-size:8px;letter-spacing:.16em;color:var(--coyote)}
-.actx-title{font-size:15px;font-weight:650;line-height:1.3;color:var(--ink)}
-.actx-brief{font-size:13px;color:#d9c7a2}
-.actx-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.actx-meta span{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--tan);border:1px solid var(--line2);padding:2px 6px;border-radius:2px}
-.actx-go{align-self:flex-start;margin-top:8px;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.14em;color:#0B0E0C;background:var(--amber);padding:6px 8px;border-radius:2px;text-decoration:none}
-.actx-more{margin:2px 0 0;padding-left:16px;color:var(--ink);font-size:12.5px}
-.actx-more li{margin:2px 0}
-@keyframes actbob{50%{transform:translateY(-4px)}}
-@keyframes actarm{50%{transform:rotate(-16deg)}}
-@keyframes actrec{50%{opacity:.25}}
-@keyframes actframe{0%{transform:translateX(0);opacity:.35}100%{transform:translateX(28px);opacity:1}}
-@keyframes actnode{50%{background:var(--amber);box-shadow:0 0 10px var(--amber)}}
-@keyframes actbolt{0%{transform:translateX(0);opacity:0}20%{opacity:1}100%{transform:translateX(78px);opacity:0}}
-@keyframes acttype{0%{transform:scaleX(.2);opacity:.4}100%{transform:scaleX(1);opacity:1}}
-@keyframes actcheck{0%,40%{box-shadow:none}60%,100%{background:var(--olive2);box-shadow:0 0 8px var(--olive2)}}
-@keyframes actswap{50%{transform:translateY(-3px);border-color:var(--amber)}}
-@keyframes actspin{to{transform:rotate(360deg)}}
-@keyframes actchev{0%{opacity:.2;transform:translateX(0)}100%{opacity:1;transform:translateX(6px)}}
-@media (prefers-reduced-motion:reduce){
-  .actx-fig,.actx-fig .arm,.actx-prop .rec,.actx-prop b,.actx-prop i,.actx-prop .bolt,.actx-prop span,.actx-prop em,.actx-prop .obj,.actx-prop .sweep{animation:none!important}
-}
+.actx-st{margin-top:3px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--coyote)}
+.actx-top .x{margin-left:auto;align-self:flex-start}
+.actx-sec{display:flex;flex-direction:column;gap:6px}
+.actx-sec h3{margin:0;font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;color:var(--amber)}
+.actx-sec.stand{padding-top:8px;border-top:1px solid rgba(155,176,90,.35)}
+.actx-sec.stand h3{color:var(--olive2)}
+.actx-card{display:block;padding:10px 10px 8px;border:1px solid var(--line2);border-left:3px solid var(--amber);border-radius:3px;background:#0d110e;color:inherit;text-decoration:none}
+.actx-card.stand{border-left-color:var(--olive2);background:rgba(107,124,58,.08)}
+.actx-card:active{border-color:var(--tan)}
+.actx-title{font-size:16px;font-weight:650;line-height:1.3;color:var(--ink)}
+.actx-detail{margin-top:2px;font-size:13px;line-height:1.35;color:#b9b3a3}
+.actx-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px}
+.actx-meta span{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--tan)}
+.actx-meta span:not(.go){border:1px solid var(--line2);padding:2px 6px;border-radius:2px}
+.actx-card.stand .actx-meta span:not(.go){color:var(--olive2);border-color:rgba(155,176,90,.45)}
+.actx-meta .go{margin-left:auto;color:var(--amber);font-weight:800}
+.actx-card.stand .actx-meta .go{color:var(--olive2)}
+.actx-none{margin:0;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);line-height:1.45}

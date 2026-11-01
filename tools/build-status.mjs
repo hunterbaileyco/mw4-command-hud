@@ -19,11 +19,24 @@ const args = Object.fromEntries(process.argv.slice(2).reduce((a, v, i, arr) =>
 const readJSON = (p) => { const t = fs.readFileSync(p, 'utf8'); return JSON.parse(t.slice(t.indexOf('{'), t.lastIndexOf('}') + 1)); };
 const NOW = args.now ? new Date(args.now).getTime() : Date.now();
 
-const LANES = ['Price', 'West', 'Ko', 'Cho', 'Jae', 'Park', 'Dunn', 'Ghost', 'Soap', 'Gaz', 'Kal'];
+const LANES = ['Ju Kwon', 'Price', 'West', 'Ko', 'Cho', 'Jae', 'Park', 'Dunn', 'Ghost', 'Soap', 'Gaz', 'Kal'];
+// Role labels. Dunn is Personal — never "Dunn Ops". Price is the only dispatcher. Flow: Kal → Price → lane.
+const ROSTER = [
+  { name: 'Price', role: 'Dispatcher' },
+  { name: 'Kal', role: 'Intake' },
+  { name: 'Ghost', role: 'Trading' },
+  { name: 'Ju Kwon', role: 'Kinsora ops' },
+  { name: 'Dunn', role: 'Personal' },
+];
+const FLOW = 'Kal → Price → lane';
 const TZ = 'America/Los_Angeles';
 const EVENT_TTL_MS = 6 * 3600 * 1000;
 const dayKey = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: TZ }).format(new Date(d));
-const hitLane = (w) => LANES.find((x) => x.toLowerCase() === String(w || '').toLowerCase());
+const hitLane = (w) => {
+  const s = String(w || '').trim().toLowerCase();
+  return LANES.find((x) => x.toLowerCase() === s)
+    || LANES.find((x) => !x.includes(' ') && x.toLowerCase() === s.split(/\s+/)[0]);
+};
 
 // Gap 5: lanes for cards (incl. Done cards) that carry no lane prefix. Order: label → "Lane: X" in
 // description (explicit wins) → name prefix → keyword map.
@@ -33,10 +46,13 @@ const LANE_KEYWORDS = [
   [/Postiz|Reels?|TikTok|Windsor/i, 'Jae'], [/retention|BFCM email/i, 'West'], [/packaging/i, 'Cho'],
 ];
 function laneOf(card, fallback = '') {
+  const name = card.name || '';
   for (const l of card.labels || []) { const m = LANES.find((x) => (l.name || '').toLowerCase().includes(x.toLowerCase())); if (m) return m; }
-  const m2 = /Lane:\s*([A-Za-z]+)/i.exec(card.description || card.desc || '');
+  const m2 = /Lane:\s*([A-Za-z]+(?:\s+[A-Za-z]+)?)/i.exec(card.description || card.desc || '');
   if (m2 && hitLane(m2[1])) return hitLane(m2[1]);
-  const m1 = /^\s*([A-Za-z]+)\s*(?:[:—–\-]|\s—)/.exec(card.name || '');
+  const multi = LANES.find((x) => x.includes(' ') && new RegExp('^\\s*' + x.replace(/ /g, '\\s+') + '\\b', 'i').test(name));
+  if (multi) return multi;
+  const m1 = /^\s*([A-Za-z]+)\s*(?:[:—–\-]|\s—)/.exec(name);
   if (m1 && hitLane(m1[1])) return hitLane(m1[1]);
   if (fallback) return fallback;
   for (const [re, lane] of LANE_KEYWORDS) if (re.test(card.name || '')) return lane;
@@ -152,6 +168,8 @@ const status = {
   kal: { boardUrl: 'https://trello.com/b/9zrVdX34/kal-trading', ...kal },
   lanes: extra.lanes || lanes,
   alerts: extra.alerts || alerts,
+  roster: ROSTER,
+  flow: FLOW,
   glance: extra.glance || {
     line1: `${cmd.counts.doing} doing · ${cmd.counts.waiting} waiting on you`,
     line2: cmd.lists.waiting[0] ? `Next: ${cmd.lists.waiting[0].short}` : (cmd.lists.doing[0] ? `Now: ${cmd.lists.doing[0].short}` : 'All clear'),

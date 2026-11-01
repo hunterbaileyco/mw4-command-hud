@@ -16,6 +16,7 @@
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="suite.css">
+<script src="roster.js"></script>
 <script src="action-panel.js"></script>
 <title>MW4 // COMMAND</title>
 <style>
@@ -470,7 +471,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   <div class="sidecol">
   <section class="orbat" id="orbatbox">
     <span class="sx-brk tl"></span><span class="sx-brk br"></span>
-    <div class="zhead"><b><span class="sec">ORB</span><span class="zt">CALLSIGNS</span><span class="zw">Operator roster</span></b><span id="orbc">11 OPS</span></div>
+    <div class="zhead"><b><span class="sec">ORB</span><span class="zt">CALLSIGNS</span><span class="zw">Kal → Price → lane</span></b><span id="orbc">12 OPS</span></div>
     <div class="orb" id="orb"></div>
   </section>
 
@@ -514,9 +515,11 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   // On GitHub Pages /api/feed doesn't exist (404) and the page shows LINK DOWN: Pages only ever serves ciphertext.
   const ZKEY = 'mw4hud.zones', EKEY = 'mw4hud.lastEvent', SKEY = 'mw4hud.sound';
   const POLL_MS = 20000, STALE_MS = 30 * 60 * 1000, FLY_MS = 1200, STEP_MS = FLY_MS + 1100;
-  const OPS = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
+  const OPS = window.MW4Roster.OPS.slice();
   const LIST = { doing: { tag: 'ACT', tone: 'act', rank: 0 }, waiting: { tag: 'HOLD', tone: 'hold', rank: 1 }, backlog: { tag: 'QUEUE', tone: 'queue', rank: 2 }, done: { tag: 'DONE', tone: 'done', rank: 3 } };
-  const DES = Object.fromEntries(OPS.map((o, i) => [o, o === 'Price' ? 'BRAVO-6' : '141-' + String(i).padStart(2, '0')]));
+  const DES = Object.fromEntries(OPS.map((o) => [o, window.MW4Roster.designator(o)]));
+  const roleOf = (op) => window.MW4Roster.role(op);
+  const slug = (op) => window.MW4Roster.slug(op);
   const ZLABEL = { ao: 'DEPLOYED · ACROSS THE WIRE', hold: 'HOLD · AWAITING HUNTER', ready: 'FOB · QUEUED', idle: 'FOB · STANDING BY', cp: 'FOB · COMMAND POST', stand: 'STANDING · ALWAYS ON' };
   const isStanding = (c) => !!(window.MW4Action && MW4Action.isStanding(c));
   const $ = (id) => document.getElementById(id);
@@ -601,7 +604,10 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   };
   const laneOf = (c, fb) => {
     if (c.lane) return c.lane;
-    const m = /^\s*([A-Za-z]+)/.exec(c.name || ''); const hit = m && OPS.find((o) => o.toLowerCase() === m[1].toLowerCase());
+    const name = String(c.name || '');
+    const multi = OPS.find((o) => o.includes(' ') && new RegExp('^\\s*' + o.replace(/\s+/g, '\\s+') + '\\b', 'i').test(name));
+    if (multi) return multi;
+    const m = /^\s*([A-Za-z]+)/.exec(name); const hit = m && OPS.find((o) => o.toLowerCase() === m[1].toLowerCase());
     return hit || fb || '';
   };
   const shortOf = (c) => { // feed supplies c.short (build-status.mjs); this is only a fallback
@@ -672,7 +678,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const el = document.createElement('div');
     el.className = 'tok'; el.dataset.op = op;
     const ini = op.slice(0, 2).toUpperCase();
-    el.innerHTML = `<span class="flash"></span><div class="bod"><div class="ring"><img src="avatars/${op.toLowerCase()}.png" alt="${esc(op)}" onerror="this.outerHTML='<div class=&quot;ini&quot;>${ini}</div>'"><span class="badge"></span><span class="hb"></span></div>
+    el.innerHTML = `<span class="flash"></span><div class="bod"><div class="ring"><img src="avatars/${slug(op)}.png" alt="${esc(op)}" onerror="this.outerHTML='<div class=&quot;ini&quot;>${ini}</div>'"><span class="badge"></span><span class="hb"></span></div>
       <div class="cs">${esc(op)}${op === 'Price' ? '<span class="rk">CPT</span>' : ''}<span class="ds">${DES[op] || ''}</span></div><div class="plate"></div><span class="rtbtag"></span></div>`;
     el.addEventListener('click', () => openSheet(op));
     return el;
@@ -990,7 +996,9 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       const standing = m.standing || m.doing.filter(isStanding);
       const ct = [finite.length ? `<b style="color:var(--amber)">A${finite.length}</b>` : '', standing.length ? `<b style="color:#9bb05a">S${standing.length}</b>` : '', m.waiting.length ? `<b style="color:var(--holdink)">H${m.waiting.length}</b>` : '', m.backlog.length ? `Q${m.backlog.length}` : ''].filter(Boolean).join(' ');
       const sub = m.zone === 'ao' ? (finite[0]?.short || '') : m.zone === 'stand' ? (standing[0]?.short || 'Always on') : m.zone === 'hold' ? (m.waiting[0]?.short || '') : ZN[m.zone];
-      return `<button class="orow z-${m.zone}" type="button" data-op="${esc(op)}"><img src="avatars/${op.toLowerCase()}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op)} <i>${esc(DES[op] || '')}</i></div><div class="zn">${esc(sub)}</div></span><span class="ct">${ct}</span></button>`;
+      const role = roleOf(op);
+      const mark = [DES[op], role].filter(Boolean).join(' · ');
+      return `<button class="orow z-${m.zone}" type="button" data-op="${esc(op)}"><img src="avatars/${slug(op)}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op)} <i>${esc(mark)}</i></div><div class="zn">${esc(sub)}</div></span><span class="ct">${ct}</span></button>`;
     }).join('');
     $('orb').querySelectorAll('.orow').forEach((b) => b.addEventListener('click', () => openSheet(b.dataset.op)));
   }
@@ -1018,14 +1026,15 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const doing = mine.filter((c) => c.list === 'doing');
     if (doing.length && window.MW4Action) {
       $('sheetp').innerHTML = MW4Action.html({
-        op, des: DES[op], avatar: `avatars/${op.toLowerCase()}.png`,
+        op, des: DES[op], avatar: `avatars/${slug(op)}.png`,
         cards: doing.map((c) => ({ name: c.name || '', short: c.short || '', lane: c.lane || op, url: c.url || '', board: c.board || '', list: 'doing' })),
       });
       $('sheet').classList.add('on');
       return;
     }
     const z = shown[op] || '';
-    $('sheetp').innerHTML = `<div class="hd"><img src="avatars/${op.toLowerCase()}.png" alt=""><div><div class="nm">${esc(op.toUpperCase())}${op === 'Price' ? ' · CPT' : ''}</div><div class="zs">${esc(ZLABEL[z] || '')}</div></div><button class="x" type="button">✕ CLOSE</button></div>` +
+    const fileRole = [roleOf(op), ZLABEL[z]].filter(Boolean).join(' · ');
+    $('sheetp').innerHTML = `<div class="hd"><img src="avatars/${slug(op)}.png" alt=""><div><div class="nm">${esc(op.toUpperCase())}${op === 'Price' ? ' · CPT' : ''}</div><div class="zs">${esc(fileRole)}</div></div><button class="x" type="button">✕ CLOSE</button></div>` +
       (mine.length ? mine.map(cardHtml).join('') : '<div class="empty">No cards on either board</div>');
     $('sheet').classList.add('on');
   }
@@ -1034,7 +1043,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const op = OPS.find((o) => o.toLowerCase() === String(c.lane || '').toLowerCase());
     const ini = (op || c.lane || 'TF').slice(0, 2).toUpperCase();
     const av = op
-      ? `<img class="av" data-open="${esc(op)}" src="avatars/${op.toLowerCase()}.png" alt="${esc(op)}" onerror="this.outerHTML='<span class=&quot;av ini&quot; data-open=&quot;${esc(op)}&quot;>${ini}</span>'">`
+      ? `<img class="av" data-open="${esc(op)}" src="avatars/${slug(op)}.png" alt="${esc(op)}" onerror="this.outerHTML='<span class=&quot;av ini&quot; data-open=&quot;${esc(op)}&quot;>${ini}</span>'">`
       : `<span class="av ini">${esc(ini)}</span>`;
     const standing = isStanding(c);
     const tone = c.list === 'doing' && standing ? 'stand' : LIST[c.list].tone;

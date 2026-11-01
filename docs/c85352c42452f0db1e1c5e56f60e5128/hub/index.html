@@ -16,6 +16,7 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="../suite.css">
 <script src="../brand-icons.js"></script>
+<script src="../roster.js"></script>
 <script src="../action-panel.js"></script>
 <title>MW4 // COMMAND SUITE</title>
 <style>
@@ -260,7 +261,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     paintWire(d);
   }
   function doingRows(d) {
-    const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
+    const OPSH = window.MW4Roster.OPS;
     const canon = (lane) => OPSH.find((o) => o.toLowerCase() === String(lane || '').toLowerCase()) || lane || 'TF141';
     const rows = [];
     for (const [board, B] of [['CMD', d.command], ['KAL', d.kal]]) {
@@ -283,7 +284,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     const btn = (op, cs, stn) => {
       const ini = String(op).slice(0, 2).toUpperCase();
       const line = (stn ? cs.filter(stand) : cs.filter((c) => !stand(c)))[0] || cs[0];
-      return `<button type="button" class="wop${stn ? ' stn' : ''}" data-op="${esc(op)}"><img src="../avatars/${esc(op.toLowerCase())}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(line.short || line.name || '')}</i></span></button>`;
+      return `<button type="button" class="wop${stn ? ' stn' : ''}" data-op="${esc(op)}"><img src="../avatars/${esc(window.MW4Roster.slug(op))}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(line.short || line.name || '')}</i></span></button>`;
     };
     const host = $('wireRow');
     const parts = [];
@@ -294,7 +295,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   }
   function openAct(op, rows) {
     const mine = rows.filter((c) => String(c.lane || '') === op);
-    $('actp').innerHTML = window.MW4Action ? MW4Action.html({ op, avatar: '../avatars/' + op.toLowerCase() + '.png', cards: mine, des: MW4Action.designator(op) }) : '';
+    $('actp').innerHTML = window.MW4Action ? MW4Action.html({ op, avatar: '../avatars/' + window.MW4Roster.slug(op) + '.png', cards: mine, des: MW4Action.designator(op) }) : '';
     $('act').classList.add('on');
   }
   $('act').addEventListener('click', (e) => { if (e.target.id === 'act' || e.target.closest('.x')) $('act').classList.remove('on'); });

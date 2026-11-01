@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="ledger.css">
 <title>MW4 // LEDGER</title>
 </head>
-<body class="sx-pad sample">
+<body class="sx-pad">
 <div class="lg-sticky">
   <div class="lg-mock" id="srcFlag">▲ Mock — not live · sales / spend ▲<small>Profit first · rev − cogs − spend · all figures sample</small></div>
   <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · LEDGER</span><span class="clk" id="clk">—</span></div>
@@ -59,11 +59,11 @@
       <div class="berule" id="beRule"></div>
       <div class="soap"><img src="../avatars/soap.png" alt="Soap"><div class="tx" id="soapTx"></div></div>
       <div class="lanes" id="lanes"></div>
-      <div class="beltk" style="margin-top:8px"><span>scale 0 → 4.0× · <span style="color:var(--holdink)">BE</span> tick = breakeven</span><span>attr = platform-reported · sample</span></div>
+      <div class="beltk" style="margin-top:8px"><span>scale 0 → 4.0× · <span style="color:var(--holdink)">BE</span> tick = breakeven</span><span id="attrNote">attr = platform-reported · sample</span></div>
     </section>
     <section class="qm panel">
       <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
-      <div class="zhead"><b><span class="sec">QM</span><span class="zt">LOADOUT · COGS</span><span class="zw">Shopify cost per item</span></b><span>TOP 4 · MTD</span></div>
+      <div class="zhead"><b><span class="sec">QM</span><span class="zt">LOADOUT · COGS</span><span class="zw">Shopify cost per item</span></b><span id="loadSpan">TOP 4 · MTD</span></div>
       <div class="gap" id="gap"></div>
       <div class="loadout" id="loadout"></div>
       <div class="side3" id="side3"></div>
@@ -88,7 +88,7 @@
     </section>
     <section class="mlog">
       <span class="sx-brk tl"></span><span class="sx-brk br"></span>
-      <div class="zhead"><b><span class="sec">LOG</span><span class="zt">MONEY LOG</span><span class="zw">today · sample</span></b><span id="logCount">0</span></div>
+      <div class="zhead"><b><span class="sec">LOG</span><span class="zt">MONEY LOG</span><span class="zw" id="logSpan">today · sample</span></b><span id="logCount">0</span></div>
       <ol id="log"></ol>
     </section>
   </div>

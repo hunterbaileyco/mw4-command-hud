@@ -1,25 +1,31 @@
-// GET /api/feed?f=status|social — serves the dashboard feeds to the HUD, Social and Hub pages on Vercel.
+// GET /api/feed?f=status|social|ledger — serves the dashboard feeds to the HUD, Social, Hub, and LEDGER pages on Vercel.
 // The repo (and therefore GitHub Pages) only ever holds the AES-256-GCM envelopes; this function decrypts them
-// server-side with the MW4_FEED_PASS project env var. The whole Vercel deployment is behind Vercel Authentication,
+// server-side with the MW4_FEED_PASS project env var (MW4_LEDGER_PASS for f=ledger when set).
+// The whole Vercel deployment is behind Vercel Authentication,
 // so after Vercel sign-in there's no second code, and nothing readable is ever committed or served by Pages.
 const fs = require('node:fs');
 const path = require('node:path');
 const { webcrypto: wc } = require('node:crypto');
 
-// literal paths so Vercel's file tracing bundles both feeds with the function
+// literal paths so Vercel's file tracing bundles the feeds with the function
 const FILES = {
   status: path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/status.json'),
   social: path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/social/metrics.json'),
-  // ledger is not an encrypted envelope yet. The LEDGER page asks for f=ledger and,
-  // on 404, renders docs/.../ledger/model.js SAMPLE. Add a ciphertext file here when
-  // Shopify / ads / Mercury are wired, and return source:"live" in that cleartext.
+  ledger: path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/ledger/feed.json'),
 };
-const keys = new Map(); // `${salt}|${iter}` -> CryptoKey; PBKDF2 is slow, derive once per warm instance
+const keys = new Map(); // `${feed}|${salt}|${iter}` -> CryptoKey; PBKDF2 is slow, derive once per warm instance
 
-async function keyFor(env) {
-  const id = env.salt + '|' + env.iter;
+function feedPass(which) {
+  const ledger = String(process.env.MW4_LEDGER_PASS || '').replace(/[\r\n]+$/, '');
+  const shared = String(process.env.MW4_FEED_PASS || '').replace(/[\r\n]+$/, '');
+  if (which === 'ledger' && ledger) return ledger;
+  return shared;
+}
+
+async function keyFor(env, which) {
+  const id = which + '|' + env.salt + '|' + env.iter;
   if (!keys.has(id)) {
-    const pass = String(process.env.MW4_FEED_PASS || '').replace(/[\r\n]+$/, '');
+    const pass = feedPass(which);
     if (!pass) throw new Error('feed key not configured');
     const km = await wc.subtle.importKey('raw', new TextEncoder().encode(pass), 'PBKDF2', false, ['deriveKey']);
     keys.set(id, await wc.subtle.deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt: Buffer.from(env.salt, 'base64'), iterations: env.iter },
@@ -38,7 +44,7 @@ async function handler(req, res) {
   try {
     const env = JSON.parse(fs.readFileSync(file, 'utf8'));
     if (!env || !env.ct) throw new Error('feed is not an encrypted envelope');
-    const pt = await wc.subtle.decrypt({ name: 'AES-GCM', iv: Buffer.from(env.iv, 'base64') }, await keyFor(env), Buffer.from(env.ct, 'base64'));
+    const pt = await wc.subtle.decrypt({ name: 'AES-GCM', iv: Buffer.from(env.iv, 'base64') }, await keyFor(env, f), Buffer.from(env.ct, 'base64'));
     res.statusCode = 200;
     return res.end(Buffer.from(pt));
   } catch (err) {

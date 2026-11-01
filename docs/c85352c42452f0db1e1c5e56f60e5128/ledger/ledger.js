@@ -1,6 +1,6 @@
 /* Renders MW4 // LEDGER from MW4Ledger.derive.
-   Live path: GET /api/feed?f=ledger with source:"live" (same contract as model.js).
-   Until that feed exists, SAMPLE is the page. */
+   Live path: GET /api/feed?f=ledger with source:"live" (AES-GCM envelope).
+   SAMPLE is only the fallback when that feed is missing or not live. */
 (function () {
   'use strict';
 
@@ -10,13 +10,21 @@
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const state = { win: 'mtd', model: null };
 
+  function visualParts(view) {
+    const raw = [Math.max(0, view.cogsPct), Math.max(0, view.spendPct), Math.max(0, view.keptPct)];
+    const sum = raw[0] + raw[1] + raw[2];
+    if (sum <= 100) return raw;
+    return raw.map((n) => n / sum * 100);
+  }
+
   function ringSvg(view, month) {
     const R = 112;
     const C = 2 * Math.PI * R;
+    const vis = visualParts(view);
     const parts = [
-      { pct: view.cogsPct, color: '#9c8256', w: 9 },
-      { pct: view.spendPct, color: '#B4472F', w: 9 },
-      { pct: view.keptPct, color: '#E8A317', w: 12, glow: true }
+      { pct: vis[0], color: '#9c8256', w: 9 },
+      { pct: vis[1], color: '#B4472F', w: 9 },
+      { pct: vis[2], color: '#E8A317', w: 12, glow: true }
     ];
     let acc = 0;
     const arcs = parts.map((p) => {
@@ -64,9 +72,20 @@
     return '<div class="t ' + cls + '"><div class="l">' + label + '</div><div class="v">' + esc(value) + '</div><div class="s">' + esc(sub) + '</div></div>';
   }
 
+  function paintStrip(model) {
+    const strip = L.stripMetrics(model, state.win);
+    const period = (strip.label || '').toLowerCase();
+    $('counters').innerHTML = ''
+      + '<div class="act"><span class="l">CM</span><span class="sub">contrib · ' + esc(period) + '</span><span class="n">' + esc(F.moneyK(strip.contrib)) + '</span></div>'
+      + '<div class="q rev"><span class="l">REV</span><span class="sub">' + esc(strip.orders) + ' orders</span><span class="n">' + esc(F.moneyK(strip.rev)) + '</span></div>'
+      + '<div class="hld"><span class="l">SPEND</span><span class="sub">ROAS ' + esc(F.roas(strip.roas)) + '</span><span class="n">' + esc(F.moneyK(strip.spend)) + '</span></div>'
+      + '<div class="shp"><span class="l">CASH</span><span class="sub">mercury · on hand</span><span class="n">' + esc(F.moneyK(strip.cash)) + '</span></div>';
+  }
+
   function paintWindow() {
     const model = state.model;
     const view = model.windows[state.win] || model.mtd;
+    paintStrip(model);
     const month = model.month;
     document.querySelectorAll('#win button').forEach((btn) => {
       const on = btn.dataset.win === view.id;
@@ -84,9 +103,10 @@
       + '<div class="cmp">' + esc(view.cm.toFixed(1)) + '%<em>CM%</em></div>'
       + '<div class="pace">' + paceHtml(view, month) + '</div></div>';
     $('moFrac').textContent = month.day + '/' + month.days;
-    const beltLabel = (cls, name, pct) => {
-      const show = pct >= 12;
-      return '<i class="' + cls + '" style="width:' + pct + '%">' + (show ? '<b>' + name + '</b>' : '') + '</i>';
+    const vis = visualParts(view);
+    const beltLabel = (cls, name, pct, width) => {
+      const show = pct >= 12 && width >= 12;
+      return '<i class="' + cls + '" style="width:' + width + '%">' + (show ? '<b>' + name + '</b>' : '') + '</i>';
     };
     $('eqcol').innerHTML = '<div class="eq">'
       + cell('rv', 'REV', F.moneyK(view.rev), F.int(view.orders) + ' ord')
@@ -97,9 +117,9 @@
       + '<div class="op">=</div>'
       + cell('cm', 'CONTRIB', F.moneyK(view.contrib), view.cm.toFixed(1) + '%')
       + '</div><div class="belt">'
-      + beltLabel('b-cg', 'COGS', view.cogsPct)
-      + beltLabel('b-sp', 'AD SPEND', view.spendPct)
-      + beltLabel('b-cm', 'KEPT', view.keptPct)
+      + beltLabel('b-cg', 'COGS', view.cogsPct, vis[0])
+      + beltLabel('b-sp', 'AD SPEND', view.spendPct, vis[1])
+      + beltLabel('b-cm', 'KEPT', view.keptPct, vis[2])
       + '</div><div class="beltk"><span>every $1 of revenue →</span><span>'
       + esc(view.cents.product) + '¢ product · ' + esc(view.cents.ads) + '¢ ads · <b>'
       + esc(view.cents.kept) + '¢ kept</b></span></div>';
@@ -122,15 +142,10 @@
   }
 
   function paintStatic(model) {
-    const today = model.windows.today;
     const fmtPct = (n) => (n * 100).toFixed(1) + '%';
-    document.body.classList.toggle('sample', model.source !== 'live');
+    const live = model.source === 'live';
+    document.body.classList.toggle('sample', !live);
     $('asof').textContent = F.asOf(model.asOf);
-    $('counters').innerHTML = ''
-      + '<div class="act"><span class="l">CM</span><span class="sub">contrib · today</span><span class="n">' + esc(F.moneyK(today.contrib)) + '</span></div>'
-      + '<div class="q rev"><span class="l">REV</span><span class="sub">' + esc(today.orders) + ' orders</span><span class="n">' + esc(F.moneyK(today.rev)) + '</span></div>'
-      + '<div class="hld"><span class="l">SPEND</span><span class="sub">ROAS ' + esc(F.roas(today.roas)) + '</span><span class="n">' + esc(F.moneyK(today.spend)) + '</span></div>'
-      + '<div class="shp"><span class="l">CASH</span><span class="sub">mercury</span><span class="n">' + esc(F.moneyK(model.mercury.balance)) + '</span></div>';
     $('win').innerHTML = model.order.map((id) => {
       const w = model.windows[id];
       return '<button type="button" role="tab" data-win="' + esc(id) + '" aria-selected="false">' + esc(w.label) + '<small>' + esc(w.range) + '</small></button>';
@@ -161,14 +176,22 @@
       return '<div class="lane ' + esc(lane.tone) + '"><div class="r1"><span class="pk">' + esc(lane.name) + '<span class="nt">' + esc(lane.note) + '</span></span>'
         + '<span class="ro">' + esc(F.roas(lane.roas)) + '<small>ROAS</small></span></div>'
         + '<div class="r2"><span>SPEND<b>' + esc(F.moneyFull(lane.spend)) + '</b></span><span>ATTR REV<b>' + esc(F.moneyFull(lane.attrRev)) + '</b></span>'
-        + '<span>AFTER COGS<b class="pos">' + (after >= 0 ? '+' : '−') + esc(F.moneyFull(Math.abs(after))) + '</b></span></div>'
+        + '<span>AFTER COGS<b class="' + (after >= 0 ? 'pos' : 'neg') + '">' + (after >= 0 ? '+' : '−') + esc(F.moneyFull(Math.abs(after))) + '</b></span></div>'
         + '<div class="scale"><i class="fill" style="width:' + (lane.fill * 100).toFixed(1) + '%"></i>'
         + '<i class="be" style="left:' + (lane.beAt * 100).toFixed(1) + '%"></i></div></div>';
     }).join('');
     const gap = model.cogs;
-    $('gap').innerHTML = '<span class="bd">COGS GAP</span><span>' + esc(gap.gapCount) + ' of ' + esc(gap.skuCount)
-      + ' SKUs have no unit cost in Shopify → counted at $0 (≈' + esc(F.moneyK(gap.gapRev))
-      + ' MTD rev). Contribution reads slightly high until filled.</span>';
+    const span = gap.span || 'MTD';
+    const loadSpan = $('loadSpan');
+    if (loadSpan) loadSpan.textContent = 'TOP 4 · ' + span;
+    if (!gap.gapCount) {
+      $('gap').innerHTML = '<span class="bd">COGS</span><span>Unit cost is set on the ' + esc(gap.skuCount)
+        + ' SKUs in Shopify. A SKU with no cost would count as $0. This ' + esc(span) + ' window has none.</span>';
+    } else {
+      $('gap').innerHTML = '<span class="bd">COGS GAP</span><span>' + esc(gap.gapCount) + ' of ' + esc(gap.skuCount)
+        + ' SKUs have no unit cost in Shopify → counted at $0 (≈' + esc(F.moneyK(gap.gapRev))
+        + ' ' + esc(span) + ' rev). Contribution reads slightly high until filled.</span>';
+    }
     $('loadout').innerHTML = gap.top.map((sku) => {
       const gm = (sku.gm * 100).toFixed(1) + '%';
       return '<div class="sk"><span class="rk">#' + sku.rank + '</span><div class="nm">' + esc(sku.name) + '</div>'
@@ -188,8 +211,8 @@
       + '<span>RESERVE<b>' + esc(F.moneyFull(model.mercury.reserve)) + '</b></span>'
       + '<span>30D NET<b class="' + (model.mercury.netBurn30d < 0 ? 'neg' : '') + '">'
       + esc(F.moneyFull(model.mercury.netBurn30d)) + '</b></span>';
-    const maxH = model.daily.reduce((m, d) => Math.max(m, d.height), 0);
-    const avgBottom = maxH > 0 ? (model.dailyAvg / (model.daily.reduce((m, d) => Math.max(m, d.cm), 0) || 1)) * 100 : 0;
+    const peak = model.daily.reduce((m, d) => Math.max(m, Math.abs(d.cm)), 0);
+    const avgBottom = peak > 0 ? (Math.abs(model.dailyAvg) / peak) * 100 : 0;
     $('bars').innerHTML = model.daily.map((d) => {
       const hot = model.dailyNote && model.dailyNote.day === d.day;
       return '<i style="height:' + Math.max(2, d.height * 100).toFixed(1) + '%" title="' + esc(F.moneyFull(d.cm)) + (hot ? ' · ' + esc(model.dailyNote.text) : '') + '"></i>';
@@ -199,9 +222,13 @@
     const lastDay = model.month.day || model.daily.length;
     $('dayEnd').textContent = 'D1–D' + lastDay;
     $('daySpan').textContent = 'D' + lastDay;
-    $('tresFlag').textContent = model.source === 'live' ? 'LIVE' : 'SAMPLE';
+    $('tresFlag').textContent = live ? 'LIVE' : 'SAMPLE';
     const chip = $('smp');
-    if (chip) chip.textContent = model.source === 'live' ? 'LIVE' : 'SAMPLE';
+    if (chip) chip.textContent = live ? 'LIVE' : 'SAMPLE';
+    const attr = $('attrNote');
+    if (attr) attr.textContent = live ? 'attr = platform-reported · not in REV' : 'attr = platform-reported · sample';
+    const logSpan = $('logSpan');
+    if (logSpan) logSpan.textContent = live ? 'recent · live' : 'today · sample';
     $('logCount').textContent = String(model.log.length);
     $('log').innerHTML = model.log.map((row) => {
       const kind = row.kind === 'out' ? 'out' : row.kind === 'mark' ? 'mark' : 'in';
@@ -210,9 +237,8 @@
       return '<li><span class="tm">' + esc(row.time) + '</span><span>' + esc(row.text) + '</span><span class="am ' + kind + '">'
         + sign + esc(F.moneyFull(Math.abs(n))) + '</span></li>';
     }).join('');
-    const live = model.source === 'live';
-    $('foot').innerHTML = 'feeds (' + (live ? 'live' : 'sample') + '): <b>shopify</b> orders + cost/item · <b>meta/tiktok/google</b> spend · <b>mercury</b> balances<br>'
-      + (live ? 'auto-refresh · polls 60s · link up' : 'sample path · live shopify / ads / mercury not wired · <a href="#" id="fsync">sync</a>');
+    $('foot').innerHTML = 'feeds (' + (live ? 'live' : 'sample') + '): <b>shopify</b> orders + cost/item · <b>meta</b> spend · tiktok/google/pinterest slot until connected · <b>mercury</b> cash<br>'
+      + (live ? 'live envelope · polls 60s · sample model is not served' : 'sample path · live envelope missing or not source live · <a href="#" id="fsync">sync</a>');
     const sync = $('fsync');
     if (sync) sync.addEventListener('click', (e) => { e.preventDefault(); boot(); });
   }

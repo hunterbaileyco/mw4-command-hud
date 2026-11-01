@@ -169,6 +169,7 @@ body.sample .lg-mock{display:block}
 .lane.slot .pk{color:var(--dim)}
 .lane.slot .r2{display:block;margin-top:6px;color:var(--coyote);letter-spacing:.08em}
 .lane .pos{color:var(--olive2)}
+.lane .neg{color:var(--holdink)}
 .maincol{display:flex;flex-direction:column;gap:10px;min-width:0}
 .sidecol{display:contents}
 

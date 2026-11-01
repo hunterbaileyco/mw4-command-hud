@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MW4 HUD">
+<meta name="theme-color" content="#0B0E0C">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>MW4 // COMMAND</title>
+<style>
+:root{
+  --bg:#0B0E0C;--panel:#121612;--line:#2A3328;--tan:#C5A572;--olive:#6B7C3A;--amber:#E8A317;
+  --hold:#8B3A2A;--holdink:#E07A5F;--ink:#E8E2D6;--dim:#8a8676;--idle:#1A1E1A;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --fly:1200ms;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 var(--sans);-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;background:radial-gradient(ellipse at 50% -10%,rgba(107,124,58,.10),transparent 60%),var(--bg)}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+.wrap{max-width:460px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 10px) 10px calc(env(safe-area-inset-bottom) + 20px);display:flex;flex-direction:column;gap:10px}
+.mono{font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase}
+
+/* ---------- header chrome ---------- */
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.brand{font-family:var(--mono);color:var(--tan);font-size:12px;font-weight:700;letter-spacing:.14em}
+.brand .sl{color:var(--olive)}
+.asof{font-family:var(--mono);color:var(--dim);font-size:10px;letter-spacing:.08em;display:flex;align-items:center;gap:6px;text-transform:uppercase}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--olive);box-shadow:0 0 6px var(--olive);animation:pulse 2s infinite}
+.dot.stale{background:var(--holdink);box-shadow:0 0 6px var(--holdink)}
+@keyframes pulse{50%{opacity:.3}}
+.chrome{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:4px;background:rgba(18,22,18,.7)}
+.chrome div{padding:5px 8px;border-right:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:4px}
+.chrome div:last-child{border-right:0}
+.chrome .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--dim)}
+.chrome .n{font-family:var(--mono);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.chrome .act .n{color:var(--amber)}.chrome .hld .n{color:var(--holdink)}.chrome .q .n{color:var(--tan)}.chrome .shp .n{color:#9bb05a}
+.intel{display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);min-width:0}
+.intel .bd{background:var(--amber);color:#0B0E0C;font-weight:700;padding:2px 6px;border-radius:2px;white-space:nowrap}
+.intel .tx{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.intel .tx i{font-style:normal;color:var(--ink);text-transform:none;letter-spacing:.02em;font-family:var(--sans);font-size:11.5px}
+
+/* ---------- STAGE ---------- */
+.stage{position:relative;border:1px solid var(--line);border-radius:6px;background:#0d110e;isolation:isolate}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:30;border-radius:6px;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px),radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(0,0,0,.55) 100%)}
+.brk{position:absolute;width:14px;height:14px;border-color:var(--tan);border-style:solid;opacity:.7;z-index:31;pointer-events:none}
+.brk.tl{top:-1px;left:-1px;border-width:2px 0 0 2px}.brk.tr{top:-1px;right:-1px;border-width:2px 2px 0 0}
+.brk.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px}.brk.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0}
+.zhead{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+.zhead b{color:var(--tan);font-weight:700}
+.zhead b::before{content:"▌";color:var(--olive);margin-right:5px}
+.drill{appearance:none;background:transparent;border:1px solid #3a4636;color:var(--tan);font-family:var(--mono);font-size:9px;letter-spacing:.14em;padding:3px 7px;border-radius:2px;cursor:pointer}
+.drill:disabled{opacity:.4}
+
+/* AO */
+.ao{position:relative;padding:10px 10px 14px;min-height:200px;border-radius:6px 6px 0 0;overflow:hidden;
+  background:
+   linear-gradient(rgba(107,124,58,.10) 1px,transparent 1px) 0 0/28px 28px,
+   linear-gradient(90deg,rgba(107,124,58,.10) 1px,transparent 1px) 0 0/28px 28px,
+   url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='260' viewBox='0 0 420 260'%3E%3Cg fill='none' stroke='%236B7C3A' stroke-opacity='.28' stroke-width='1'%3E%3Cpath d='M40 200c30-60 90-90 150-70s100 40 150-10 60-90 40-110'/%3E%3Cpath d='M70 210c25-45 80-70 125-55s95 35 130-5 45-70 30-90'/%3E%3Cpath d='M100 215c20-30 60-50 95-40s80 25 105 0 30-45 20-60'/%3E%3Cpath d='M-10 90c40 10 70-20 110-15s60 40 100 30'/%3E%3Cpath d='M-10 60c50 10 80-25 120-20s70 45 120 30'/%3E%3Cellipse cx='330' cy='70' rx='40' ry='22'/%3E%3Cellipse cx='330' cy='70' rx='22' ry='11'/%3E%3C/g%3E%3C/svg%3E") center/cover no-repeat,
+   radial-gradient(ellipse at 50% 30%,rgba(232,163,23,.06),transparent 70%)}
+.ao .grid{position:absolute;bottom:8px;right:10px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:rgba(197,165,114,.4);text-align:right;line-height:1.6;pointer-events:none}
+.ao .cmp{position:absolute;left:10px;bottom:10px;width:26px;height:26px;border:1px solid rgba(197,165,114,.35);border-radius:50%;pointer-events:none}
+.ao .cmp::before{content:"N";position:absolute;top:-13px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:8px;color:rgba(197,165,114,.6)}
+.ao .cmp::after{content:"";position:absolute;left:50%;top:3px;bottom:3px;width:1px;background:linear-gradient(var(--amber) 50%,rgba(197,165,114,.4) 50%)}
+.sweep{position:absolute;inset:-40%;pointer-events:none;background:conic-gradient(from 0deg,rgba(232,163,23,.0) 0deg,rgba(232,163,23,.07) 25deg,transparent 26deg);animation:spin 9s linear infinite;z-index:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.zone{position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:center;align-content:flex-start;gap:12px 10px}
+#zAO{margin-top:14px;min-height:150px;gap:16px 10px}
+.quiet{position:absolute;left:0;right:0;top:50%;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);pointer-events:none;z-index:1}
+
+/* WIRE */
+.wire{position:relative;height:40px;z-index:3;display:flex;align-items:center;justify-content:center}
+.wire::before{content:"";position:absolute;left:0;right:0;top:50%;height:16px;transform:translateY(-50%);
+  background:
+   repeating-linear-gradient(45deg,rgba(232,163,23,.85) 0 1.2px,transparent 1.2px 9px),
+   repeating-linear-gradient(-45deg,rgba(232,163,23,.85) 0 1.2px,transparent 1.2px 9px);
+  -webkit-mask:linear-gradient(transparent 0,#000 30%,#000 70%,transparent 100%);mask:linear-gradient(transparent 0,#000 30%,#000 70%,transparent 100%);
+  filter:drop-shadow(0 0 3px rgba(232,163,23,.7));animation:crawl 6s linear infinite}
+.wire::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:var(--amber);box-shadow:0 0 10px 2px rgba(232,163,23,.55),0 -9px 0 -0px rgba(232,163,23,.35),0 9px 0 0 rgba(232,163,23,.35)}
+@keyframes crawl{to{background-position:90px 0,90px 0}}
+.wire .lbl{position:relative;z-index:2;background:#0d110e;border:1px solid rgba(232,163,23,.6);color:var(--amber);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;padding:3px 8px;border-radius:2px;white-space:nowrap;box-shadow:0 0 12px rgba(232,163,23,.25)}
+.wire .chev{position:absolute;z-index:2;font-family:var(--mono);font-size:10px;color:var(--amber);letter-spacing:-1px;opacity:.85;background:#0d110e;padding:0 3px}
+.wire .chev.l{left:8px}.wire .chev.r{right:8px}
+.wire .chev span{display:inline-block;animation:chev 1.6s infinite}
+.wire .chev span:nth-child(2){animation-delay:.2s}.wire .chev span:nth-child(3){animation-delay:.4s}
+@keyframes chev{0%,100%{opacity:.25}40%{opacity:1}}
+.wire.hot::after{animation:hot 1.8s ease-out}
+.wire.hot::before{animation:crawl 6s linear infinite,hotw 1.8s ease-out}
+.wire.hot .lbl{animation:hotl 1.8s ease-out}
+.wire.hot.rtb::after{animation:hotg 1.8s ease-out}
+@keyframes hot{0%{height:3px;box-shadow:0 0 60px 22px rgba(232,163,23,1),0 0 18px 6px #fff3c4}35%{height:2px;box-shadow:0 0 44px 16px rgba(232,163,23,.9)}100%{height:1px;box-shadow:0 0 10px 2px rgba(232,163,23,.55)}}
+@keyframes hotg{0%{height:3px;background:#c9e07a;box-shadow:0 0 60px 22px rgba(155,176,90,1),0 0 18px 6px #eaffc0}100%{height:1px;box-shadow:0 0 10px 2px rgba(232,163,23,.55)}}
+@keyframes hotw{0%,40%{filter:drop-shadow(0 0 10px rgba(232,163,23,1)) brightness(1.8)}}
+@keyframes hotl{0%,60%{background:var(--amber);color:#0B0E0C;box-shadow:0 0 26px rgba(232,163,23,.9)}}
+.side{position:absolute;font-family:var(--mono);font-size:8px;letter-spacing:.18em;color:rgba(197,165,114,.55);left:10px}
+.side.up{top:-1px}.side.dn{bottom:-1px}
+
+/* HOLD BOX */
+.holdbox{position:relative;margin:4px 10px 0;padding:8px 8px 10px;border-radius:4px;z-index:2;
+  background:linear-gradient(rgba(139,58,42,.10),rgba(139,58,42,.04));
+  border:1px dashed rgba(232,163,23,.55)}
+.holdbox::before{content:"";position:absolute;inset:0;border-radius:4px;pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0 22px,rgba(232,163,23,.13) 22px 23px)}
+.holdbox .zhead b{color:var(--amber)}
+.holdbox .zhead b::before{color:var(--holdink)}
+.holdbox .hz{position:absolute;top:-1px;left:0;right:0;height:3px;background:repeating-linear-gradient(-45deg,var(--amber) 0 6px,#0d110e 6px 12px);opacity:.75;border-radius:4px 4px 0 0}
+#zHOLD{margin-top:8px;min-height:84px}
+.holdbox.empty #zHOLD::after{content:"NOTHING ON HUNTER · ALL CLEAR";font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--dim);align-self:center}
+
+/* FOB */
+.fob{position:relative;padding:10px 10px 12px;border-radius:0 0 6px 6px;
+  background:linear-gradient(rgba(197,165,114,.035),rgba(197,165,114,.015)),
+   repeating-linear-gradient(90deg,rgba(42,51,40,.5) 0 1px,transparent 1px 46px)}
+.fobgrid{display:grid;grid-template-columns:88px 1fr;gap:8px;margin-top:8px}
+.cp{position:relative;border:1px solid #3a4636;border-radius:4px;padding:16px 4px 8px;display:flex;justify-content:center;align-items:flex-start;background:rgba(107,124,58,.07);min-height:110px}
+.cp::before{content:"CMD POST";position:absolute;top:3px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:8px;letter-spacing:.16em;color:var(--olive)}
+#zREADY{justify-content:flex-start;min-height:110px;gap:10px 6px}
+
+/* ---------- tokens ---------- */
+.tok{position:relative;display:flex;flex-direction:column;align-items:center;width:76px;cursor:pointer;z-index:4;will-change:transform}
+.tok.fly{z-index:20}
+.tok .bod{display:flex;flex-direction:column;align-items:center;width:100%}
+.ring{position:relative;width:52px;height:52px;border-radius:50%;padding:2px;background:var(--line)}
+.ring img,.ring .ini{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;background:var(--idle)}
+.ring .ini{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;font-weight:700;color:var(--tan)}
+.badge{position:absolute;right:-6px;top:-4px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.04em;padding:1px 4px;border-radius:2px;line-height:1.3;display:none}
+.badge.on{display:block}
+.hb{position:absolute;left:-6px;top:-4px;font-family:var(--mono);font-size:8px;font-weight:700;padding:1px 3px;border-radius:2px;line-height:1.3;background:var(--hold);color:var(--tan);display:none}
+.hb.on{display:block}
+.cs{margin-top:4px;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.12em;color:var(--ink);text-transform:uppercase;white-space:nowrap}
+.cs .rk{color:var(--olive);margin-left:3px}
+.plate{margin-top:3px;width:100%;font-size:10px;line-height:1.25;color:var(--dim);text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.plate:empty{display:none}
+.flash{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.14em;padding:2px 5px;border-radius:2px;white-space:nowrap;opacity:0;pointer-events:none;z-index:5}
+.flash.go{animation:flash 3.2s ease-out}
+@keyframes flash{0%{opacity:0;transform:translate(-50%,6px)}10%,75%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+.flash.rtb{background:var(--olive);color:#0B0E0C}
+.flash.dep{background:var(--amber);color:#0B0E0C}
+.flash.hld{background:var(--hold);color:var(--tan)}
+.flash.clr{background:var(--line);color:var(--tan)}
+.tok .rtbtag{margin-top:3px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:#9bb05a;border:1px solid rgba(107,124,58,.6);padding:0 4px;border-radius:2px;display:none}
+.tok .rtbtag.on{display:inline-block}
+
+/* deployed */
+.tok.s-ao{width:118px}
+.tok.s-ao .ring{width:68px;height:68px;background:conic-gradient(var(--amber),#7a5a10,var(--amber));box-shadow:0 0 18px rgba(232,163,23,.55)}
+.tok.s-ao .bod{animation:bob 3.2s ease-in-out infinite}
+.tok.s-ao:nth-child(2n) .bod{animation-delay:-1.1s}.tok.s-ao:nth-child(3n) .bod{animation-delay:-2.2s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.tok.s-ao .ring::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid rgba(232,163,23,.5);animation:ping 2.4s ease-out infinite}
+@keyframes ping{0%{transform:scale(.85);opacity:.9}100%{transform:scale(1.35);opacity:0}}
+.tok.s-ao .badge{background:var(--amber);color:#0B0E0C}
+.tok.s-ao .cs{color:var(--amber)}
+.tok.s-ao .plate{display:block;color:var(--ink);background:rgba(11,14,12,.85);border:1px solid rgba(232,163,23,.45);border-left:2px solid var(--amber);border-radius:2px;padding:3px 5px;text-align:left;font-size:10.5px}
+.tok.s-ao .plate .ln{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tok.s-ao .plate .ln+.ln{-webkit-line-clamp:1}
+.tok.s-ao .plate .ln+.ln{border-top:1px dashed rgba(232,163,23,.25);margin-top:2px;padding-top:2px}
+.tok.s-ao .plate .mk{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--amber);display:block}
+/* hold */
+.tok.s-hold{width:80px}
+.tok.s-hold .ring{background:var(--hold);animation:hpulse 2s ease-in-out infinite}
+@keyframes hpulse{0%,100%{box-shadow:0 0 0 0 rgba(232,163,23,.0)}50%{box-shadow:0 0 0 3px rgba(232,163,23,.45),0 0 12px rgba(224,122,95,.5)}}
+.tok.s-hold .badge{background:var(--amber);color:#0B0E0C}
+.tok.s-hold .cs{color:var(--tan)}
+.tok.s-hold .plate{color:#d9b48a;font-size:9.5px}
+/* ready / idle */
+.tok.s-ready .ring{background:#4a5a30}
+.tok.s-ready .ring img{filter:saturate(.75) brightness(.88)}
+.tok.s-ready .badge{background:var(--line);color:var(--tan);border:1px solid #3a4636}
+.tok.s-ready .plate{font-size:9px}
+.tok.s-idle{opacity:.72}
+.tok.s-idle .ring img{filter:grayscale(.75) brightness(.7)}
+.tok.s-idle .cs{color:var(--dim)}
+.tok.s-idle .plate{font-family:var(--mono);font-size:8px;letter-spacing:.14em}
+.tok.s-cp{width:72px}
+.tok.s-cp .ring{width:58px;height:58px;background:conic-gradient(var(--tan),var(--olive),var(--tan))}
+.tok.s-cp .plate{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--olive)}
+
+/* ---------- ticker ---------- */
+.ticker{position:relative;display:flex;align-items:stretch;border:1px solid var(--line);border-radius:4px;background:var(--panel);overflow:hidden;height:28px}
+.ticker .tl{flex:0 0 auto;display:flex;align-items:center;padding:0 8px;background:var(--olive);color:#0B0E0C;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.16em;z-index:2}
+.ticker .vp{flex:1;overflow:hidden;position:relative;-webkit-mask:linear-gradient(90deg,transparent,#000 12px,#000 92%,transparent);mask:linear-gradient(90deg,transparent,#000 12px,#000 92%,transparent)}
+.ticker .rail{position:absolute;top:0;bottom:0;left:0;display:flex;align-items:center;white-space:nowrap;animation:marq var(--dur,40s) linear infinite}
+@keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.ti{display:inline-flex;align-items:center;gap:6px;padding:0 14px 0 0;font-size:11.5px;color:var(--ink)}
+.ti::after{content:"◆";color:var(--line);margin-left:14px;font-size:8px}
+.ti .k{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;color:#9bb05a}
+.ti .k.dep{color:var(--amber)}.ti .k.hld{color:var(--holdink)}
+.ti .w{font-family:var(--mono);font-size:8.5px;color:var(--dim);letter-spacing:.08em}
+.ti.new{color:#fff}
+.ti.new .k{animation:pulse 1s 4}
+
+/* ---------- mission log ---------- */
+details.log{background:var(--panel);border:1px solid var(--line);border-radius:6px}
+details.log>summary{list-style:none;cursor:pointer;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--tan)}
+details.log>summary::-webkit-details-marker{display:none}
+details.log>summary::before{content:"▸";color:var(--olive);margin-right:6px}
+details.log[open]>summary::before{content:"▾"}
+details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-size:9px}
+.logb{padding:0 12px 12px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:#0d110e;border:1px solid var(--line);border-radius:6px;padding:3px;gap:3px;margin-bottom:10px}
+.seg button{appearance:none;border:1px solid transparent;background:transparent;color:var(--dim);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.14em;padding:8px 0;border-radius:4px;cursor:pointer}
+.seg button .c{opacity:.7;margin-left:5px;font-weight:400}
+.seg button.on{background:var(--line);color:var(--tan);box-shadow:inset 0 -2px 0 var(--amber)}
+.chip{display:inline-block;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.12em;padding:2px 6px;border-radius:2px;line-height:1.2;white-space:nowrap}
+.chip.act{background:var(--amber);color:#0B0E0C}.chip.hold{background:var(--hold);color:var(--tan)}
+.chip.queue{background:var(--line);color:var(--tan)}.chip.done{background:var(--olive);color:#0B0E0C}
+.btag{font-family:var(--mono);font-size:8.5px;letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);padding:1px 4px;border-radius:2px}
+.btag.kal{color:var(--tan);border-color:#4a4330}
+.card{display:flex;flex-direction:column;gap:4px;padding:9px 0;border-bottom:1px solid var(--line)}
+.card:first-child{padding-top:0}.card:last-child{border-bottom:0;padding-bottom:0}
+.ch{display:flex;align-items:center;gap:7px}
+.ch .ln{color:var(--ink);font-weight:600;font-size:12.5px}
+.ch .go{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--dim)}
+.ct{color:var(--ink);font-size:13px;line-height:1.35}
+.empty{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--dim);padding:6px 0;text-transform:uppercase}
+
+/* ---------- dossier sheet ---------- */
+#sheet{position:fixed;inset:0;z-index:50;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55)}
+#sheet.on{display:flex}
+#sheet .pn{width:min(460px,100%);max-height:72vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom) + 16px);animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+#sheet .hd{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+#sheet .hd img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid var(--line)}
+#sheet .hd .nm{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--ink)}
+#sheet .hd .zs{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);margin-top:2px}
+#sheet .x{margin-left:auto;appearance:none;background:transparent;border:1px solid var(--line);color:var(--tan);font-family:var(--mono);font-size:10px;padding:5px 8px;border-radius:2px;cursor:pointer}
+
+/* footer */
+.ft{font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);text-align:center;text-transform:uppercase;line-height:1.8}
+.ft a{color:var(--tan);border-bottom:1px dotted var(--tan)}
+.ft .st{color:var(--holdink);font-weight:700}
+.boards{display:flex;justify-content:center;gap:10px;margin-bottom:2px}
+
+/* gate */
+#gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;background:var(--bg)}
+#gate form{position:relative;width:min(340px,100%);display:flex;flex-direction:column;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px}
+#gate .brand{font-size:14px;text-align:center}
+#gate .cls{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-align:center;text-transform:uppercase}
+#gate label{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--tan);text-transform:uppercase}
+#gate input{width:100%;margin-top:6px;background:#0B0E0C;border:1px solid var(--line);border-radius:2px;color:var(--ink);padding:12px;font-family:var(--mono);font-size:16px;letter-spacing:.2em;text-align:center;outline:none}
+#gate input:focus{border-color:var(--olive);box-shadow:0 0 0 1px var(--olive)}
+#gate button{background:var(--olive);color:#0B0E0C;border:0;border-radius:2px;padding:12px;font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.2em;cursor:pointer}
+#gate .err{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.16em;color:var(--holdink);min-height:16px;text-align:center}
+#gate.shake form{animation:sh .3s}
+@keyframes sh{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+#app{display:none}
+#edge{position:fixed;inset:0;pointer-events:none;z-index:45;opacity:0}
+#edge.rtb{box-shadow:inset 0 0 0 3px #9bb05a,inset 0 0 70px 18px rgba(155,176,90,.7);animation:edge 1.2s ease-out}
+#edge.dep{box-shadow:inset 0 0 0 2px var(--amber),inset 0 0 50px 10px rgba(232,163,23,.45);animation:edge .9s ease-out}
+#edge.hld{box-shadow:inset 0 0 0 2px var(--holdink),inset 0 0 50px 10px rgba(224,122,95,.45);animation:edge .9s ease-out}
+@keyframes edge{0%{opacity:0}12%{opacity:1}100%{opacity:0}}
+.snd{appearance:none;background:transparent;border:1px solid var(--line);border-radius:2px;color:var(--tan);font-size:12px;line-height:1;padding:3px 5px;cursor:pointer}
+.snd.off{opacity:.55}
+@media (prefers-reduced-motion:reduce){.sweep,.tok .bod,.ring::after,.wire::before{animation:none!important}:root{--fly:400ms}}
+</style>
+</head>
+<body>
+<div id="gate"><form id="gf" autocomplete="off">
+  <div class="brand">MW4 <span class="sl">//</span> COMMAND</div>
+  <div class="cls">Restricted · Task Force Kinsora · Eyes only · feed encrypted</div>
+  <label for="pw">Auth code
+    <input id="pw" type="password" placeholder="••••••••" autocomplete="current-password" autofocus>
+  </label>
+  <button type="submit">▶ UNLOCK</button>
+  <div class="err" id="gerr"></div>
+</form></div>
+
+<div id="app"><div class="wrap">
+  <div class="top">
+    <div class="brand">MW4 <span class="sl">//</span> COMMAND <span class="sl">·</span> TF141</div>
+    <div class="asof"><span class="dot" id="dot"></span><span id="upd">—</span><button class="snd" id="snd" type="button" aria-label="Toggle sound" title="Sound">🔊</button></div>
+  </div>
+  <div class="chrome">
+    <div class="act"><span class="l">ACT</span><span class="n" id="nAct">0</span></div>
+    <div class="hld"><span class="l">HOLD</span><span class="n" id="nHold">0</span></div>
+    <div class="q"><span class="l">QUEUE</span><span class="n" id="nQ">0</span></div>
+    <div class="shp"><span class="l">SHIPPED</span><span class="n" id="nShip">0</span></div>
+  </div>
+  <div class="intel" id="intel"></div>
+
+  <section class="stage" id="stage">
+    <span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span>
+    <div class="ao">
+      <div class="sweep"></div>
+      <div class="zhead"><b>AO · Across the wire</b><span id="aoc">0 DEPLOYED</span></div>
+      <div class="grid">GRID 38S MB 4471<br>OBJ · KINSORA</div>
+      <div class="cmp"></div>
+      <div class="quiet" id="quiet">AO QUIET · NO OPERATORS DEPLOYED</div>
+      <div class="zone" id="zAO"></div>
+    </div>
+    <div class="wire" id="wire">
+      <span class="side up">▲ ACROSS · FIELD</span><span class="side dn">▼ THIS SIDE · BASE</span>
+      <span class="chev l"><span>›</span><span>›</span><span>›</span></span>
+      <span class="lbl">—— CROSSING THE WIRE ——</span>
+      <span class="chev r"><span>‹</span><span>‹</span><span>‹</span></span>
+    </div>
+    <div class="holdbox" id="holdbox">
+      <span class="hz"></span>
+      <div class="zhead"><b>Hold box · Awaiting Hunter</b><span id="hdc">0 STALLED</span></div>
+      <div class="zone" id="zHOLD"></div>
+    </div>
+    <div class="fob">
+      <div class="zhead"><b>FOB · Ready room</b><span><button class="drill" id="drill" type="button">▶ DRILL</button></span></div>
+      <div class="fobgrid">
+        <div class="cp"><div class="zone" id="zCP"></div></div>
+        <div class="zone" id="zREADY"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="ticker"><span class="tl">AAR</span><div class="vp"><div class="rail" id="rail"></div></div></div>
+
+  <details class="log" id="log">
+    <summary>MISSION LOG<span class="r" id="logc">CMD + KAL</span></summary>
+    <div class="logb">
+      <div class="seg" role="tablist">
+        <button data-tab="ops" class="on">OPS<span class="c" id="tOps"></span></button>
+        <button data-tab="hold">HOLD<span class="c" id="tHold"></span></button>
+        <button data-tab="done">DONE<span class="c" id="tDone"></span></button>
+      </div>
+      <div id="feed"></div>
+    </div>
+  </details>
+
+  <div class="ft">
+    <div class="boards"><a id="cmdLink" target="_blank" rel="noopener">CMD BOARD ↗</a><a id="kalLink" target="_blank" rel="noopener">KAL BOARD ↗</a></div>
+    <div><span id="stale"></span>AUTO-REFRESH · POLLS 20S · <span id="ref">—</span> · <a href="#" id="lock">LOCK</a></div>
+  </div>
+</div></div>
+
+<div id="edge"></div>
+<div id="sheet"><div class="pn" id="sheetp"></div></div>
+
+<script>
+(() => {
+  'use strict';
+  // Feed is an encrypted envelope {v,alg:"AES-GCM",kdf:"PBKDF2-SHA256",iter,salt,iv,ct}. The auth code is
+  // checked against HASH, then stretched with PBKDF2-SHA256(salt, iter) into an AES-256-GCM key (Web Crypto).
+  // The raw key (not the code) is kept in sessionStorage so a reload in the same tab stays unlocked.
+  const HASH = '0b488216b0f3fff7076b1a9af7ed5abb84e17176fde44fddba9138b0ab08fcc9';
+  const KEY = 'mw4hud.unlock', KKEY = 'mw4hud.k', ZKEY = 'mw4hud.zones', EKEY = 'mw4hud.lastEvent', SKEY = 'mw4hud.sound';
+  const POLL_MS = 20000, STALE_MS = 30 * 60 * 1000, FLY_MS = 1200, STEP_MS = FLY_MS + 1100;
+  const OPS = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
+  const LIST = { doing: { tag: 'ACT', tone: 'act', rank: 0 }, waiting: { tag: 'HOLD', tone: 'hold', rank: 1 }, backlog: { tag: 'QUEUE', tone: 'queue', rank: 2 }, done: { tag: 'DONE', tone: 'done', rank: 3 } };
+  const ZLABEL = { ao: 'DEPLOYED · ACROSS THE WIRE', hold: 'HOLD · AWAITING HUNTER', ready: 'FOB · QUEUED', idle: 'FOB · STANDING BY', cp: 'FOB · COMMAND POST' };
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const safeUrl = (u) => /^https:\/\/trello\.com\//.test(u || '') ? u : '#';
+  const te = new TextEncoder();
+  const b64 = { enc: (u) => btoa(String.fromCharCode(...new Uint8Array(u))), dec: (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0)) };
+  async function sha256(t) {
+    const b = await crypto.subtle.digest('SHA-256', te.encode(t));
+    return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('');
+  }
+  let aesKey = null, keyMeta = null;   // CryptoKey + {salt, iter} it was derived for
+  async function deriveFrom(code, env) {
+    const km = await crypto.subtle.importKey('raw', te.encode(code), 'PBKDF2', false, ['deriveBits']);
+    const raw = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: b64.dec(env.salt), iterations: env.iter }, km, 256);
+    keyMeta = { salt: env.salt, iter: env.iter };
+    aesKey = await crypto.subtle.importKey('raw', raw, 'AES-GCM', false, ['decrypt']);
+    try { sessionStorage.setItem(KKEY, JSON.stringify({ ...keyMeta, k: b64.enc(raw) })); } catch (_) { /* private mode */ }
+  }
+  async function restoreKey() {
+    try {
+      const s = JSON.parse(sessionStorage.getItem(KKEY) || 'null'); if (!s) return false;
+      aesKey = await crypto.subtle.importKey('raw', b64.dec(s.k), 'AES-GCM', false, ['decrypt']); keyMeta = { salt: s.salt, iter: s.iter }; return true;
+    } catch (_) { return false; }
+  }
+  async function fetchEnv() {
+    const r = await fetch('./status.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }
+  async function openEnv(env) {
+    if (!env || !env.ct) return env; // legacy cleartext feed
+    if (!aesKey) throw new Error('NO KEY');
+    if (keyMeta && (keyMeta.salt !== env.salt || keyMeta.iter !== env.iter)) { relock('KEY ROTATED · RE-ENTER CODE'); throw new Error('KEY ROTATED'); }
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(env.iv) }, aesKey, b64.dec(env.ct));
+    return JSON.parse(new TextDecoder().decode(pt));
+  }
+  function relock(msg) {
+    sessionStorage.removeItem(KEY); sessionStorage.removeItem(KKEY); aesKey = null;
+    if (started) location.reload(); else { $('gate').style.display = ''; $('gerr').textContent = msg || ''; }
+  }
+
+  // ---------- sound (Web Audio, no files) ----------
+  let soundOn = localStorage.getItem(SKEY) !== '0', actx = null;
+  const paintSnd = () => { $('snd').textContent = soundOn ? '🔊' : '🔇'; $('snd').classList.toggle('off', !soundOn); };
+  function audio() {
+    if (!actx) { const A = window.AudioContext || window.webkitAudioContext; if (!A) return null; actx = new A(); }
+    if (actx.state === 'suspended') actx.resume().catch(() => {});
+    return actx;
+  }
+  function tone(f0, f1, t0, dur, type = 'triangle', vol = 0.12) {
+    const a = audio(); if (!a) return;
+    const o = a.createOscillator(), g = a.createGain(), t = a.currentTime + t0;
+    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
+  }
+  function blip(kind) {
+    if (!soundOn) return;
+    if (kind === 'deploy') { tone(420, 880, 0, 0.22, 'square', 0.07); tone(880, 1320, 0.2, 0.12, 'triangle', 0.09); }
+    else if (kind === 'rtb') { tone(988, 988, 0, 0.13, 'triangle', 0.13); tone(659, 659, 0.16, 0.2, 'triangle', 0.13); }
+    else if (kind === 'hold') { tone(196, 150, 0, 0.38, 'sawtooth', 0.06); tone(98, 90, 0, 0.38, 'sine', 0.12); }
+    else if (kind === 'cleared') { tone(523, 784, 0, 0.16, 'sine', 0.1); }
+  }
+  $('snd').addEventListener('click', (e) => { e.stopPropagation(); soundOn = !soundOn; localStorage.setItem(SKEY, soundOn ? '1' : '0'); paintSnd(); if (soundOn) blip('cleared'); });
+  ['pointerdown', 'touchstart', 'keydown'].forEach((ev) => document.addEventListener(ev, () => { if (soundOn) audio(); }, { passive: true }));
+  paintSnd();
+
+  let lastData = null, lastFetch = null, tab = 'ops', cards = [], pending = null, started = false;
+  let prevZones = null;           // op -> committed zone from the previous render (in memory)
+  const shown = {};               // op -> zone currently drawn on stage
+  let events = [];                // locally observed transitions (fallback when the feed has no events)
+  let feedEvents = [];            // server events (feed.events)
+  let lastEventSeen = localStorage.getItem(EKEY) || '';
+  let drill = null;               // {op, phase:'out'|'back'} simulated run
+  let queue = [], playing = false, stageDirty = false, ov = {};
+  const toks = {};                // op -> token element (persistent so we can FLIP)
+
+  function unlock() {
+    if (started) return; started = true;
+    $('gate').style.display = 'none'; $('app').style.display = 'block';
+    load(); setInterval(load, POLL_MS);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (pending) { const d = pending; pending = null; render(d); } load(); } });
+  }
+  $('gf').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = $('pw').value; $('pw').value = '';
+    if (soundOn) audio(); // user gesture: unlock audio on iOS
+    const h = await sha256(code);
+    if (h !== HASH) { $('gerr').textContent = '✕ ACCESS DENIED'; const g = $('gate'); g.classList.remove('shake'); void g.offsetWidth; g.classList.add('shake'); return; }
+    $('gerr').textContent = 'DECRYPTING…';
+    try {
+      const env = await fetchEnv();
+      if (env.ct) { await deriveFrom(code, env); await openEnv(env); }
+      sessionStorage.setItem(KEY, h); $('gerr').textContent = ''; unlock();
+    } catch (err) { $('gerr').textContent = '✕ DECRYPT FAILED · ' + String(err.message || err).toUpperCase().slice(0, 40); }
+  });
+  $('lock').addEventListener('click', (e) => { e.preventDefault(); relock(); });
+  document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
+    tab = b.dataset.tab; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b)); renderFeed();
+  }));
+  $('sheet').addEventListener('click', (e) => { if (e.target.id === 'sheet' || e.target.closest('.x')) $('sheet').classList.remove('on'); });
+  if (sessionStorage.getItem(KEY) === HASH) restoreKey().then((ok) => { if (ok) unlock(); else relock(); });
+
+  const ago = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'just now' : m < 60 ? m + 'm ago' : Math.floor(m / 60) + 'h ' + (m % 60) + 'm ago'; };
+  const agoShort = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'NOW' : m < 60 ? m + 'M' : Math.floor(m / 60) + 'H'; };
+  const stamp = (d) => {
+    const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(d).map((x) => [x.type, x.value]));
+    return `${p.day} ${String(p.month).toUpperCase()} · ${p.hour}${p.minute} PT`;
+  };
+  const laneOf = (c, fb) => {
+    if (c.lane) return c.lane;
+    const m = /^\s*([A-Za-z]+)/.exec(c.name || ''); const hit = m && OPS.find((o) => o.toLowerCase() === m[1].toLowerCase());
+    return hit || fb || '';
+  };
+  const shortOf = (c) => { // feed supplies c.short (build-status.mjs); this is only a fallback
+    if (c.short) return c.short;
+    const n = String(c.name || ''), lane = c.lane;
+    let t = lane ? n.replace(new RegExp('^\\s*' + lane + '\\s*(?::|—|–|-)\\s*', 'i'), '') : n;
+    t = t.charAt(0).toUpperCase() + t.slice(1);
+    return t.length > 28 ? t.slice(0, 27).replace(/\s+\S*$/, '') + '…' : t;
+  };
+
+  function tick() {
+    if (!lastData) return;
+    const t = new Date(lastData.updatedAt), age = Date.now() - t.getTime(), stale = !(age <= STALE_MS);
+    $('dot').classList.toggle('stale', stale);
+    $('upd').textContent = isNaN(t) ? '—' : stamp(t);
+    $('stale').innerHTML = stale ? `<span class="st">⚠ STALE · DATA ${esc(ago(age).toUpperCase())}</span> · ` : '';
+    $('ref').textContent = lastFetch ? 'SYNC ' + ago(Date.now() - lastFetch).toUpperCase() : '—';
+  }
+  setInterval(tick, 10000);
+
+  async function load() {
+    try {
+      const d = await openEnv(await fetchEnv()); lastData = d; lastFetch = Date.now();
+      if (document.hidden && prevZones) pending = d; else render(d); // hold deltas until Hunter is looking
+      tick();
+    } catch (err) { $('ref').innerHTML = '<span class="st">LINK DOWN · ' + esc(err.message) + '</span>'; }
+  }
+
+  const chip = (tag, tone) => `<span class="chip ${tone}">${tag}</span>`;
+
+  // ---------- Trello -> theater model ----------
+  function model() {
+    const out = {};
+    for (const op of OPS) {
+      const mine = cards.filter((c) => c.lane === op);
+      const g = (k) => mine.filter((c) => c.list === k);
+      const doing = g('doing'), waiting = g('waiting'), backlog = g('backlog'), done = g('done');
+      let zone = doing.length ? 'ao' : op === 'Price' ? 'cp' : waiting.length ? 'hold' : backlog.length ? 'ready' : 'idle';
+      out[op] = { op, zone, doing, waiting, backlog, done };
+    }
+    if (drill && out[drill.op]) {
+      const m = out[drill.op];
+      if (drill.phase === 'out') { m.zone = 'ao'; m.doing = [{ short: 'TRAINING DRILL · kill-house run', drill: true }, ...m.doing]; }
+    }
+    return out;
+  }
+  // apply temporary zone overrides (event replay) on top of the real model
+  function withOv(M) {
+    const out = { ...M };
+    for (const [op, o] of Object.entries(ov)) {
+      const m = { ...M[op], zone: o.zone };
+      if (o.zone === 'ao' && !m.doing.length) m.doing = [{ short: o.mission || 'Mission' }];
+      if (o.zone === 'ao' && o.mission && !m.doing.some((c) => c.short === o.mission)) m.doing = [{ short: o.mission }, ...m.doing];
+      if (o.zone === 'hold' && !m.waiting.length) m.waiting = [{ short: o.mission || 'Awaiting Hunter' }];
+      if (o.zone === 'ready' && !m.backlog.length) m.zone = 'idle';
+      out[op] = m;
+    }
+    return out;
+  }
+
+  function makeTok(op) {
+    const el = document.createElement('div');
+    el.className = 'tok'; el.dataset.op = op;
+    const ini = op.slice(0, 2).toUpperCase();
+    el.innerHTML = `<span class="flash"></span><div class="bod"><div class="ring"><img src="avatars/${op.toLowerCase()}.png" alt="${esc(op)}" onerror="this.outerHTML='<div class=&quot;ini&quot;>${ini}</div>'"><span class="badge"></span><span class="hb"></span></div>
+      <div class="cs">${esc(op)}${op === 'Price' ? '<span class="rk">CPT</span>' : ''}</div><div class="plate"></div><span class="rtbtag"></span></div>`;
+    el.addEventListener('click', () => openSheet(op));
+    return el;
+  }
+
+  function paintTok(el, m) {
+    el.className = 'tok s-' + m.zone + (el.classList.contains('fly') ? ' fly' : '');
+    const badge = el.querySelector('.badge'), hb = el.querySelector('.hb'), plate = el.querySelector('.plate'), rtb = el.querySelector('.rtbtag');
+    let b = '', h = '', p = '';
+    if (m.zone === 'ao') {
+      if (m.doing.length > 1) b = '×' + m.doing.length;
+      if (m.waiting.length) h = 'H' + m.waiting.length;
+      const lines = m.doing.slice(0, 2).map((c) => `<span class="ln" title="${esc(c.name || c.short)}">${esc(c.short)}</span>`);
+      if (m.doing.length > 2) lines.push(`<span class="ln">+${m.doing.length - 2} more</span>`);
+      p = `<span class="mk">${m.doing[0] && m.doing[0].drill ? 'SIM · ' : ''}MISSION</span>` + lines.join('');
+    } else if (m.zone === 'hold') {
+      b = 'HOLD' + (m.waiting.length > 1 ? ' ×' + m.waiting.length : '');
+      p = esc(m.waiting[0] ? m.waiting[0].short : 'Awaiting Hunter');
+    } else if (m.zone === 'ready') {
+      b = 'Q' + m.backlog.length; p = esc(m.backlog[0] ? m.backlog[0].short : '');
+    } else if (m.zone === 'cp') {
+      if (m.waiting.length) h = 'H' + m.waiting.length;
+      p = 'OVERWATCH';
+    } else p = 'STANDBY';
+    badge.textContent = b; badge.classList.toggle('on', !!b);
+    hb.textContent = h; hb.classList.toggle('on', !!h);
+    plate.innerHTML = p;
+    const last = m.done.filter((c) => c.doneAt).sort((a, c) => c.doneAt.localeCompare(a.doneAt))[0];
+    const age = last ? Date.now() - new Date(last.doneAt).getTime() : Infinity;
+    const showR = m.zone !== 'ao' && age < 3 * 3600 * 1000;
+    rtb.textContent = showR ? 'RTB ' + agoShort(age) : ''; rtb.classList.toggle('on', showR);
+  }
+
+  function flashTok(el, kind, text) {
+    const f = el.querySelector('.flash');
+    f.className = 'flash ' + kind; f.textContent = text; void f.offsetWidth; f.classList.add('go');
+  }
+  function edge(kind) { const e = $('edge'); e.className = ''; void e.offsetWidth; e.className = kind; }
+
+  const ZEL = { ao: 'zAO', hold: 'zHOLD', ready: 'zREADY', idle: 'zREADY', cp: 'zCP' };
+  const SIDE = (z) => (z === 'ao' ? 'field' : 'base');
+
+  // returns 'out' | 'back' | '' (direction of any wire crossing)
+  function renderStage(M, animate, snap = []) {
+    const first = {};
+    if (animate) for (const op of OPS) if (toks[op] && toks[op].isConnected && !snap.includes(op)) first[op] = toks[op].getBoundingClientRect();
+    const order = { zAO: [], zHOLD: [], zREADY: [], zCP: [] };
+    for (const op of OPS) order[ZEL[M[op].zone]].push(op);
+    order.zHOLD.sort((a, b) => M[b].waiting.length - M[a].waiting.length);
+    order.zREADY.sort((a, b) => (M[a].zone === 'idle') - (M[b].zone === 'idle'));
+    for (const [zid, list] of Object.entries(order)) {
+      const z = $(zid);
+      for (const op of list) {
+        if (!toks[op]) toks[op] = makeTok(op);
+        paintTok(toks[op], M[op]);
+        z.appendChild(toks[op]);
+      }
+    }
+    const nAO = order.zAO.length, nH = order.zHOLD.length;
+    $('aoc').textContent = nAO + ' DEPLOYED'; $('quiet').style.display = nAO ? 'none' : '';
+    $('hdc').textContent = nH + ' STALLED'; $('holdbox').classList.toggle('empty', !nH);
+    let crossed = '';
+    const was = { ...shown };
+    for (const op of OPS) shown[op] = M[op].zone;
+    if (!animate) return '';
+    for (const op of OPS) {
+      const el = toks[op], a = first[op]; if (!a) continue;
+      const b = el.getBoundingClientRect();
+      const dx = (a.left + a.width / 2) - (b.left + b.width / 2), dy = (a.top + a.height / 2) - (b.top + b.height / 2);
+      if (Math.abs(dx) < 1 && Math.abs(dy) < 1) continue;
+      const pz = was[op], nz = M[op].zone, big = pz && pz !== nz;
+      if (big && SIDE(pz) !== SIDE(nz)) crossed = nz === 'ao' ? 'out' : 'back';
+      el.style.transition = 'none'; el.style.transform = `translate(${dx}px,${dy}px)`;
+      if (big) el.classList.add('fly');
+      void el.offsetWidth;
+      const dur = big ? FLY_MS : 450;
+      el.style.transition = `transform ${dur}ms cubic-bezier(.45,.05,.25,1)`; el.style.transform = '';
+      setTimeout(() => { el.classList.remove('fly'); el.style.transition = ''; }, dur + 50);
+    }
+    if (crossed) { const w = $('wire'); w.classList.remove('hot', 'rtb'); void w.offsetWidth; w.classList.add('hot'); if (crossed === 'back') w.classList.add('rtb'); }
+    return crossed;
+  }
+
+  // local fallback: zone changes noticed between two polls (used for ops the feed has no events for)
+  function diffEvents(M, skip) {
+    if (!prevZones) return;
+    for (const op of OPS) {
+      if (skip && skip.has(op)) continue;
+      const pz = prevZones[op], nz = M[op].zone; if (!pz || pz === nz) continue;
+      const el = toks[op]; let ev = null;
+      const lastDone = M[op].done.filter((c) => c.doneAt).sort((a, c) => c.doneAt.localeCompare(a.doneAt))[0];
+      if (pz === 'ao' && nz === 'hold') { ev = { k: 'hld', tag: 'STALLED', txt: M[op].waiting[0]?.short || 'awaiting Hunter' }; flashTok(el, 'hld', 'HOLD'); blip('hold'); edge('hld'); }
+      else if (pz === 'ao') { ev = { k: 'rtb', tag: 'RTB', txt: drill && drill.op === op ? 'Drill complete (sim)' : lastDone?.short || 'mission closed' }; flashTok(el, 'rtb', 'RTB ✓'); blip('rtb'); edge('rtb'); }
+      else if (nz === 'ao') { ev = { k: 'dep', tag: 'DEPLOY', txt: M[op].doing[0]?.short || '' }; flashTok(el, 'dep', '▲ DEPLOY'); blip('deploy'); edge('dep'); }
+      else if (pz === 'hold') { ev = { k: 'rtb', tag: 'CLEARED', txt: 'released from hold' }; flashTok(el, 'clr', 'CLEARED'); blip('cleared'); }
+      else if (nz === 'hold') { ev = { k: 'hld', tag: 'HOLD', txt: M[op].waiting[0]?.short || '' }; flashTok(el, 'hld', 'HOLD'); blip('hold'); }
+      if (ev) events.unshift({ ...ev, op, at: Date.now(), isNew: true });
+    }
+    events = events.slice(0, 8);
+  }
+
+  // ---------- server event replay (Gap 3) ----------
+  const baseZone = (op, M) => (op === 'Price' ? 'cp' : M[op].backlog.length ? 'ready' : 'idle');
+  function legs(e, M) {
+    const cur = M[e.op].zone;
+    if (e.kind === 'deploy') return [cur !== 'ao' ? cur : baseZone(e.op, M), 'ao'];
+    if (e.kind === 'rtb') return ['ao', cur !== 'ao' ? cur : baseZone(e.op, M)];
+    if (e.kind === 'hold') return [e.from === 'doing' ? 'ao' : cur !== 'hold' ? cur : baseZone(e.op, M), 'hold'];
+    return ['hold', cur !== 'hold' ? cur : baseZone(e.op, M)]; // cleared
+  }
+  function markSeen(t) { if (t > lastEventSeen) { lastEventSeen = t; try { localStorage.setItem(EKEY, t); } catch (_) { /* */ } } }
+  function playQueue() {
+    if (playing) return;
+    const e = queue.shift();
+    if (!e) { ov = {}; const M = model(); renderStage(M, true); commit(M); renderTicker(); if (stageDirty) { stageDirty = false; stageUpdate(); } return; }
+    playing = true;
+    const M = model(), [from, to] = legs(e, M);
+    ov[e.op] = { zone: from, mission: e.mission };
+    renderStage(withOv(M), true, [e.op]);           // snap token to its starting zone
+    setTimeout(() => {
+      ov[e.op] = { zone: to, mission: e.mission };
+      renderStage(withOv(model()), true);           // fly across the wire
+      const el = toks[e.op];
+      const F = { deploy: ['dep', '▲ DEPLOY'], rtb: ['rtb', 'RTB ✓'], hold: ['hld', 'HOLD'], cleared: ['clr', 'CLEARED'] }[e.kind];
+      if (el && F) flashTok(el, F[0], F[1]);
+      blip(e.kind); edge({ deploy: 'dep', rtb: 'rtb', hold: 'hld' }[e.kind] || '');
+      e.isNew = true; markSeen(e.t); renderTicker();
+      setTimeout(() => { playing = false; playQueue(); }, STEP_MS);
+    }, 120);
+  }
+
+  const EK = { deploy: ['dep', 'DEPLOY'], rtb: ['rtb', 'RTB'], hold: ['hld', 'HOLD'], cleared: ['rtb', 'CLEARED'] };
+  function renderTicker() {
+    const done = cards.filter((c) => c.list === 'done').sort((a, b) => String(b.doneAt || '').localeCompare(String(a.doneAt || '')));
+    const items = [];
+    const rtbSeen = new Set();
+    const fe = feedEvents.filter((e) => Date.now() - Date.parse(e.t) < 3 * 3600 * 1000 && e.t <= lastEventSeen).slice().reverse();
+    for (const e of fe) {
+      const [k, tag] = EK[e.kind] || ['rtb', String(e.kind).toUpperCase()];
+      if (e.kind === 'rtb') rtbSeen.add(e.mission);
+      items.push(`<span class="ti${e.isNew ? ' new' : ''}"><span class="k ${k}">${tag} · ${esc(String(e.op).toUpperCase())}</span>${esc(e.mission || '')}<span class="w">${agoShort(Date.now() - Date.parse(e.t))}</span></span>`);
+    }
+    for (const e of events.filter((x) => Date.now() - x.at < 30 * 60 * 1000))
+      items.push(`<span class="ti${e.isNew ? ' new' : ''}"><span class="k ${e.k}">${e.tag} · ${esc(e.op.toUpperCase())}</span>${esc(e.txt)}<span class="w">${agoShort(Date.now() - e.at)}</span></span>`);
+    for (const c of done.slice(0, 12)) {
+      if (rtbSeen.has(c.short)) continue;
+      const who = c.lane ? c.lane.toUpperCase() : 'TF141';
+      const w = c.doneAt ? `<span class="w">${agoShort(Date.now() - new Date(c.doneAt).getTime())}</span>` : '';
+      items.push(`<span class="ti"><span class="k">RTB · ${esc(who)}</span>${esc(c.short)}${w}</span>`);
+    }
+    events.forEach((e) => { e.isNew = false; }); feedEvents.forEach((e) => { e.isNew = false; });
+    if (!items.length) items.push('<span class="ti"><span class="k">AAR</span>No ships logged yet today</span>');
+    const html = items.join('');
+    const rail = $('rail');
+    if (rail.dataset.h !== html) {
+      rail.dataset.h = html; rail.innerHTML = html + html;
+      rail.style.setProperty('--dur', Math.max(20, items.length * 6) + 's');
+    }
+  }
+
+  function render(d) {
+    const C = d.command || {}, K = d.kal || {};
+    cards = [];
+    for (const [board, B, fb] of [['CMD', C, ''], ['KAL', K, 'Kal']]) {
+      const L = B.lists || {};
+      for (const k of Object.keys(LIST)) for (const c of L[k] || []) {
+        const lane = laneOf(c, fb);
+        cards.push({ ...c, lane, list: k, board, short: shortOf({ ...c, lane }) });
+      }
+    }
+    const by = (k) => cards.filter((c) => c.list === k);
+    const cc = C.counts || {}, kc = K.counts || {};
+    const nAct = by('doing').length, nHold = by('waiting').length, nQ = by('backlog').length;
+    const nShip = (cc.doneToday || 0) + (kc.doneToday || 0);
+    $('nAct').textContent = nAct; $('nHold').textContent = nHold; $('nQ').textContent = nQ; $('nShip').textContent = nShip;
+    $('cmdLink').href = safeUrl(C.boardUrl); $('kalLink').href = safeUrl(K.boardUrl);
+
+    const g = d.glance || {};
+    $('intel').innerHTML = (g.line1 || g.line2) ? `${g.badge ? `<span class="bd">${esc(g.badge)}</span>` : ''}<span class="tx">${esc(g.line1 || '')}${g.line2 ? ' · <i>' + esc(g.line2) + '</i>' : ''}</span>` : '';
+
+    const known = new Set(feedEvents.map((e) => e.t + e.op + e.kind));
+    for (const e of Array.isArray(d.events) ? d.events : []) if (!known.has(e.t + e.op + e.kind)) feedEvents.push({ ...e });
+    feedEvents = feedEvents.filter((e) => Date.now() - Date.parse(e.t) < 6 * 3600 * 1000).sort((a, b) => a.t.localeCompare(b.t));
+    if (playing || queue.length) stageDirty = true; else stageUpdate();
+    $('tOps').textContent = nAct + nHold + nQ; $('tHold').textContent = nHold;
+    $('tDone').textContent = by('done').length || nShip || '';
+    $('logc').textContent = `${nAct + nHold + nQ} OPEN · CMD + KAL`;
+    renderFeed();
+  }
+
+  function newFeedEvents() {
+    const fresh = feedEvents.filter((e) => OPS.includes(e.op) && e.t > lastEventSeen && !queue.includes(e));
+    if (!lastEventSeen) { // first visit on this device: don't replay history, start tracking from now
+      const max = feedEvents.reduce((m, e) => (e.t > m ? e.t : m), (lastData && lastData.updatedAt) || ''); if (max) markSeen(max); return [];
+    }
+    if (fresh.length > 8) { markSeen(fresh[fresh.length - 9].t); return fresh.slice(-8); }
+    return fresh;
+  }
+
+  function stageUpdate() {
+    const M = model();
+    const fresh = drill ? [] : newFeedEvents();
+    if (fresh.length) {
+      // keep the ops we're about to replay where they're drawn now; everyone else moves normally
+      const skip = new Set(fresh.map((e) => e.op));
+      ov = {}; for (const op of skip) if (shown[op]) ov[op] = { zone: shown[op] };
+      const first = !prevZones;
+      renderStage(first ? M : withOv(M), !first);
+      if (!first) diffEvents(M, skip);
+      commit(M);
+      queue.push(...fresh);
+      renderTicker();
+      setTimeout(playQueue, first ? 700 : 300);
+      return;
+    }
+    let animate = !!prevZones;
+    if (!prevZones) { // first load, no feed events to replay: replay zone changes seen since last visit (<12h)
+      try {
+        const s = JSON.parse(localStorage.getItem(ZKEY) || 'null');
+        if (s && Date.now() - s.at < 12 * 3600 * 1000 && s.z) {
+          const changed = OPS.filter((op) => s.z[op] && s.z[op] !== M[op].zone);
+          if (changed.length && changed.length <= 6) {
+            const ghostM = {}; for (const op of OPS) ghostM[op] = s.z[op] ? { ...M[op], zone: s.z[op] === 'ao' && !M[op].doing.length ? 'ao' : s.z[op] } : M[op];
+            for (const op of changed) if (ghostM[op].zone === 'ao' && !ghostM[op].doing.length) ghostM[op] = { ...ghostM[op], doing: [{ short: M[op].done[0]?.short || 'Mission' }] };
+            for (const op of changed) if (ghostM[op].zone === 'hold' && !ghostM[op].waiting.length) ghostM[op] = { ...ghostM[op], waiting: [{ short: 'Awaiting Hunter' }] };
+            for (const op of changed) if (ghostM[op].zone === 'ready' && !ghostM[op].backlog.length) ghostM[op] = { ...ghostM[op], zone: 'idle' };
+            renderStage(ghostM, false);
+            prevZones = Object.fromEntries(OPS.map((op) => [op, ghostM[op].zone]));
+            setTimeout(() => { const M2 = model(); renderStage(M2, true); diffEvents(M2); commit(M2); renderTicker(); }, 700);
+            renderTicker();
+            return;
+          }
+        }
+      } catch (_) { /* ignore */ }
+    }
+    renderStage(M, animate);
+    diffEvents(M);
+    commit(M);
+    renderTicker();
+  }
+  function commit(M) {
+    prevZones = Object.fromEntries(OPS.map((op) => [op, M[op].zone]));
+    if (!drill) try { localStorage.setItem(ZKEY, JSON.stringify({ at: Date.now(), z: prevZones })); } catch (_) { /* private mode */ }
+  }
+
+  // ---------- drill: show a full out-and-back run on demand ----------
+  $('drill').addEventListener('click', () => {
+    if (drill || !lastData || playing) return;
+    const M = model();
+    const op = M.Ghost.zone !== 'ao' ? 'Ghost' : OPS.find((o) => o !== 'Price' && M[o].zone !== 'ao');
+    if (!op) return;
+    $('drill').disabled = true;
+    drill = { op, phase: 'out' }; stageUpdate();
+    setTimeout(() => { drill.phase = 'back'; stageUpdate(); setTimeout(() => { drill = null; $('drill').disabled = false; commit(model()); }, FLY_MS + 200); }, 4200);
+  });
+
+  function openSheet(op) {
+    const mine = cards.filter((c) => c.lane === op).sort((a, b) => LIST[a.list].rank - LIST[b.list].rank);
+    const z = shown[op] || '';
+    $('sheetp').innerHTML = `<div class="hd"><img src="avatars/${op.toLowerCase()}.png" alt=""><div><div class="nm">${esc(op.toUpperCase())}${op === 'Price' ? ' · CPT' : ''}</div><div class="zs">${esc(ZLABEL[z] || '')}</div></div><button class="x" type="button">✕ CLOSE</button></div>` +
+      (mine.length ? mine.map(cardHtml).join('') : '<div class="empty">No cards on either board</div>');
+    $('sheet').classList.add('on');
+  }
+
+  const cardHtml = (c) => `<a class="card" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener" title="${esc(c.name || '')}">
+      <div class="ch">${chip(LIST[c.list].tag, LIST[c.list].tone)}<span class="btag ${c.board === 'KAL' ? 'kal' : ''}">${c.board}</span><span class="ln">${esc(c.lane || '—')}</span><span class="go">↗</span></div>
+      <div class="ct">${esc(c.short)}</div></a>`;
+
+  function renderFeed() {
+    let list;
+    if (tab === 'hold') list = cards.filter((c) => c.list === 'waiting');
+    else if (tab === 'done') list = cards.filter((c) => c.list === 'done');
+    else list = cards.filter((c) => c.list !== 'done');
+    if (tab !== 'done') list = [...list].sort((a, b) => LIST[a.list].rank - LIST[b.list].rank || a.lane.localeCompare(b.lane));
+    $('feed').innerHTML = list.length ? list.map(cardHtml).join('')
+      : `<div class="empty">${tab === 'done' ? 'No recent ships on feed yet' : tab === 'hold' ? 'Nothing on Hunter · all clear' : 'No missions'}</div>`;
+  }
+})();
+</script>
+</body>
+</html>

@@ -7,6 +7,20 @@ Phone-first status page. The live site is the Vercel deployment (`mw4-command-hu
 - `tools/build-status.mjs` builds the cleartext model off-repo, diffs it against the previous snapshot (deploy / rtb / hold / cleared events, ~6 h retained), and encrypts it.
 - `tools/mw4crypto.js` is a dependency-free PBKDF2-HMAC-SHA256 + AES-256-GCM decryptor used by the iOS Scriptable widgets (`scriptable/`), assembled by `tools/build-scriptable.mjs`.
 
+## Scriptable install (paste once)
+
+Hunter pastes two short loaders. After that, widget updates ship with a merge to `main`. Do not paste `scriptable/MW4 Glance.js` or `scriptable/MW4 Waiting.js` onto the phone.
+
+1. Install Scriptable from the App Store.
+2. Open the existing **Glance** script, select all, paste `scriptable/MW4 Glance Loader.js`, and keep the name **Glance**. Do the same for **Waiting** with `scriptable/MW4 Waiting Loader.js`.
+3. If those scripts are already gone: create a script, paste the loader, rename it to Glance or Waiting, then point the Home Screen widget at that name.
+4. Home Screen → long-press the widget → Edit Widget → Script: **Glance** or **Waiting**. Glance is small or medium. Waiting is small, medium, or large. Tapping a widget still opens the live HUD.
+5. Run each loader once with ▶ only if the widget says AUTH NEEDED. The HUD code is saved in the iOS Keychain (`mw4hud.authcode`) and is reused from the scripts already on the phone.
+
+Each run downloads the matching built script from GitHub Raw (`main`) and runs it. The last copy that compiled is stored on the phone (`FileManager.local()`, documents directory). If the download fails, that copy runs. If there is no copy yet, the widget shows **NO SCRIPT**.
+
+Developers: edit `scriptable/src/*`, run `node tools/build-scriptable.mjs`, merge to `main`. The build rewrites the full widgets and both loaders. Loaders do not contain the feed URL. The widget they run still requests the encrypted Vercel `status.json` (bypass query included) and decrypts it on the phone. It does not call `/api/feed`.
+
 ## Dashboard hub
 - `docs/<token>/hub/` — phone-first index with tiles for the MW4 Command HUD and the Social (Jae) board.
 - `docs/<token>/social/` — static "Kinsora social — published metrics" board (TikTok @kinsora.co, TikTok @wearkinsora,
@@ -25,5 +39,5 @@ Phone-first status page. The live site is the Vercel deployment (`mw4-command-hu
   server-side with the `MW4_FEED_PASS` project env var and returns JSON with `Cache-Control: no-store`.
 - The repo still only holds the AES-256-GCM envelopes — `status.json` and `social/metrics.json` are
   unchanged and keep being written encrypted by `build-status.mjs` / `build-social.mjs`. Nothing readable is committed.
-- Scriptable widgets fetch the encrypted `status.json` from Vercel and still decrypt on-device with the Keychain auth code (AES-GCM is unchanged). `STATUS_URL` in `scriptable/src/common.js` is the Vercel `status.json` URL plus the Deployment Protection bypass query param. Widgets do not call `/api/feed` (that cleartext endpoint stays SSO-gated). Edit `scriptable/src/*`, then `node tools/build-scriptable.mjs`. After the URL changes, re-paste each built script in Scriptable on the phone, or pull the Raw file after merge — the widget keeps the copy already saved on the device.
+- Scriptable widgets fetch the encrypted `status.json` from Vercel and still decrypt on-device with the Keychain auth code (AES-GCM is unchanged). `STATUS_URL` in `scriptable/src/common.js` is the Vercel `status.json` URL plus the Deployment Protection bypass query param. Widgets do not call `/api/feed` (that cleartext endpoint stays SSO-gated). Phone install is the two loaders above; do not re-paste the full scripts after a merge.
 - `api/feed.js` at the repo root is a shim that only matters if the Vercel Root Directory is the repo root.

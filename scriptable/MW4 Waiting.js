@@ -2,7 +2,7 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: yellow; icon-glyph: exclamation-triangle;
 /*
- * MW4 Waiting — Scriptable widget (small / medium / large). HOLD cage: "Waiting on Hunter" cards (Command, then Kal) under a hazard rail.
+ * MW4 Waiting — Scriptable widget (small / medium / large). HOLD cage: "Waiting on Hunter" cards (Command, then Trading) under a hazard rail.
  *
  * PHONE: do not paste this file. Paste scriptable/MW4 Waiting Loader.js once, over the
  * existing "Waiting" script, and keep the name "Waiting" so the Home Screen widget
@@ -214,7 +214,7 @@ function softFail(w, need, script) {
   txt(w, auth ? `Open Scriptable → run “${script}” (or “MW4 ${script}”) once → enter auth code.` : "Feed unreachable · retrying on next refresh.", F.r(9), col("dim"), 3);
   w.addSpacer();
 }
-const LANE_TAG = (c) => String(c.lane || (c.tag === "KAL" ? "KAL" : "CMD")).toUpperCase();
+const LANE_TAG = (c) => String(c.tag || "").toUpperCase() === "KAL" ? "TRADING" : String(c.lane || "CMD").toUpperCase();
 // Same rule as the HUD: a Doing card is standing when its name or short already says so.
 function isStanding(c) {
   const name = String((c && c.name) || "");
@@ -223,7 +223,7 @@ function isStanding(c) {
 }
 function doingSplit(d) {
   const cmd = (((d || {}).command || {}).lists || {}).doing || [];
-  const kal = ((((d || {}).kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Kal" }));
+  const kal = ((((d || {}).kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Ghost" }));
   const all = [...cmd, ...kal];
   return { finite: all.filter((c) => !isStanding(c)), standing: all.filter(isStanding) };
 }
@@ -237,7 +237,7 @@ function opFromLane(c) {
   const lane = String(c.lane || "");
   const hit = by(lane);
   if (hit) return hit;
-  if (String(c.tag || "").toUpperCase() === "KAL" && !lane) return "Kal";
+  if (String(c.tag || "").toUpperCase() === "KAL" && !lane) return "Ghost";
   const name = String(c.name || "");
   const multi = OPS_AV.find((o) => o.includes(" ") && new RegExp("^\\s*" + o.replace(/\s+/g, "\\s+") + "\\b", "i").test(name));
   if (multi) return multi;
@@ -439,8 +439,9 @@ function cageRow(w, c, fam) {
   r.setPadding(3, 6, 3, 6);
   mountFace(r, opFromLane(c), fam === "small" ? 16 : 22);
   const bar = r.addStack(); bar.size = new Size(3, 14); bar.backgroundColor = col(kal ? "amber" : "holdink");
-  const tg = r.addStack(); tg.size = new Size(fam === "small" ? 34 : 46, 0);
-  txt(tg, LANE_TAG(c).slice(0, 6), F.h(fam === "small" ? 7.5 : 8), col(kal ? "amber" : "tan"), 1); tg.addSpacer();
+  const laneTag = LANE_TAG(c);
+  const tg = r.addStack(); tg.size = new Size(fam === "small" ? (laneTag.length > 4 ? 52 : 34) : (laneTag.length > 4 ? 58 : 46), 0);
+  txt(tg, laneTag, F.h(fam === "small" ? 7.5 : 8), col(kal ? "amber" : "tan"), 1); tg.addSpacer();
   txt(r, c.short || c.name, F.m(fam === "small" ? 8.5 : 9.5), col("ink"), 1);
   r.addSpacer();
   if (c.url && fam !== "small") txt(r, "↗", F.b(8), col("dim"), 1);
@@ -460,12 +461,12 @@ async function build() {
   hdr.addSpacer();
   if (!d) { softFail(w, need || "NO SIGNAL", "Waiting"); return w; }
   const cmdW = ((d.command || {}).lists || {}).waiting || [], kalW = ((d.kal || {}).lists || {}).waiting || [];
-  const items = [...cmdW.map((c) => ({ ...c, tag: "CMD" })), ...kalW.map((c) => ({ ...c, tag: "KAL", lane: c.lane || "Kal" }))];
+  const items = [...cmdW.map((c) => ({ ...c, tag: "CMD" })), ...kalW.map((c) => ({ ...c, tag: "KAL", lane: c.lane || "Ghost" }))];
   chip(hdr, String(items.length), col("holdink"), col("hold", 0.45), 10, col("holdink", 0.8));
 
   w.addSpacer(3);
   const sub = w.addStack(); sub.centerAlignContent(); sub.spacing = 4;
-  if (fam !== "small") { txt(sub, `CMD ${cmdW.length}`, F.sb(7.5), col("tan"), 1); txt(sub, "·", F.sb(7.5), col("dim"), 1); txt(sub, `KAL ${kalW.length}`, F.sb(7.5), col("amber"), 1); }
+  if (fam !== "small") { txt(sub, `CMD ${cmdW.length}`, F.sb(7.5), col("tan"), 1); txt(sub, "·", F.sb(7.5), col("dim"), 1); txt(sub, `TRADING ${kalW.length}`, F.sb(7.5), col("amber"), 1); }
   sub.addSpacer();
   const stale = offline || Date.now() - new Date(d.updatedAt).getTime() > 30 * 60 * 1000;
   txt(sub, (offline ? "OFFLINE · " : stale ? "STALE · " : "") + ago(d.updatedAt), F.sb(7.5), stale ? col("holdink") : col("dim"), 1);
@@ -480,7 +481,7 @@ async function build() {
   const shown = items.slice(0, max);
   await preloadAvatars(shown);
   shown.forEach((c, i) => {
-    if (i && c.tag === "KAL" && shown[i - 1].tag !== "KAL" && fam === "large") { w.addSpacer(2); zoneLabel(w, "KAL BOARD", "amber", "amber", 7); w.addSpacer(2); }
+    if (i && c.tag === "KAL" && shown[i - 1].tag !== "KAL" && fam === "large") { w.addSpacer(2); zoneLabel(w, "TRADING BOARD", "amber", "amber", 7); w.addSpacer(2); }
     cageRow(w, c, fam); w.addSpacer(2);
   });
   w.addSpacer();

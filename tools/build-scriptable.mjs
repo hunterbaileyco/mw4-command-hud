@@ -32,7 +32,7 @@ const INSTALL = (name, sizes, what) => {
 };
 const targets = [
   ['MW4 Glance', 'glance.body.js', 'deep-brown', 'crosshairs', 'small / medium', 'Theater HUD: ACT/HOLD/QUEUE/SHIPPED chrome, AO plates, the wire, HOLD, AAR ticker.'],
-  ['MW4 Waiting', 'waiting.body.js', 'yellow', 'exclamation-triangle', 'small / medium / large', 'HOLD cage: "Waiting on Hunter" cards (Command, then Kal) under a hazard rail.'],
+  ['MW4 Waiting', 'waiting.body.js', 'yellow', 'exclamation-triangle', 'small / medium / large', 'HOLD cage: "Waiting on Hunter" cards (Command, then Trading) under a hazard rail.'],
 ];
 
 // Same acceptance rule the loaders use. A GitHub error page or a 404 body must not replace the cache.

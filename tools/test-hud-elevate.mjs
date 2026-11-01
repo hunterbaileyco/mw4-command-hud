@@ -110,5 +110,17 @@ const hubHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/h
 assert.match(hubHtml, /Ju Kwon/);
 assert.match(hubHtml, /TRADING BOARD/);
 assert.doesNotMatch(hubHtml, /KAL BOARD/);
+assert.doesNotMatch(hubHtml, /'Dunn'/);
+const commonSrc = readFileSync(new URL('../scriptable/src/common.js', import.meta.url), 'utf8');
+const waitingSrc = readFileSync(new URL('../scriptable/src/waiting.body.js', import.meta.url), 'utf8');
+const glanceSrc = readFileSync(new URL('../scriptable/src/glance.body.js', import.meta.url), 'utf8');
+assert.match(commonSrc, /return "Ghost"/);
+assert.match(commonSrc, /"TRADING"/);
+assert.doesNotMatch(commonSrc, /return "Kal"/);
+assert.match(waitingSrc, /TRADING BOARD/);
+assert.match(waitingSrc, /lane: c\.lane \|\| "Ghost"/);
+assert.doesNotMatch(waitingSrc, /KAL BOARD/);
+assert.match(glanceSrc, /\^ghost\$\/i/);
+assert.doesNotMatch(glanceSrc, /\^kal\$\/i/);
 
 console.log('hud elevate checks ok');

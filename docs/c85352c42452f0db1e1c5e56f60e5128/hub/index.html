@@ -282,11 +282,15 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   const slugOf = (op) => op === 'Ju Kwon' ? 'ju' : String(op || '').toLowerCase();
   const iniOf = (op) => op === 'Ju Kwon' ? 'JK' : String(op || '').slice(0, 2).toUpperCase();
   function doingRows(d) {
-    const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Ju Kwon', 'Dunn', 'Soap', 'Gaz', 'Kal'];
+    const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Ju Kwon', 'Soap', 'Gaz', 'Kal'];
     const canon = (lane) => OPSH.find((o) => o.toLowerCase() === String(lane || '').toLowerCase()) || lane || 'TF141';
     const rows = [];
     for (const [board, B] of [['CMD', d.command], ['KAL', d.kal]]) {
-      for (const c of (((B || {}).lists || {}).doing) || []) rows.push({ ...c, board, lane: canon(c.lane || (board === 'KAL' ? 'Ghost' : '')), list: 'doing' });
+      for (const c of (((B || {}).lists || {}).doing) || []) {
+        const lane = canon(c.lane || (board === 'KAL' ? 'Ghost' : ''));
+        if (/^dunn$/i.test(lane)) continue;
+        rows.push({ ...c, board, lane, list: 'doing' });
+      }
     }
     return rows;
   }

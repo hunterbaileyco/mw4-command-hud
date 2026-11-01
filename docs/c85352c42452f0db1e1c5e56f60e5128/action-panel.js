@@ -1,87 +1,69 @@
-/* In-action panel for an operator who is Doing (across the wire).
-   Mission title, brief, lane, and board come only from the feed card.
-   The looping scene is chosen from words already on that card. */
+/* Live feed for one operator. Titles, briefs, lane, and board come only from the feed card.
+   Standing work is cards whose name or short already says "standing" — not a new feed field. */
 (function (root) {
   const OPS = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal"];
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-  const SCENE = {
-    shoot: "CONTENT SHOOT",
-    flow: "RETENTION FLOW",
-    write: "ON THE PAGE",
-    clear: "CLEARING TICKETS",
-    creative: "ADS CREATIVE",
-    intel: "BUYER INTEL",
-    wire: "ON THE WIRE",
-  };
   function designator(op) {
     if (op === "Price") return "BRAVO-6";
     const i = OPS.indexOf(op);
     return i < 0 ? "" : "141-" + String(i).padStart(2, "0");
   }
-  function sceneFor(text) {
-    const s = String(text || "").toLowerCase();
-    if (/tiktok|instagram|reel|shoot|content|video|ugc|\bcut\b|social|pinterest|youtube|clip/.test(s)) return "shoot";
-    if (/retention|klaviyo|email|sms|\bflow\b|lifecycle|sequence|pulse/.test(s)) return "flow";
-    if (/\bseo\b|search|caption|\bcopy\b|write|brief|blog|index/.test(s)) return "write";
-    if (/ticket|trello|inbox|triage|intake|clear|support/.test(s)) return "clear";
-    if (/\bads?\b|creative|campaign|\bmeta\b|static|still/.test(s)) return "creative";
-    if (/buyer|learn|research|audit|intel|clarity/.test(s)) return "intel";
-    return "wire";
+  function isStanding(c) {
+    const name = String((c && c.name) || "");
+    const short = String((c && c.short) || "");
+    return /\(\s*standing\s*\)/i.test(name) || /\(\s*standing\s*\)/i.test(short) || /\bstanding\b/i.test(name);
   }
   function safeUrl(u) { return /^https:\/\/trello\.com\//.test(u || "") ? u : ""; }
-  function titleOf(c) { return String((c && (c.name || c.short)) || "").trim(); }
-  function briefOf(c) {
-    const s = String((c && c.short) || "").trim();
-    const n = String((c && c.name) || "").trim();
-    if (!s || !n || s === n) return "";
-    return s;
+  function norm(t) {
+    let s = String(t || "").toLowerCase().trim();
+    const lane = "price|ghost|cho|west|ko|park|jae|dunn|soap|gaz|kal";
+    s = s.replace(new RegExp("^(" + lane + ")\\s*[:\\u2014\\u2013-]\\s*"), "");
+    s = s.replace(new RegExp("^(" + lane + ")\\s+"), "");
+    return s.replace(/[^a-z0-9]+/g, "");
   }
-  function prop(scene) {
-    if (scene === "shoot") return '<i class="vf"></i><i class="rec">REC</i><b></b><b></b><b></b>';
-    if (scene === "flow") return '<i></i><i></i><i></i><span class="bolt"></span>';
-    if (scene === "write") return '<span></span><span></span><span></span><em></em>';
-    if (scene === "clear") return '<span></span><span></span><span></span>';
-    if (scene === "creative") return '<b></b><b></b><b></b>';
-    if (scene === "intel") return '<i class="ret"></i><i class="sweep"></i>';
-    return '<i></i><i></i><i></i><em class="obj"></em>';
+  function linesOf(c) {
+    const name = String((c && c.name) || "").trim();
+    const short = String((c && c.short) || "").trim();
+    const title = short || name || "—";
+    const detail = name && short && norm(name) !== norm(short) ? name : "";
+    return { title, detail };
+  }
+  function cardHtml(c, kind) {
+    const { title, detail } = linesOf(c);
+    const lane = String(c.lane || "—");
+    const board = String(c.board || "");
+    const url = safeUrl(c.url);
+    const status = kind === "stand" ? "STANDING" : "DOING";
+    const body = `<div class="actx-title">${esc(title)}</div>` +
+      (detail ? `<div class="actx-detail">${esc(detail)}</div>` : "") +
+      `<div class="actx-meta"><span>${esc(lane)}</span>${board ? `<span>${esc(board)}</span>` : ""}<span>${status}</span>` +
+      (url ? `<span class="go">OPEN ↗</span>` : "") + `</div>`;
+    if (!url) return `<article class="actx-card ${kind}">${body}</article>`;
+    return `<a class="actx-card ${kind}" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${body}</a>`;
   }
   function html(opts) {
     const op = String((opts && opts.op) || "");
-    const cards = (opts && opts.cards) || [];
-    const doing = cards.filter((c) => !c.list || c.list === "doing");
-    const primary = doing[0];
+    const cards = ((opts && opts.cards) || []).filter((c) => !c.list || c.list === "doing");
+    const finite = cards.filter((c) => !isStanding(c));
+    const standing = cards.filter(isStanding);
     const des = (opts && opts.des) || designator(op);
     const ini = op.slice(0, 2).toUpperCase();
     const avatar = (opts && opts.avatar) || ("avatars/" + op.toLowerCase() + ".png");
-    const close = '<button class="x" type="button">✕ CLOSE</button>';
-    if (!primary) {
-      return `<div class="hd"><img src="${esc(avatar)}" alt=""><div><div class="nm">${esc(op.toUpperCase())}${des ? " · " + esc(des) : ""}</div><div class="zs">NOT ACROSS THE WIRE</div></div>${close}</div><div class="empty">No Doing card on the feed for this callsign.</div>`;
+    const face = `<img class="actx-face" src="${esc(avatar)}" alt="" onerror="this.outerHTML='<b class=&quot;actx-face ini&quot;>${esc(ini)}</b>'">`;
+    const close = '<button class="x" type="button">CLOSE</button>';
+    if (!finite.length && !standing.length) {
+      return `<div class="actx actx-empty"><div class="actx-top">${face}<div class="actx-id"><div class="actx-cs">${esc(op.toUpperCase())}${des ? " <i>" + esc(des) + "</i>" : ""}</div><div class="actx-st">NOT ACROSS THE WIRE</div></div>${close}</div><p class="actx-none">No Doing card on the feed for this callsign.</p></div>`;
     }
-    const scene = sceneFor([primary.name, primary.short, primary.lane].filter(Boolean).join(" "));
-    const title = titleOf(primary);
-    const brief = briefOf(primary);
-    const lane = String(primary.lane || op || "—");
-    const board = String(primary.board || "");
-    const url = safeUrl(primary.url);
-    const rest = doing.slice(1);
-    const face = `<img src="${esc(avatar)}" alt="${esc(op)}" onerror="this.outerHTML='<b class=&quot;ini&quot;>${esc(ini)}</b>'">`;
-    return `<div class="actx" data-scene="${scene}">
-      <div class="actx-top"><span class="sec">DOING</span><span class="mot">${SCENE[scene]}</span>${close}</div>
-      <div class="actx-stage" aria-hidden="true">
-        <div class="actx-fig">${face}<i class="arm"></i><i class="rig"></i></div>
-        <div class="actx-prop ${scene}">${prop(scene)}<div class="slate">${esc(brief || title)}</div></div>
-      </div>
-      <div class="actx-read">
-        <div class="actx-cs">${esc(op.toUpperCase())}${des ? " <i>" + esc(des) + "</i>" : ""}</div>
-        <div class="actx-st">DOING · ACROSS THE WIRE</div>
-        <div class="actx-k">MISSION</div>
-        <div class="actx-title">${esc(title || "—")}</div>
-        ${brief ? `<div class="actx-k">BRIEF</div><div class="actx-brief">${esc(brief)}</div>` : ""}
-        <div class="actx-meta"><span>LANE ${esc(lane)}</span>${board ? `<span>${esc(board)}</span>` : ""}<span>STATUS DOING</span></div>
-        ${url ? `<a class="actx-go" href="${esc(url)}" target="_blank" rel="noopener noreferrer">OPEN CARD ↗</a>` : ""}
-        ${rest.length ? `<div class="actx-k">ALSO DOING</div><ul class="actx-more">${rest.map((c) => `<li>${esc(titleOf(c) || "—")}</li>`).join("")}</ul>` : ""}
-      </div>
-    </div>`;
+    const st = finite.length
+      ? (finite.length + " finite" + (standing.length ? " · " + standing.length + " standing" : ""))
+      : "On station · no finite mission";
+    const finiteBlock = finite.length
+      ? `<section class="actx-sec"><h3>Doing</h3>${finite.map((c) => cardHtml(c, "finite")).join("")}</section>`
+      : `<p class="actx-none">No finite Doing card. This callsign is not across the wire.</p>`;
+    const standBlock = standing.length
+      ? `<section class="actx-sec stand"><h3>Standing · always on</h3>${standing.map((c) => cardHtml(c, "stand")).join("")}</section>`
+      : "";
+    return `<div class="actx"><div class="actx-top">${face}<div class="actx-id"><div class="actx-cs">${esc(op.toUpperCase())}${des ? " <i>" + esc(des) + "</i>" : ""}</div><div class="actx-st">${esc(st)}</div></div>${close}</div>${finiteBlock}${standBlock}</div>`;
   }
-  root.MW4Action = { html, sceneFor, designator, SCENE };
+  root.MW4Action = { html, designator, isStanding };
 })(window);

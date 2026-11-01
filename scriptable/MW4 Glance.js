@@ -215,6 +215,18 @@ function softFail(w, need, script) {
   w.addSpacer();
 }
 const LANE_TAG = (c) => String(c.lane || (c.tag === "KAL" ? "KAL" : "CMD")).toUpperCase();
+// Same rule as the HUD: a Doing card is standing when its name or short already says so.
+function isStanding(c) {
+  const name = String((c && c.name) || "");
+  const short = String((c && c.short) || "");
+  return /\(\s*standing\s*\)/i.test(name) || /\(\s*standing\s*\)/i.test(short) || /\bstanding\b/i.test(name);
+}
+function doingSplit(d) {
+  const cmd = (((d || {}).command || {}).lists || {}).doing || [];
+  const kal = ((((d || {}).kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Kal" }));
+  const all = [...cmd, ...kal];
+  return { finite: all.filter((c) => !isStanding(c)), standing: all.filter(isStanding) };
+}
 
 // Operator portraits — same callsigns and files as the HUD theater (avatars/<callsign>.png).
 const OPS_AV = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal"];
@@ -429,18 +441,23 @@ function brand(w, d, offline, small) {
   txt(r, (offline ? "OFFLINE · " : stale ? "STALE · " : small ? "" : hhmm(d.updatedAt) + " · ") + ago(d.updatedAt), F.sb(8.5), stale ? col("holdink") : col("dim"), 1);
   return r;
 }
-function cell(stack, label, n, color, size) {
+function cell(stack, label, n, color, size, note) {
   const c = stack.addStack(); c.centerAlignContent(); c.backgroundColor = col("panel", 0.92);
   c.borderColor = col("line"); c.borderWidth = 1; c.setPadding(3, 5, 3, 5);
-  txt(c, label, F.sb(7.5), col("dim"), 1); c.addSpacer(); txt(c, String(n), F.h(size), col(color), 1);
+  const lab = c.addStack(); lab.layoutVertically();
+  txt(lab, label, F.sb(7.5), col("dim"), 1);
+  if (note) txt(lab, note, F.sb(6), col("ship"), 1);
+  c.addSpacer(); txt(c, String(n), F.h(size), col(color), 1);
   return c;
 }
 function chromeStrip(w, d, small) {
   const cc = (d.command && d.command.counts) || {}, kc = (d.kal && d.kal.counts) || {};
   const sum = (k) => (cc[k] ?? 0) + (kc[k] ?? 0); // HUD chrome counts both boards (Command + Kal)
-  const cells = [["ACT", sum("doing"), "amber"], ["HOLD", sum("waiting"), "holdink"],
-                 [small ? "Q" : "QUEUE", sum("backlog"), "tan"], [small ? "SHIP" : "SHIPPED", sum("doneToday"), "ship"]];
-  if (!small) { const r = w.addStack(); r.spacing = 3; for (const [l, n, k] of cells) cell(r, l, n, k, 15); return; }
+  const split = doingSplit(d);
+  const stn = !small && split.standing.length ? split.standing.length + " STN" : "";
+  const cells = [["ACT", split.finite.length, "amber", stn], ["HOLD", sum("waiting"), "holdink", ""],
+                 [small ? "Q" : "QUEUE", sum("backlog"), "tan", ""], [small ? "SHIP" : "SHIPPED", sum("doneToday"), "ship", ""]];
+  if (!small) { const r = w.addStack(); r.spacing = 3; for (const [l, n, k, note] of cells) cell(r, l, n, k, 15, note); return; }
   for (const pair of [cells.slice(0, 2), cells.slice(2)]) {
     const r = w.addStack(); r.spacing = 3; for (const [l, n, k] of pair) cell(r, l, n, k, 13); w.addSpacer(3);
   }
@@ -491,18 +508,31 @@ function plate(row, c, opts) {
   return p;
 }
 async function aoRow(w, d, max, vertical) {
-  const doing = [...(((d.command || {}).lists || {}).doing || []), ...((((d.kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Kal" })))];
+  const { finite } = doingSplit(d);
   const r = w.addStack(); r.spacing = 3;
-  zoneTag(r, "AO", doing.length, "ao");
+  zoneTag(r, "AO", finite.length, "ao");
   const box = r.addStack(); box.spacing = 3; if (vertical) box.layoutVertically();
-  if (!doing.length) {
+  if (!finite.length) {
     const e = box.addStack(); e.backgroundColor = col("panel", 0.9); e.borderColor = col("line"); e.borderWidth = 1; e.setPadding(5, 6, 5, 6);
-    txt(e, "NO ONE ACROSS · FOB STANDING BY", F.sb(8), col("dim"), 1); e.addSpacer(); return;
+    txt(e, "NO FINITE MISSION · AO QUIET", F.sb(8), col("dim"), 1); e.addSpacer(); return;
   }
-  const shown = doing.length > max ? doing.slice(0, max - 1) : doing;
+  const shown = finite.length > max ? finite.slice(0, max - 1) : finite;
   await preloadAvatars(shown);
   for (const c of shown) plate(box, c, { border: "amber", tag: /^kal$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15, action: true });
-  if (doing.length > max) { const m = box.addStack(); m.backgroundColor = col("panel", 0.9); m.borderColor = col("line"); m.borderWidth = 1; m.setPadding(4, 5, 4, 5); txt(m, "+" + (doing.length - shown.length), F.h(10), col("amber"), 1); }
+  if (finite.length > max) { const m = box.addStack(); m.backgroundColor = col("panel", 0.9); m.borderColor = col("line"); m.borderWidth = 1; m.setPadding(4, 5, 4, 5); txt(m, "+" + (finite.length - shown.length), F.h(10), col("amber"), 1); }
+}
+async function standRow(w, standing, max, vertical) {
+  if (!standing.length) return;
+  const r = w.addStack(); r.spacing = 3;
+  zoneTag(r, "STN", standing.length, "stand");
+  const box = r.addStack(); box.spacing = 3; if (vertical) box.layoutVertically();
+  const shown = standing.slice(0, max);
+  await preloadAvatars(shown);
+  for (const c of shown) plate(box, c, { border: "olive", tag: "olive", face: vertical ? 18 : 15, action: true });
+  if (standing.length > shown.length) {
+    const m = box.addStack(); m.backgroundColor = col("panel", 0.9); m.borderColor = col("olive", 0.7); m.borderWidth = 1; m.setPadding(4, 5, 4, 5);
+    txt(m, "+" + (standing.length - shown.length), F.h(10), col("ship"), 1);
+  }
 }
 async function holdRow(w, d, max, vertical) {
   const cc = (d.command && d.command.counts) || {}, kc = (d.kal && d.kal.counts) || {};
@@ -543,6 +573,8 @@ async function build() {
   }
   w.addSpacer(5); intel(w, g, false);
   w.addSpacer(5); await aoRow(w, d, large ? 6 : 3, large);
+  const stn = doingSplit(d).standing;
+  if (stn.length) { w.addSpacer(4); await standRow(w, stn, large ? 4 : 2, large); }
   w.addSpacer(4); wireBar(w, "── CROSSING THE WIRE ──", 11, 7);
   w.addSpacer(4); await holdRow(w, d, large ? 6 : 2, large);
   w.addSpacer(); w.addSpacer(4);

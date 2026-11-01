@@ -63,6 +63,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .stats .n{font-family:var(--mono);font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
 .stats .n.a{color:var(--amber)}.stats .n.h{color:var(--holdink)}.stats .n.t{color:var(--tan)}.stats .n.g{color:var(--olive2)}
 .stats .n.lk{color:#3d463a;letter-spacing:.05em}
+.stats .s{font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:#9bb05a;text-transform:uppercase;min-height:10px}
 .hint{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:6px;min-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hint b{color:var(--amber)}.hint .w{color:var(--holdink)}
 .wireops{position:relative;border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:10px}
@@ -71,6 +72,10 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .wireops .lockd{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;padding:8px 0}
 .wrow{display:flex;flex-wrap:wrap;gap:8px}
 .wop{appearance:none;display:flex;align-items:center;gap:8px;min-height:52px;padding:6px 10px 6px 6px;background:#0d110e;border:1px solid rgba(232,163,23,.4);border-radius:4px;color:var(--ink);cursor:pointer;text-align:left}
+.wop.stn{border-color:rgba(155,176,90,.55)}
+.wop.stn img,.wop.stn .ini{box-shadow:0 0 0 2px #9bb05a}
+.wlab{flex:0 0 100%;font-family:var(--mono);font-size:8px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.wlab.stn{color:#9bb05a}
 .wop img,.wop .ini{width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px var(--amber);background:var(--idle);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--tan)}
 .wop b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em}
 .wop i{display:block;font-style:normal;font-size:11px;color:var(--dim);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -125,7 +130,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
       <div class="chips"><span>AO</span><span>WIRE</span><span>HOLD CAGE</span><span>FOB</span><span>ORBAT</span><span>AAR</span><span>MISSION LOG</span></div>
       <div class="hint" id="hudHint">▒ Syncing live counts…</div>
       <div class="stats">
-        <div><div class="l">ACT</div><div class="n a lk" id="hAct">▒▒</div></div>
+        <div><div class="l">ACT</div><div class="n a lk" id="hAct">▒▒</div><div class="s" id="hStn"></div></div>
         <div><div class="l">HOLD</div><div class="n h lk" id="hHold">▒▒</div></div>
         <div><div class="l">QUEUE</div><div class="n t lk" id="hQ">▒▒</div></div>
         <div><div class="l">SHIPPED</div><div class="n g lk" id="hShip">▒▒</div></div>
@@ -198,9 +203,9 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   ];
   function paintChannels(channels) {
     const list = (channels && channels.length ? channels : FALLBACK_CH).slice(0, 4);
-    $('socChips').innerHTML = list.map((c) => `<span>${mark(c, 12)}${esc(String(c.handle || c.short || c.key).replace(/^@/, '@'))}</span>`).join('');
+    $('socChips').innerHTML = list.map((c) => `<span>${mark(c, 16)}${esc(String(c.handle || c.short || c.key).replace(/^@/, '@'))}</span>`).join('');
     const box = $('socStats').children;
-    list.forEach((c, i) => { if (box[i]) box[i].querySelector('.l').innerHTML = mark(c, 11) + esc(c.short || c.key); });
+    list.forEach((c, i) => { if (box[i]) box[i].querySelector('.l').innerHTML = mark(c, 14) + esc(c.short || c.key); });
   }
   const PT = (d, o) => new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', ...o }).format(d);
   const agoShort = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'NOW' : m < 60 ? m + 'M' : Math.floor(m / 60) + 'H'; };
@@ -230,8 +235,11 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   function setN(id, v) { const el = $(id); el.textContent = v; el.classList.remove('lk'); }
   function hud(d) {
     const C = d.command || {}, K = d.kal || {}, cc = C.counts || {}, kc = K.counts || {};
-    const n = (k) => (cc[k] || 0) + (kc[k] || 0);
-    setN('hAct', n('doing')); setN('hHold', n('waiting')); setN('hQ', n('backlog')); setN('hShip', n('doneToday'));
+    const rows = doingRows(d);
+    const finiteN = rows.filter((c) => !window.MW4Action || !MW4Action.isStanding(c)).length;
+    const standN = rows.length - finiteN;
+    setN('hAct', finiteN); setN('hHold', (cc.waiting || 0) + (kc.waiting || 0)); setN('hQ', (cc.backlog || 0) + (kc.backlog || 0)); setN('hShip', (cc.doneToday || 0) + (kc.doneToday || 0));
+    $('hStn').textContent = standN ? standN + ' STN' : '';
     const t = new Date(d.updatedAt), age = Date.now() - t.getTime(), stale = !(age <= 30 * 60 * 1000);
     $('isync').innerHTML = (stale ? '<span style="color:var(--holdink)">⚠ STALE · </span>' : '') + 'HUD ' + PT(t) + ' PT · ' + agoShort(age);
     const g = d.glance || {};
@@ -248,21 +256,37 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     $('sitc').textContent = ev.length + ' CROSSINGS · ' + (d.alerts || []).length + ' ALERTS';
     paintWire(d);
   }
-  function paintWire(d) {
+  function doingRows(d) {
     const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
     const canon = (lane) => OPSH.find((o) => o.toLowerCase() === String(lane || '').toLowerCase()) || lane || 'TF141';
     const rows = [];
     for (const [board, B] of [['CMD', d.command], ['KAL', d.kal]]) {
       for (const c of (((B || {}).lists || {}).doing) || []) rows.push({ ...c, board, lane: canon(c.lane || (board === 'KAL' ? 'Kal' : '')), list: 'doing' });
     }
+    return rows;
+  }
+  function paintWire(d) {
+    const rows = doingRows(d);
+    const stand = (c) => !!(window.MW4Action && MW4Action.isStanding(c));
     const by = new Map();
     rows.forEach((c) => { const k = c.lane || 'TF141'; if (!by.has(k)) by.set(k, []); by.get(k).push(c); });
-    const host = $('wireRow');
-    if (!by.size) { host.innerHTML = '<div class="lockd">AO QUIET · NO OPERATORS DEPLOYED</div>'; return; }
-    host.innerHTML = [...by.entries()].map(([op, cs]) => {
+    const finiteOps = [];
+    const standOps = [];
+    for (const [op, cs] of by) {
+      const finite = cs.filter((c) => !stand(c));
+      if (finite.length) finiteOps.push([op, finite]);
+      else standOps.push([op, cs]);
+    }
+    const btn = (op, cs, stn) => {
       const ini = String(op).slice(0, 2).toUpperCase();
-      return `<button type="button" class="wop" data-op="${esc(op)}"><img src="../avatars/${esc(op.toLowerCase())}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(cs[0].short || cs[0].name || '')}</i></span></button>`;
-    }).join('');
+      const line = (stn ? cs.filter(stand) : cs.filter((c) => !stand(c)))[0] || cs[0];
+      return `<button type="button" class="wop${stn ? ' stn' : ''}" data-op="${esc(op)}"><img src="../avatars/${esc(op.toLowerCase())}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(line.short || line.name || '')}</i></span></button>`;
+    };
+    const host = $('wireRow');
+    const parts = [];
+    parts.push(finiteOps.length ? finiteOps.map(([op, cs]) => btn(op, cs, false)).join('') : '<div class="lockd">AO QUIET · NO FINITE MISSIONS</div>');
+    if (standOps.length) parts.push('<div class="wlab stn">Standing · always on</div>' + standOps.map(([op, cs]) => btn(op, cs, true)).join(''));
+    host.innerHTML = parts.join('');
     host.querySelectorAll('.wop').forEach((b) => b.addEventListener('click', () => openAct(b.dataset.op, rows)));
   }
   function openAct(op, rows) {

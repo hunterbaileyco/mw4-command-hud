@@ -192,6 +192,18 @@ function softFail(w, need, script) {
   w.addSpacer();
 }
 const LANE_TAG = (c) => String(c.lane || (c.tag === "KAL" ? "KAL" : "CMD")).toUpperCase();
+// Same rule as the HUD: a Doing card is standing when its name or short already says so.
+function isStanding(c) {
+  const name = String((c && c.name) || "");
+  const short = String((c && c.short) || "");
+  return /\(\s*standing\s*\)/i.test(name) || /\(\s*standing\s*\)/i.test(short) || /\bstanding\b/i.test(name);
+}
+function doingSplit(d) {
+  const cmd = (((d || {}).command || {}).lists || {}).doing || [];
+  const kal = ((((d || {}).kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Kal" }));
+  const all = [...cmd, ...kal];
+  return { finite: all.filter((c) => !isStanding(c)), standing: all.filter(isStanding) };
+}
 
 // Operator portraits — same callsigns and files as the HUD theater (avatars/<callsign>.png).
 const OPS_AV = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal"];

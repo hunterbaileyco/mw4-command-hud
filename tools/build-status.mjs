@@ -63,7 +63,8 @@ function laneOf(card, fallback = '') {
 const SHORTS = [
   [/Build Better Brands/i, 'BBA LEARN FIRST'], [/Week 1 .*Postiz queue/i, 'W1 Postiz queue'], [/FOMO \/ Dupe/i, 'FOMO / Dupe live'],
   [/Cart D — Travel Pouch/i, 'Cart D pouch filter'], [/Cart E — Alia KIN10/i, 'Alia KIN10 reuse'], [/Cart C — promote/i, 'Cart C promote TeDcYe'],
-  [/Cart B — seed HOLD/i, 'Cart B seed HOLD'], [/Cart A — measurement/i, 'Cart A Nov 7'], [/Checkout E2 remakes/i, 'E2 remakes'],
+  [/Cart B — seed HOLD/i, 'Cart B seed HOLD'], [/Cart A — measurement/i, 'Cart A Nov 7'], [/Checkout E2 remakes|Email 2 remakes/i, 'E2 remakes HOLD'],
+  [/Nov 7 measurement/i, 'Cart v2 Nov 7 re-check'], [/BTS gift-reel v4/i, 'BTS reel v4 Drive HOLD'],
   [/Jewlry typo/i, 'Jewlry + Welcome'], [/KIN10 orphan deactivate/i, 'KIN10 deactivate'], [/Redeemed-flag/i, 'Redeemed-flag pack'],
   [/Theme slot cleanup/i, 'Theme slot deletes'], [/News index \(main-blog\)/i, 'News index parked'], [/AKM redesign/i, 'AKM theme watch'],
   [/Clarity daily/i, 'Clarity daily'], [/Weekly audit self-improve/i, 'Weekly audit'], [/Monthly site re-audit/i, 'Monthly re-audit'],

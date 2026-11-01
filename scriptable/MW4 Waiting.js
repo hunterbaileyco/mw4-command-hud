@@ -222,7 +222,7 @@ async function build() {
   if (!d) {
     w.addSpacer();
     const e = w.addText(need || "NO SIGNAL"); e.textColor = need === "AUTH NEEDED" ? C.amber : C.red; e.font = Font.heavyMonospacedSystemFont(14);
-    if (need === "AUTH NEEDED") { const s = w.addText("Open Scriptable → run “MW4 Waiting” once → enter auth code."); s.textColor = C.dim; s.font = Font.monospacedSystemFont(9); }
+    if (need === "AUTH NEEDED") { const s = w.addText("Open Scriptable → run “MW4 Waiting” once → enter auth code."); s.textColor = C.dim; s.font = Font.regularMonospacedSystemFont(9); }
     w.addSpacer(); return w;
   }
   const items = [
@@ -232,16 +232,16 @@ async function build() {
   const n = hdr.addText(String(items.length) + (offline ? " · OFF" : ""));
   n.font = Font.heavyMonospacedSystemFont(11); n.textColor = offline ? C.red : C.amber;
   w.addSpacer(6);
-  if (!items.length) { const t = w.addText("All clear."); t.textColor = C.dim; t.font = Font.monospacedSystemFont(12); }
+  if (!items.length) { const t = w.addText("All clear."); t.textColor = C.dim; t.font = Font.regularMonospacedSystemFont(12); }
   for (const c of items.slice(0, max)) {
     const r = w.addStack(); r.spacing = 6;
     const tg = r.addText(String(c.tag).toUpperCase().slice(0, 5).padEnd(5, " "));
     tg.font = Font.semiboldMonospacedSystemFont(9); tg.textColor = c.tag === "KAL" ? C.amber : C.coyote;
-    const t = r.addText(fam === "large" ? c.name : (c.short || c.name)); t.font = Font.monospacedSystemFont(11); t.textColor = C.txt; t.lineLimit = 1;
+    const t = r.addText(fam === "large" ? c.name : (c.short || c.name)); t.font = Font.regularMonospacedSystemFont(11); t.textColor = C.txt; t.lineLimit = 1;
     if (c.url) r.url = c.url;
     w.addSpacer(3);
   }
-  if (items.length > max) { const m = w.addText(`+${items.length - max} more`); m.font = Font.monospacedSystemFont(9); m.textColor = C.dim; }
+  if (items.length > max) { const m = w.addText(`+${items.length - max} more`); m.font = Font.regularMonospacedSystemFont(9); m.textColor = C.dim; }
   w.addSpacer();
   return w;
 }

@@ -221,7 +221,7 @@ function stat(stack, n, label, color) {
 function softFail(w, title, sub) {
   w.addSpacer();
   const e = w.addText(title); e.textColor = title === "AUTH NEEDED" ? C.amber : C.red; e.font = Font.heavyMonospacedSystemFont(14);
-  const s = w.addText(sub); s.textColor = C.dim; s.font = Font.monospacedSystemFont(9); s.lineLimit = 3;
+  const s = w.addText(sub); s.textColor = C.dim; s.font = Font.regularMonospacedSystemFont(9); s.lineLimit = 3;
   w.addSpacer();
 }
 
@@ -243,7 +243,7 @@ async function build() {
   const g = d.glance || {};
   if (g.badge) { const b = w.addText(g.badge); b.font = Font.heavyMonospacedSystemFont(10); b.textColor = C.amber; }
   const l1 = w.addText(g.line1 || ""); l1.font = Font.boldMonospacedSystemFont(fam === "small" ? 11 : 13); l1.textColor = C.txt; l1.lineLimit = 2;
-  const l2 = w.addText(g.line2 || ""); l2.font = Font.monospacedSystemFont(fam === "small" ? 9 : 11); l2.textColor = C.dim; l2.lineLimit = 2;
+  const l2 = w.addText(g.line2 || ""); l2.font = Font.regularMonospacedSystemFont(fam === "small" ? 9 : 11); l2.textColor = C.dim; l2.lineLimit = 2;
   // latest event from the feed (deploy / rtb / hold / cleared) within the last 2 h
   const ev = (d.events || []).filter((e) => Date.now() - Date.parse(e.t) < 2 * 3600 * 1000).slice(-1)[0];
   if (ev && fam !== "small") {

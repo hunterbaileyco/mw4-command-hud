@@ -19,87 +19,83 @@ body.sx-pad .wrap{
 .intel .tx{white-space:normal;overflow:visible;text-overflow:unset}
 .holdbox .rule{position:relative;z-index:2;margin:6px 2px 0;font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#c79a86;text-transform:uppercase;line-height:1.45}
 
-/* token is the ring; the plate is .pl — reset the old bordered token */
+/* Theater plates share the ORBAT avatar-on-box silhouette.
+   --lap is how far the ring sinks into the plate (~1/3, same as .nd).
+   The ring paints above the plate, so the gold edge tucks behind the
+   portrait instead of cutting the face. Callsign, 141-XX and T+ start
+   below the ring (--lap + 7px). */
 .tok.s-ao,.tok.s-hold,.tok.s-stand,.tok.s-ready,.tok.s-idle,.tok.s-cp{
-  width:auto;padding:0;background:none;border:0;box-shadow:none;border-radius:0;
+  --ring:54px;--lap:18px;
+  width:calc(50% - 6px);max-width:100%;padding:0;background:none;border:0;box-shadow:none;border-radius:0;opacity:1;
 }
-.tok .pl{position:relative;width:100%;border-radius:4px;text-align:center;min-width:0}
-.tok .cs{margin-top:0}
-.tok .dsr{display:flex;justify-content:center;gap:7px;margin-top:3px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
-.tok .mk{display:flex;justify-content:space-between;align-items:center;gap:6px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-.tok .mt{text-align:left;font-weight:600;font-size:13px;line-height:1.35;color:var(--ink);text-wrap:pretty;overflow-wrap:anywhere;hyphens:manual}
-.tok .x2{display:flex;gap:6px;align-items:flex-start;text-align:left;margin-top:7px;padding-top:6px;border-top:1px dashed rgba(232,163,23,.28);font-size:12px;line-height:1.35;font-weight:500;color:#cfc8b8}
+.tok.s-cp{width:min(168px,100%)}
+.tok .pl{position:relative;display:flex;flex-direction:column;align-items:stretch;width:100%;border-radius:4px;text-align:center;min-width:0}
+.tok .cs{order:1;margin-top:0;font-size:13px;font-weight:800;letter-spacing:.14em;color:var(--amber);text-shadow:0 0 12px rgba(232,163,23,.35)}
+.tok .dsr{order:2;display:flex;justify-content:center;gap:8px;margin-top:2px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:rgba(232,163,23,.78);text-transform:uppercase}
+.tok .dsr .tp{color:var(--tan)}
+.tok .mk{display:none!important}
+.tok .mt,.tok .ov{order:3;margin-top:5px;padding-top:4px;border-top:1px solid rgba(197,165,114,.22);text-align:center;font-family:var(--mono);font-weight:600;font-size:11px;line-height:1.35;letter-spacing:.02em;color:var(--ink);text-wrap:pretty;overflow-wrap:anywhere;hyphens:manual}
+.tok .ov{letter-spacing:.1em}
+.tok .mt:empty{display:none}
+.tok .x2{order:4;display:flex;gap:6px;align-items:flex-start;justify-content:center;text-align:center;margin-top:4px;padding-top:0;border-top:0;font-family:var(--mono);font-size:10px;line-height:1.35;font-weight:500;color:var(--ink)}
 .tok .x2 b{flex:0 0 auto;font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.08em;color:var(--amber);border:1px solid rgba(232,163,23,.55);padding:2px 3px;border-radius:2px}
+.tok .ftag{order:8;margin-top:6px;font-family:var(--mono);font-size:7.5px;font-weight:700;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.tok .ftag .q{color:var(--tan);margin-left:6px}
 .tok .badge,.tok .hb,.tok .rtbtag{display:none!important}
 
 .zone{align-items:flex-start}
-#zAO,#zSTAND,#zHOLD{align-items:stretch}
+#zAO,#zSTAND,#zHOLD,#zREADY{align-items:stretch}
 
-/* AO — 2-up on Duo, full mission, callsign loudest.
-   The ring sits clear of the plate: the plate's top rule is the 141 / T+ status line
-   and must not cross the portrait. */
-.tok.s-ao{width:calc(50% - 6px);max-width:100%}
-.tok.s-ao .ring{position:relative;z-index:2;width:62px;height:62px;margin-bottom:4px;background:conic-gradient(var(--amber),#7a5a10,var(--amber));box-shadow:0 0 16px rgba(232,163,23,.5)}
-.tok.s-ao .pl{padding:8px 9px 10px;background:linear-gradient(180deg,rgba(232,163,23,.16),rgba(11,14,12,.88) 46%);border:1px solid rgba(232,163,23,.45);box-shadow:0 12px 24px rgba(0,0,0,.45),inset 0 1px 0 rgba(232,163,23,.3)}
-.tok.s-ao .pl::before{content:"";position:absolute;left:-1px;top:16px;bottom:12px;width:2px;background:var(--amber);box-shadow:0 0 8px var(--amber)}
-.tok.s-ao .cs{font-size:15px;letter-spacing:.14em;color:var(--amber);text-shadow:0 0 12px rgba(232,163,23,.35)}
-.tok.s-ao .dsr{justify-content:space-between;color:rgba(232,163,23,.8)}
-.tok.s-ao .dsr .tp{color:var(--tan)}
-.tok.s-ao .mk{margin:9px 0 5px;padding-top:7px;border-top:1px solid rgba(232,163,23,.28);color:var(--amber)}
+.tok.s-ao .ring,
+.tok.s-hold .ring,
+.tok.s-stand .ring,
+.tok.s-ready .ring,
+.tok.s-idle .ring,
+.tok.s-cp .ring{
+  position:relative;z-index:4;width:var(--ring);height:var(--ring);margin-bottom:calc(var(--lap) * -1);
+  background:conic-gradient(var(--amber),#7a5a10,var(--amber));box-shadow:0 0 14px rgba(232,163,23,.5);animation:none;
+}
+.tok.s-ao .pl,
+.tok.s-hold .pl,
+.tok.s-stand .pl,
+.tok.s-ready .pl,
+.tok.s-idle .pl,
+.tok.s-cp .pl{
+  padding:calc(var(--lap) + 7px) 8px 8px;
+  background:linear-gradient(180deg,rgba(232,163,23,.14),rgba(11,14,12,.92) 55%);
+  border:1px solid rgba(232,163,23,.45);
+  box-shadow:0 8px 18px rgba(0,0,0,.4);
+}
+.tok.s-ready .ring img,.tok.s-idle .ring img{filter:none}
+.tok.s-hold .cs,.tok.s-stand .cs,.tok.s-ready .cs,.tok.s-idle .cs,.tok.s-cp .cs{color:var(--amber);text-shadow:0 0 12px rgba(232,163,23,.35)}
 
-/* Kal — same plate, coyote board */
-.tok.s-ao.kal .ring{background:conic-gradient(var(--tan),#5a4628,var(--coyote),#5a4628,var(--tan));box-shadow:0 0 14px rgba(156,130,86,.5)}
-.tok.s-ao.kal .ring::after{border-color:rgba(197,165,114,.55)}
-.tok.s-ao.kal .pl{background:repeating-linear-gradient(-45deg,transparent 0 9px,rgba(197,165,114,.06) 9px 18px),linear-gradient(180deg,rgba(156,130,86,.24),rgba(11,14,12,.9) 48%);border-color:rgba(197,165,114,.6);outline:1px solid rgba(156,130,86,.4);outline-offset:2px}
-.tok.s-ao.kal .pl::before{background:var(--coyote);box-shadow:0 0 8px rgba(197,165,114,.55);width:3px}
-.tok.s-ao.kal .cs{color:var(--tan);text-shadow:none}
-.tok.s-ao.kal .dsr,.tok.s-ao.kal .mk{color:var(--coyote);border-top-color:rgba(197,165,114,.35)}
-.tok .stamp{position:absolute;top:28px;right:-4px;z-index:5;transform:rotate(8deg);font-family:var(--mono);font-size:7.5px;font-weight:800;letter-spacing:.14em;color:var(--tan);border:1.5px solid var(--tan);padding:3px 4px;border-radius:2px;background:rgba(11,14,12,.9)}
-
-/* standing bay — not part of DOING */
-.tok.s-stand{width:calc(50% - 6px);padding:0;background:none;border:0;box-shadow:none}
-.tok.s-stand .ring{width:46px;height:46px;margin-bottom:-16px}
-.tok.s-stand .pl{padding:22px 8px 9px;background:linear-gradient(180deg,rgba(107,124,58,.22),rgba(11,14,12,.88) 50%);border:1px solid rgba(155,176,90,.5)}
-.tok.s-stand .cs{font-size:13px}
-.tok.s-stand .mk{margin:7px 0 4px}
-.tok.s-stand .mt{font-size:12.5px;font-weight:500;color:#d7d1c2}
-.tok.s-stand .x2{border-top-color:rgba(155,176,90,.35)}
-.tok.s-stand .x2 b{color:var(--olive2);border-color:rgba(155,176,90,.55)}
-
-/* HOLD cage — one plate per ask */
-.tok.s-hold{width:calc(50% - 6px)}
-.tok.s-hold .ring{width:50px;height:50px;margin-bottom:-16px}
-.tok.s-hold .pl{padding:22px 8px 9px;background:linear-gradient(180deg,rgba(139,58,42,.4),rgba(11,14,12,.9) 55%);border:1px solid rgba(224,122,95,.55);box-shadow:inset 0 0 16px rgba(139,58,42,.35)}
-.tok.s-hold .cs{font-size:13px;color:var(--tan)}
-.tok.s-hold .mk{margin:7px 0 4px;color:var(--holdink)}
-.tok.s-hold .mt{font-size:12.5px;color:#f1dccb}
-.age{font-family:var(--mono);font-size:8.5px;font-weight:800;letter-spacing:.04em;color:var(--holdink);border:1px solid rgba(224,122,95,.65);padding:2px 4px;border-radius:2px;white-space:nowrap}
+/* HOLD — same gold plate, Cho-style hazard tape along the top edge */
+.tok.s-hold .pl{
+  background:
+    repeating-linear-gradient(-45deg,var(--amber) 0 6px,#0d110e 6px 12px) top / 100% 4px no-repeat,
+    linear-gradient(180deg,rgba(232,163,23,.14),rgba(11,14,12,.92) 55%);
+}
+.age{font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.04em;color:var(--holdink);border:1px solid rgba(224,122,95,.65);padding:1px 4px;border-radius:2px;white-space:nowrap}
 .age.stale{background:var(--holdink);color:#0B0E0C}
+.holdbox .tok.s-hold .ring::before{content:none;background:none}
 .tok.s-hold.echo .ring{background:transparent;border:1.5px dashed var(--amber);padding:1px;animation:none;box-shadow:none}
 .tok.s-hold.echo .ring img{filter:saturate(.55) brightness(.82)}
 .tok.s-hold.echo .pl{border-style:dashed}
-.tok.s-hold .stillao{display:block;margin-top:6px;text-align:left;font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.12em;color:var(--amber)}
+.tok.s-hold .stillao{order:5;display:block;margin-top:6px;text-align:center;font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.12em;color:var(--amber)}
 
-/* FOB */
-.tok.s-cp{width:84px}
-.tok.s-cp .ring{width:54px;height:54px;margin-bottom:0}
-.tok.s-cp .pl{padding:6px 2px 0;background:none;border:0;box-shadow:none}
-.tok.s-cp .cs{color:var(--tan);font-size:11px}
-.tok.s-cp .ov{margin-top:4px;font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.14em;color:var(--olive2)}
-.tok.s-ready{width:calc(50% - 6px);max-width:168px}
-.tok.s-ready .ring{width:44px;height:44px;margin-bottom:-14px;background:#4a5a30}
-.tok.s-ready .pl{padding:18px 7px 8px;background:rgba(107,124,58,.12);border:1px solid rgba(107,124,58,.45)}
-.tok.s-ready .cs{font-size:11px;color:var(--tan)}
-.tok.s-ready .mk{margin:6px 0 3px;color:var(--olive2);font-size:8px}
-.tok.s-ready .mk .q{color:var(--tan)}
-.tok.s-ready .mt{font-size:12px;font-weight:500;color:#d4cebf}
-.tok.s-idle{width:64px;opacity:.5}
-.tok.s-idle .ring{width:34px;height:34px;margin-bottom:0;background:var(--line2)}
-.tok.s-idle .ring img{filter:grayscale(1) brightness(.62)}
-.tok.s-idle .pl{padding:4px 0 0;background:none;border:0;box-shadow:none}
-.tok.s-idle .cs{font-size:9px;color:var(--dim);letter-spacing:.12em}
-.tok.s-idle .dsr{font-size:7px}
-.tok.s-idle .mk{justify-content:center;color:var(--dim);font-size:7.5px;margin-top:2px}
+/* Ghost trading reuses the coyote board (class kal). Callsign stays tan. */
+.tok.s-ao.kal .ring{background:conic-gradient(var(--tan),#5a4628,var(--coyote),#5a4628,var(--tan));box-shadow:0 0 14px rgba(156,130,86,.5)}
+.tok.s-ao.kal .ring::after{border-color:rgba(197,165,114,.55)}
+.tok.s-ao.kal .pl{background:repeating-linear-gradient(-45deg,transparent 0 9px,rgba(197,165,114,.06) 9px 18px),linear-gradient(180deg,rgba(156,130,86,.24),rgba(11,14,12,.92) 55%);border-color:rgba(197,165,114,.6);outline:1px solid rgba(156,130,86,.4);outline-offset:2px}
+.tok.s-ao.kal .pl::before{content:none}
+.tok.s-ao.kal .cs{color:var(--tan);text-shadow:none}
+.tok.s-ao.kal .dsr{color:var(--coyote)}
+.tok .stamp{position:absolute;top:auto;right:-6px;bottom:-6px;z-index:5;transform:rotate(7deg);font-family:var(--mono);font-size:7.5px;font-weight:800;letter-spacing:.14em;color:var(--tan);border:1.5px solid var(--tan);padding:2px 4px;border-radius:2px;background:rgba(11,14,12,.92)}
+
+/* FOB frame steps back so the CMD plate is the card */
+.fobgrid{grid-template-columns:minmax(148px,180px) minmax(0,1fr);align-items:start}
+.cp{background:transparent;border:0;box-shadow:none;min-height:0;padding:16px 2px 2px}
+.cp::after{content:none;display:none}
 
 .orow.z-kal{border-left:3px double var(--coyote)}
 .orow.z-kal .nm{color:var(--tan)}
@@ -108,10 +104,9 @@ body.sx-pad .wrap{
 @media(min-width:900px){
   #zAO{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 12px;align-items:stretch}
   .tok.s-ao{width:auto}
-  .tok.s-ao .mt{font-size:13.5px}
-  .tok.s-stand,.tok.s-hold{width:220px}
+  .tok .mt,.tok .ov{font-size:12px}
+  .tok.s-stand,.tok.s-hold,.tok.s-ready,.tok.s-idle{width:200px}
   #zSTAND,#zHOLD{justify-content:flex-start}
-  .tok.s-ready{width:180px}
 }
 
 /* Duo width: keep two-up plates from colliding or clipping, and let counter subs wrap */
@@ -120,10 +115,12 @@ body.sx-pad .wrap{
   .chrome>div,.chrome div{min-width:0}
   .ao,.stage{overflow:visible}
   #zAO{padding:0 4px}
-  .tok.s-ao .cs{font-size:14px;letter-spacing:.12em}
-  .tok.s-ao .mt,.tok.s-hold .mt{font-size:13px}
-  .fobgrid{grid-template-columns:84px minmax(0,1fr)}
-  #zREADY{min-width:0}
+  .tok .cs{font-size:12px;letter-spacing:.12em}
+  .tok .mt,.tok .ov{font-size:10.5px}
+  .fobgrid{grid-template-columns:1fr}
+  .cp{align-items:center}
+  #zCP{width:min(180px,86%)}
+  #zREADY{min-width:0;justify-content:center}
   .holdbox .zw,.standbay .zw,.fob .zw,.ao .zw{max-width:42vw}
 }
 

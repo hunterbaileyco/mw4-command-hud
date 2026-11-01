@@ -155,7 +155,7 @@ body.sx-pad .wrap{
 .owlab.o{fill:var(--olive2)}
 .spine{position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:12px 12px;padding:8px 20px 4px}
 .spine .hunter{grid-column:2;grid-row:1;justify-self:center}
-.spine .ghost{grid-column:1;grid-row:2;justify-self:center}
+.spine .ghost,.spine .kal{grid-column:1;grid-row:2;justify-self:center}
 .spine .price{grid-column:2;grid-row:2;justify-self:center}
 .gate{position:relative;z-index:3;margin:18px 14px 8px;padding:8px 8px 12px;display:grid;grid-template-columns:1fr 1fr;gap:18px 20px;
   border:1.5px solid rgba(232,163,23,.7);border-radius:4px;

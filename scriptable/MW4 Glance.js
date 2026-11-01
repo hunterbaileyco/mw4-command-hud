@@ -229,7 +229,7 @@ function doingSplit(d) {
 }
 
 // Operator portraits — same callsigns and files as the HUD theater (avatars/<callsign>.png).
-const OPS_AV = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal"];
+const OPS_AV = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal", "Ju Kwon"];
 const avatarMem = {}; // op lower -> Image | null for this run
 function opFromLane(c) {
   if (!c) return null;
@@ -238,12 +238,15 @@ function opFromLane(c) {
   const hit = by(lane);
   if (hit) return hit;
   if (String(c.tag || "").toUpperCase() === "KAL" && !lane) return "Kal";
-  const m = /^\s*([A-Za-z]+)/.exec(String(c.name || ""));
+  const name = String(c.name || "");
+  const multi = OPS_AV.find((o) => o.includes(" ") && new RegExp("^\\s*" + o.replace(/\s+/g, "\\s+") + "\\b", "i").test(name));
+  if (multi) return multi;
+  const m = /^\s*([A-Za-z]+)/.exec(name);
   return m ? by(m[1]) : null;
 }
 function avatarURL(op) {
   const q = STATUS_URL.indexOf("?") >= 0 ? STATUS_URL.slice(STATUS_URL.indexOf("?")) : "";
-  return HUD_URL + "avatars/" + String(op).toLowerCase() + ".png" + q;
+  return HUD_URL + "avatars/" + String(op).toLowerCase().replace(/\s+/g, "-") + ".png" + q;
 }
 // Portrait tap opens the live HUD action panel for this callsign (Doing readout is rendered there).
 function hudOpURL(op) { return HUD_URL + "?op=" + encodeURIComponent(op); }

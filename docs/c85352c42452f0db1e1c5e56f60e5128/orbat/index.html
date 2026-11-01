@@ -42,12 +42,12 @@ a{color:inherit;text-decoration:none}
     </div>
     <div class="asof"><span class="dot"></span><span id="nfile">12 ON FILE</span></div>
   </div>
-  <div class="brief"><b>BRIEF ▸</b> <b>Price is the only dispatcher.</b> Ghost feeds intake into Price. Cho gates creative — doesn’t manage, assign, or re-prioritise. West, Jae, Park and Dunn pass Cho’s checkpoint, then ship or send back. Kal and Ju Kwon sit outside the wire.</div>
+  <div class="brief"><b>BRIEF ▸</b> <b>Price is the only dispatcher.</b> Kal feeds intake into Price. Cho gates creative — doesn’t manage, assign, or re-prioritise. West, Jae, Park and Ju Kwon pass Cho’s checkpoint, then ship or send back. Ghost and Dunn sit outside the wire.</div>
   <div class="omap" id="omap">
     <svg class="owires" id="owires" aria-hidden="true"></svg>
     <div class="spine">
       <div class="nd big t-tan cmdr hunter" data-pin="hunter"><div class="ring"><span class="ini">★</span></div><div class="pl"><div class="cs">HUNTER</div><div class="ds">ACTUAL · OWNER</div><div class="rl">Commander · approves every ask</div></div></div>
-      <a class="nd t-olive ghost" data-pin="ghost" href="../files/#ghost"><div class="ring"><img src="../avatars/ghost.png" alt=""></div><div class="pl"><div class="cs">GHOST</div><div class="ds">141-01</div><div class="rl">Intake → Price</div><div class="live" data-live="ghost"></div></div></a>
+      <a class="nd t-olive kal" data-pin="kal" href="../files/#kal"><div class="ring"><img src="../avatars/kal.png" alt=""></div><div class="pl"><div class="cs">KAL</div><div class="ds">141-10</div><div class="rl">Intake → Price</div><div class="live" data-live="kal"></div></div></a>
       <a class="nd big t-tan price" data-pin="price" href="../files/#price"><div class="ring"><img src="../avatars/price.png" alt=""></div><div class="pl"><span class="st">SOLE DISPATCH</span><div class="cs">PRICE</div><div class="ds">BRAVO-6</div><div class="rl">Sole dispatcher</div><div class="live" data-live="price"></div></div></a>
     </div>
     <div class="gate">
@@ -55,7 +55,7 @@ a{color:inherit;text-decoration:none}
       <a class="nd t-amber" data-pin="west" href="../files/#west"><div class="ring"><img src="../avatars/west.png" alt=""></div><div class="pl"><div class="cs">WEST</div><div class="ds">141-03</div><div class="rl">Email/SMS + onsite</div><div class="live" data-live="west"></div></div></a>
       <a class="nd t-amber" data-pin="jae" href="../files/#jae"><div class="ring"><img src="../avatars/jae.png" alt=""></div><div class="pl"><div class="cs">JAE</div><div class="ds">141-06</div><div class="rl">Organic social</div><div class="live" data-live="jae"></div></div></a>
       <a class="nd t-amber" data-pin="park" href="../files/#park"><div class="ring"><img src="../avatars/park.png" alt=""></div><div class="pl"><div class="cs">PARK</div><div class="ds">141-05</div><div class="rl">SEO + articles</div><div class="live" data-live="park"></div></div></a>
-      <a class="nd t-olive" data-pin="dunn" href="../files/#dunn"><div class="ring"><img src="../avatars/dunn.png" alt=""></div><div class="pl"><div class="cs">DUNN</div><div class="ds">141-07</div><div class="rl">Support desk</div><div class="live" data-live="dunn"></div></div></a>
+      <a class="nd t-olive" data-pin="ju" href="../files/#ju"><div class="ring"><span class="ini">JK</span></div><div class="pl"><div class="cs">JU KWON</div><div class="ds">EXT-01</div><div class="rl">Kinsora ops</div><div class="live" data-live="ju"></div></div></a>
       <div class="gl">CHO · CREATIVE GATE<i>Checkpoint · not a manager · Price still wires each lane</i></div>
     </div>
     <div class="sectors">
@@ -69,8 +69,8 @@ a{color:inherit;text-decoration:none}
     </div>
     <div class="fence">
       <span class="fl">OUTSIDE KINSORA DISPATCH</span>
-      <a class="nd t-coyote" data-pin="kal" href="../files/#kal"><div class="ring"><img src="../avatars/kal.png" alt=""></div><div class="pl"><span class="st">KAL BOARD</span><div class="cs">KAL</div><div class="ds">141-10</div><div class="rl">Copy-trading desk</div><div class="live" data-live="kal"></div></div></a>
-      <a class="nd t-dim" data-pin="ju" href="../files/#ju"><div class="ring"><span class="ini">JK</span></div><div class="pl"><span class="st">OFF BOARD</span><div class="cs">JU KWON</div><div class="ds">EXT-01</div><div class="rl">Personal ops</div></div></a>
+      <a class="nd t-coyote" data-pin="ghost" href="../files/#ghost"><div class="ring"><img src="../avatars/ghost.png" alt=""></div><div class="pl"><span class="st">TRADING</span><div class="cs">GHOST</div><div class="ds">141-01</div><div class="rl">Trading</div><div class="live" data-live="ghost"></div></div></a>
+      <a class="nd t-dim" data-pin="dunn" href="../files/#dunn"><div class="ring"><img src="../avatars/dunn.png" alt=""></div><div class="pl"><span class="st">PERSONAL</span><div class="cs">DUNN</div><div class="ds">141-07</div><div class="rl">Personal</div></div></a>
       <div class="fn">No wire from Price · own boards</div>
     </div>
   </div>
@@ -125,9 +125,9 @@ a{color:inherit;text-decoration:none}
       const end = mark[s.cls] ? ' marker-end="' + mark[s.cls] + '"' : '';
       return '<path class="' + s.cls + '" d="' + dAttr(s.pts) + '"' + end + '/>';
     }).join('');
-    if (box.ghost && box.price) {
-      const x = (box.ghost.r + box.price.l) / 2;
-      const y = (Math.max(box.ghost.t, box.price.t) + Math.min(box.ghost.b, box.price.b)) / 2;
+    if (box.kal && box.price) {
+      const x = (box.kal.r + box.price.l) / 2;
+      const y = (Math.max(box.kal.t, box.price.t) + Math.min(box.kal.b, box.price.b)) / 2;
       body += '<text class="owlab o" x="' + x.toFixed(1) + '" y="' + (y - 7).toFixed(1) + '" text-anchor="middle">IN ▸</text>';
     }
     if (box.price && box.cho) {
@@ -176,7 +176,7 @@ a{color:inherit;text-decoration:none}
         }
       }
       document.querySelectorAll('[data-live]').forEach((el) => {
-        const op = OPS.find((o) => o.toLowerCase() === el.dataset.live);
+        const op = OPS.find((o) => o.toLowerCase() === el.dataset.live || MW4Roster.slugOf(o) === el.dataset.live);
         if (!op) return;
         el.textContent = zoneOf(op, cards);
       });

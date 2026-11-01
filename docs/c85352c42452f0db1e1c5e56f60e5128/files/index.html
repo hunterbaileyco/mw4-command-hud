@@ -75,10 +75,12 @@ a{color:inherit}
   let feedCards = [];
   let shown = 'price';
 
+  function mark(f) { return f && f.id === 'ju' ? 'JK' : (f ? f.name.slice(0, 2).toUpperCase() : '★'); }
   function face(id, px) {
     const f = R.BY_ID[id];
-    if (!f || f.off) return `<span class="ring" style="width:${px}px;height:${px}px"><span class="ini">${id === 'ju' ? 'JK' : '★'}</span></span>`;
-    const ini = f.name.slice(0, 2).toUpperCase();
+    if (!f) return `<span class="ring" style="width:${px}px;height:${px}px"><span class="ini">★</span></span>`;
+    if (f.id === 'ju') return `<span class="ring" style="width:${px}px;height:${px}px"><span class="ini">JK</span></span>`;
+    const ini = mark(f);
     return `<span class="ring" style="width:${px}px;height:${px}px"><img src="../avatars/${esc(f.id)}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"></span>`;
   }
   function chip(end) {
@@ -98,13 +100,13 @@ a{color:inherit}
     const finite = doing.filter((c) => !isStanding(c));
     const waiting = rows.filter((c) => c.list === 'waiting');
     const backlog = rows.filter((c) => c.list === 'backlog');
-    if (f.id === 'kal' && finite.length) return 'kal';
+    if (f.id === 'ghost' && finite.length) return 'kal';
     if (finite.length) return 'ao';
     if (f.id === 'price') return 'cp';
     if (waiting.length) return 'hold';
     if (doing.length) return 'stand';
     if (backlog.length) return 'ready';
-    if (f.id === 'kal') return 'kal';
+    if (f.id === 'ghost') return 'kal';
     return 'idle';
   }
   function nowLine(f) {
@@ -137,8 +139,7 @@ a{color:inherit}
   function renderRail() {
     $('rail').innerHTML = R.FILES.map((f) => {
       const z = zoneKey(f);
-      const ini = f.off ? 'JK' : '';
-      const ring = f.off
+      const ring = f.id === 'ju'
         ? '<span class="ring"><span class="ini">JK</span></span>'
         : `<span class="ring"><span class="face"><img src="../avatars/${esc(f.id)}.png" alt=""></span></span>`;
       return `<a class="rt z-${z}" href="#${esc(f.id)}" data-id="${esc(f.id)}" aria-selected="${f.id === shown}">${ring}<span class="pl"><div class="cs">${esc(f.name.split(' ')[0].toUpperCase())}</div><div class="ds">${esc(f.des)}</div><div class="zn">${esc(z === 'cp' ? 'CMD' : z === 'off' ? 'OFF' : z.toUpperCase())}</div></span></a>`;
@@ -153,10 +154,10 @@ a{color:inherit}
     const f = R.BY_ID[id] || R.BY_ID.price;
     shown = f.id;
     const z = zoneKey(f);
-    const ring = f.off
+    const ring = f.id === 'ju'
       ? '<div class="pic"><span class="ini">JK</span><span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span></div>'
       : `<div class="pic"><img src="../avatars/${esc(f.id)}.png" alt=""><span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span></div>`;
-    const selfRing = f.off
+    const selfRing = f.id === 'ju'
       ? '<span class="ring"><span class="ini">JK</span></span>'
       : `<span class="ring"><img src="../avatars/${esc(f.id)}.png" alt=""></span>`;
     $('dos').className = 'panel dos z-' + z;

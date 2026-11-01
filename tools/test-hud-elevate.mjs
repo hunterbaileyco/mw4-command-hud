@@ -13,22 +13,27 @@ for (const name of ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn'
   assert.ok(R.FILES.some((f) => f.name === name), name);
 }
 
-assert.deepEqual(ids(by.cho.from).sort(), ['dunn', 'jae', 'park', 'west']);
+assert.deepEqual(ids(by.cho.from).sort(), ['jae', 'ju', 'park', 'west']);
 assert.ok(labels(by.cho.to).includes('SHIP') && labels(by.cho.to).includes('SEND BACK'));
 assert.equal(ids(by.cho.to).length, 0, 'Cho does not assign people');
-for (const id of ['west', 'jae', 'park', 'dunn']) {
+for (const id of ['west', 'jae', 'park', 'ju']) {
   assert.ok(ids(by[id].to).includes('cho'), id + ' flows to the Cho gate');
   assert.ok(ids(by[id].from).includes('price'), id + ' is dispatched by Price');
   assert.ok(!ids(by[id].from).includes('cho'), id + ' is not managed by Cho');
 }
-assert.deepEqual(ids(by.ghost.to), ['price']);
-assert.ok(!ids(by.ghost.from).includes('price') || true);
-assert.equal(ids(by.ghost.to).length, 1);
+assert.deepEqual(ids(by.kal.to), ['price']);
+assert.equal(ids(by.kal.to).length, 1);
 assert.ok(labels(by.price.to).includes('ALL 9 LANES'));
 assert.equal(ids(by.price.to).length, 0, 'Price file does not draw a management tree');
-assert.ok(ids(by.price.from).includes('ghost'));
-assert.ok(!ids(by.kal.from).includes('price') && !ids(by.kal.to).includes('price'));
-assert.ok(by.ju.off && !R.OPS.includes('Ju Kwon'));
+assert.ok(ids(by.price.from).includes('kal'));
+assert.ok(!ids(by.ghost.from).includes('price') && !ids(by.ghost.to).includes('price'));
+assert.equal(by.kal.role.startsWith('Intake'), true);
+assert.equal(by.ghost.map, 'Trading');
+assert.equal(by.ju.map, 'Kinsora ops');
+assert.equal(by.dunn.map, 'Personal');
+assert.equal(/ops/i.test(by.dunn.role + by.dunn.unit + by.dunn.stamp + by.dunn.map), false);
+assert.ok(by.dunn.off && !R.OPS.includes('Dunn'));
+assert.ok(!by.ju.off && R.OPS.includes('Ju Kwon'));
 assert.match(by.cho.not, /manage, assign or re-prioritise/);
 assert.doesNotMatch(by.cho.not, /assign work to/);
 
@@ -44,18 +49,18 @@ function layout(W) {
   const right = W - 22 - nw;
   return {
     hunter: box(right, 8, nw, 88),
-    ghost: box(left, 118, nw, 104),
+    kal: box(left, 118, nw, 104),
     price: box(right, 112, nw, 112),
     cho: box((W - nw) / 2, 292, nw, 96),
     west: box(left, 430, nw - 8, 96),
     jae: box(right + 8, 430, nw - 8, 96),
     park: box(left, 560, nw - 8, 96),
-    dunn: box(right + 8, 560, nw - 8, 96),
+    ju: box(right + 8, 560, nw - 8, 96),
     ko: box(left + 6, 710, nw - 10, 92),
     gaz: box(right - 20, 710, Math.floor(nw * 0.62), 92),
     soap: box(right + Math.floor(nw * 0.48), 710, Math.floor(nw * 0.5), 92),
-    kal: box(left, 860, nw, 88),
-    ju: box(right, 860, nw, 88),
+    ghost: box(left, 860, nw, 88),
+    dunn: box(right, 860, nw, 88),
   };
 }
 for (const width of [390, 430]) {

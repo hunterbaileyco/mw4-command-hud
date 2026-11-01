@@ -172,8 +172,8 @@ const status = {
   roster: ROSTER,
   flow: FLOW,
   glance: extra.glance || {
-    line1: `${cmd.counts.doing} doing · ${cmd.counts.waiting} waiting on you`,
-    line2: cmd.lists.waiting[0] ? `Next: ${cmd.lists.waiting[0].short}` : (cmd.lists.doing[0] ? `Now: ${cmd.lists.doing[0].short}` : 'All clear'),
+    line1: `${cmd.counts.doing + kal.counts.doing} doing · ${W} waiting on you`,
+    line2: (cmd.lists.waiting[0] || kal.lists.waiting[0]) ? `Next: ${(cmd.lists.waiting[0] || kal.lists.waiting[0]).short}` : (cmd.lists.doing[0] ? `Now: ${cmd.lists.doing[0].short}` : 'All clear'),
     badge: W ? `${W} WAIT` : 'CLEAR',
   },
   events,

@@ -113,7 +113,7 @@ function board(dump, fb, tag) {
 }
 
 const C = board(readJSON(args.command), '', 'CMD');
-const Kb = board(readJSON(args.kal), 'Kal', 'KAL');
+const Kb = board(readJSON(args.kal), 'Ghost', 'KAL');
 const cmd = C.out, kal = Kb.out;
 const extra = args.extra && fs.existsSync(args.extra) ? readJSON(args.extra) : {};
 const snap = { ...C.snap, ...Kb.snap };
@@ -125,7 +125,7 @@ let prevSnap = prev && prev.snap;
 if (prev && !prevSnap && prev.command) { // legacy: previous published cleartext status.json
   prevSnap = {};
   for (const [B, tag] of [[prev.command, 'CMD'], [prev.kal, 'KAL']]) for (const k of ['doing', 'waiting', 'backlog', 'done'])
-    for (const c of (B && B.lists && B.lists[k]) || []) prevSnap[c.id] = { list: k, op: c.lane || (tag === 'KAL' ? 'Kal' : 'TF141'), short: c.short || shortOf(c.name, c.lane), board: tag };
+    for (const c of (B && B.lists && B.lists[k]) || []) prevSnap[c.id] = { list: k, op: c.lane || (tag === 'KAL' ? 'Ghost' : 'TF141'), short: c.short || shortOf(c.name, c.lane), board: tag };
 }
 const fresh = [];
 if (prevSnap) {
@@ -150,14 +150,14 @@ const events = [...((prev && prev.events) || []), ...stamped].filter((e) => NOW 
 
 // ---------- lanes / alerts / glance ----------
 const lanes = LANES.filter((n) => n !== 'Price').map((name) => {
-  const src = name === 'Kal' ? kal : cmd;
+  const src = name === 'Ghost' ? kal : cmd;
   const d = src.lists.doing.filter((c) => c.lane === name), w = src.lists.waiting.filter((c) => c.lane === name);
   const status = w.length ? 'blocked' : d.length ? 'active' : 'idle';
   return { name, status, note: w.length ? `${w.length} waiting on Hunter` : d.length ? d[0].short : '' };
 });
 const alerts = [];
 const W = cmd.counts.waiting + kal.counts.waiting;
-if (W) alerts.push({ level: 'warn', text: `${W} card${W > 1 ? 's' : ''} waiting on Hunter (${cmd.counts.waiting} Command · ${kal.counts.waiting} Kal)` });
+if (W) alerts.push({ level: 'warn', text: `${W} card${W > 1 ? 's' : ''} waiting on Hunter (${cmd.counts.waiting} Command · ${kal.counts.waiting} Ghost)` });
 if (cmd.counts.doneToday) alerts.push({ level: 'go', text: `${cmd.counts.doneToday} shipped today` });
 if (!cmd.counts.doing) alerts.push({ level: 'info', text: 'Nothing in Doing on Command' });
 

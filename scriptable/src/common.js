@@ -1,6 +1,6 @@
 // ===== MW4 shared (feed + auth) — generated into each script by tools/build-scriptable.mjs =====
-const STATUS_URL = "https://hunterbaileyco.github.io/mw4-command-hud/c85352c42452f0db1e1c5e56f60e5128/status.json";
-const HUD_URL = STATUS_URL.replace(/status\.json$/, "");
+const STATUS_URL = "https://mw4-command-hud.vercel.app/c85352c42452f0db1e1c5e56f60e5128/status.json?x-vercel-protection-bypass=5a9wEv8Xnt58mOSIhh87xWagl7JgXZj5";
+const HUD_URL = STATUS_URL.replace(/status\.json(\?.*)?$/, "");
 const AUTH_HASH = "0b488216b0f3fff7076b1a9af7ed5abb84e17176fde44fddba9138b0ab08fcc9"; // SHA-256 of the auth code
 const KC_CODE = "mw4hud.authcode", KC_KEY = "mw4hud.aeskey";
 const RESET = false; // set true, run once in the app to forget the saved auth code, then set back to false
@@ -48,7 +48,7 @@ async function loadFeed() {
   const cache = fm.joinPath(fm.cacheDirectory(), "mw4-status.enc.json");
   let env = null, offline = false;
   try {
-    const req = new Request(STATUS_URL + "?t=" + Date.now());
+    const req = new Request(STATUS_URL + (STATUS_URL.indexOf("?") >= 0 ? "&" : "?") + "t=" + Date.now());
     req.timeoutInterval = 15;
     env = JSON.parse(await req.loadString());
     fm.writeString(cache, JSON.stringify(env));

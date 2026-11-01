@@ -191,7 +191,7 @@ function softFail(w, need, script) {
   txt(w, auth ? `Open Scriptable → run “${script}” (or “MW4 ${script}”) once → enter auth code.` : "Feed unreachable · retrying on next refresh.", F.r(9), col("dim"), 3);
   w.addSpacer();
 }
-const LANE_TAG = (c) => String(c.lane || (c.tag === "KAL" ? "KAL" : "CMD")).toUpperCase();
+const LANE_TAG = (c) => String(c.tag || "").toUpperCase() === "KAL" ? "TRADING" : String(c.lane || "CMD").toUpperCase();
 // Same rule as the HUD: a Doing card is standing when its name or short already says so.
 function isStanding(c) {
   const name = String((c && c.name) || "");
@@ -200,7 +200,7 @@ function isStanding(c) {
 }
 function doingSplit(d) {
   const cmd = (((d || {}).command || {}).lists || {}).doing || [];
-  const kal = ((((d || {}).kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Kal" }));
+  const kal = ((((d || {}).kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Ghost" }));
   const all = [...cmd, ...kal];
   return { finite: all.filter((c) => !isStanding(c)), standing: all.filter(isStanding) };
 }
@@ -214,7 +214,7 @@ function opFromLane(c) {
   const lane = String(c.lane || "");
   const hit = by(lane);
   if (hit) return hit;
-  if (String(c.tag || "").toUpperCase() === "KAL" && !lane) return "Kal";
+  if (String(c.tag || "").toUpperCase() === "KAL" && !lane) return "Ghost";
   const name = String(c.name || "");
   const multi = OPS_AV.find((o) => o.includes(" ") && new RegExp("^\\s*" + o.replace(/\s+/g, "\\s+") + "\\b", "i").test(name));
   if (multi) return multi;

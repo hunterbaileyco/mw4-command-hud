@@ -1,6 +1,7 @@
 /* Live feed for one operator. Titles, briefs, lane, and board come only from the feed card.
    Standing work is cards whose name or short already says "standing" — not a new feed field. */
 (function (root) {
+  // Dunn is personal-only. Listed here solely so designator() keeps 141-07 numbering.
   const OPS = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal", "Ju Kwon"];
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   function designator(op) {

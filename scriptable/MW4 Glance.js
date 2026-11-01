@@ -214,7 +214,7 @@ function softFail(w, need, script) {
   txt(w, auth ? `Open Scriptable → run “${script}” (or “MW4 ${script}”) once → enter auth code.` : "Feed unreachable · retrying on next refresh.", F.r(9), col("dim"), 3);
   w.addSpacer();
 }
-const LANE_TAG = (c) => String(c.lane || (c.tag === "KAL" ? "KAL" : "CMD")).toUpperCase();
+const LANE_TAG = (c) => String(c.tag || "").toUpperCase() === "KAL" ? "TRADING" : String(c.lane || "CMD").toUpperCase();
 // Same rule as the HUD: a Doing card is standing when its name or short already says so.
 function isStanding(c) {
   const name = String((c && c.name) || "");
@@ -223,7 +223,7 @@ function isStanding(c) {
 }
 function doingSplit(d) {
   const cmd = (((d || {}).command || {}).lists || {}).doing || [];
-  const kal = ((((d || {}).kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Kal" }));
+  const kal = ((((d || {}).kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Ghost" }));
   const all = [...cmd, ...kal];
   return { finite: all.filter((c) => !isStanding(c)), standing: all.filter(isStanding) };
 }
@@ -237,7 +237,7 @@ function opFromLane(c) {
   const lane = String(c.lane || "");
   const hit = by(lane);
   if (hit) return hit;
-  if (String(c.tag || "").toUpperCase() === "KAL" && !lane) return "Kal";
+  if (String(c.tag || "").toUpperCase() === "KAL" && !lane) return "Ghost";
   const name = String(c.name || "");
   const multi = OPS_AV.find((o) => o.includes(" ") && new RegExp("^\\s*" + o.replace(/\s+/g, "\\s+") + "\\b", "i").test(name));
   if (multi) return multi;
@@ -521,7 +521,7 @@ async function aoRow(w, d, max, vertical) {
   }
   const shown = finite.length > max ? finite.slice(0, max - 1) : finite;
   await preloadAvatars(shown);
-  for (const c of shown) plate(box, c, { border: "amber", tag: /^kal$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15, action: true });
+  for (const c of shown) plate(box, c, { border: "amber", tag: /^ghost$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15, action: true });
   if (finite.length > max) { const m = box.addStack(); m.backgroundColor = col("panel", 0.9); m.borderColor = col("line"); m.borderWidth = 1; m.setPadding(4, 5, 4, 5); txt(m, "+" + (finite.length - shown.length), F.h(10), col("amber"), 1); }
 }
 async function standRow(w, standing, max, vertical) {
@@ -539,7 +539,7 @@ async function standRow(w, standing, max, vertical) {
 }
 async function holdRow(w, d, max, vertical) {
   const cc = (d.command && d.command.counts) || {}, kc = (d.kal && d.kal.counts) || {};
-  const waiting = [...(((d.command || {}).lists || {}).waiting || []), ...((((d.kal || {}).lists || {}).waiting || []).map((c) => ({ ...c, lane: c.lane || "Kal" })))];
+  const waiting = [...(((d.command || {}).lists || {}).waiting || []), ...((((d.kal || {}).lists || {}).waiting || []).map((c) => ({ ...c, lane: c.lane || "Ghost" })))];
   const n = (cc.waiting ?? 0) + (kc.waiting ?? 0);
   const r = w.addStack(); r.spacing = 3;
   zoneTag(r, "HOLD", n, "hold");
@@ -550,7 +550,7 @@ async function holdRow(w, d, max, vertical) {
   }
   const shown = waiting.slice(0, max);
   await preloadAvatars(shown);
-  for (const c of shown) plate(box, c, { border: "holdink", tag: /^kal$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15 });
+  for (const c of shown) plate(box, c, { border: "holdink", tag: /^ghost$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15 });
   if (waiting.length > shown.length) {
     const m = box.addStack(); m.layoutVertically(); m.backgroundColor = col("hold", 0.35); m.borderColor = col("holdink", 0.6); m.borderWidth = 1; m.setPadding(2, 5, 2, 5);
     txt(m, "+" + (waiting.length - shown.length), F.h(9), col("holdink"), 1); txt(m, "WAITING ▸", F.sb(6.5), col("dim"), 1);

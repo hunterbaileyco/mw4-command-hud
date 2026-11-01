@@ -88,7 +88,7 @@ async function aoRow(w, d, max, vertical) {
   }
   const shown = finite.length > max ? finite.slice(0, max - 1) : finite;
   await preloadAvatars(shown);
-  for (const c of shown) plate(box, c, { border: "amber", tag: /^kal$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15, action: true });
+  for (const c of shown) plate(box, c, { border: "amber", tag: /^ghost$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15, action: true });
   if (finite.length > max) { const m = box.addStack(); m.backgroundColor = col("panel", 0.9); m.borderColor = col("line"); m.borderWidth = 1; m.setPadding(4, 5, 4, 5); txt(m, "+" + (finite.length - shown.length), F.h(10), col("amber"), 1); }
 }
 async function standRow(w, standing, max, vertical) {
@@ -106,7 +106,7 @@ async function standRow(w, standing, max, vertical) {
 }
 async function holdRow(w, d, max, vertical) {
   const cc = (d.command && d.command.counts) || {}, kc = (d.kal && d.kal.counts) || {};
-  const waiting = [...(((d.command || {}).lists || {}).waiting || []), ...((((d.kal || {}).lists || {}).waiting || []).map((c) => ({ ...c, lane: c.lane || "Kal" })))];
+  const waiting = [...(((d.command || {}).lists || {}).waiting || []), ...((((d.kal || {}).lists || {}).waiting || []).map((c) => ({ ...c, lane: c.lane || "Ghost" })))];
   const n = (cc.waiting ?? 0) + (kc.waiting ?? 0);
   const r = w.addStack(); r.spacing = 3;
   zoneTag(r, "HOLD", n, "hold");
@@ -117,7 +117,7 @@ async function holdRow(w, d, max, vertical) {
   }
   const shown = waiting.slice(0, max);
   await preloadAvatars(shown);
-  for (const c of shown) plate(box, c, { border: "holdink", tag: /^kal$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15 });
+  for (const c of shown) plate(box, c, { border: "holdink", tag: /^ghost$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15 });
   if (waiting.length > shown.length) {
     const m = box.addStack(); m.layoutVertically(); m.backgroundColor = col("hold", 0.35); m.borderColor = col("holdink", 0.6); m.borderWidth = 1; m.setPadding(2, 5, 2, 5);
     txt(m, "+" + (waiting.length - shown.length), F.h(9), col("holdink"), 1); txt(m, "WAITING ▸", F.sb(6.5), col("dim"), 1);

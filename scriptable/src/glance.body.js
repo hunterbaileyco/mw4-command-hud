@@ -62,15 +62,17 @@ function zoneTag(row, top, n, kind) {
 }
 function plate(row, c, opts) {
   const p = row.addStack(); p.layoutVertically(); p.backgroundColor = col("panel", 0.95);
-  p.borderColor = col(opts.border, 0.75); p.borderWidth = 1; p.setPadding(2, 5, 2, 5); p.spacing = 0;
-  const top = p.addStack(); top.centerAlignContent(); top.spacing = 3;
-  const bar = top.addStack(); bar.size = new Size(2, 7); bar.backgroundColor = col(opts.border);
-  txt(top, LANE_TAG(c), F.h(7.5), col(opts.tag), 1); top.addSpacer();
-  txt(p, c.short || c.name, F.m(opts.size || 8.5), col("ink"), 1);
+  p.borderColor = col(opts.border, 0.75); p.borderWidth = 1; p.setPadding(3, 5, 3, 5); p.spacing = 1;
+  const top = p.addStack(); top.centerAlignContent(); top.spacing = 4;
+  const bar = top.addStack(); bar.size = new Size(2, 16); bar.backgroundColor = col(opts.border);
+  const op = opFromLane(c);
+  mountFace(top, op, opts.face || 16, opts.action && op ? hudOpURL(op) : "");
+  txt(top, LANE_TAG(c), F.h(7), col(opts.tag), 1); top.addSpacer();
+  txt(p, c.short || c.name, F.m(opts.size || 8.5), col("ink"), 2);
   if (c.url) p.url = c.url;
   return p;
 }
-function aoRow(w, d, max, vertical) {
+async function aoRow(w, d, max, vertical) {
   const doing = [...(((d.command || {}).lists || {}).doing || []), ...((((d.kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Kal" })))];
   const r = w.addStack(); r.spacing = 3;
   zoneTag(r, "AO", doing.length, "ao");
@@ -80,10 +82,11 @@ function aoRow(w, d, max, vertical) {
     txt(e, "NO ONE ACROSS · FOB STANDING BY", F.sb(8), col("dim"), 1); e.addSpacer(); return;
   }
   const shown = doing.length > max ? doing.slice(0, max - 1) : doing;
-  for (const c of shown) plate(box, c, { border: "amber", tag: /^kal$/i.test(c.lane) ? "amber" : "tan" });
+  await preloadAvatars(shown);
+  for (const c of shown) plate(box, c, { border: "amber", tag: /^kal$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15, action: true });
   if (doing.length > max) { const m = box.addStack(); m.backgroundColor = col("panel", 0.9); m.borderColor = col("line"); m.borderWidth = 1; m.setPadding(4, 5, 4, 5); txt(m, "+" + (doing.length - shown.length), F.h(10), col("amber"), 1); }
 }
-function holdRow(w, d, max, vertical) {
+async function holdRow(w, d, max, vertical) {
   const cc = (d.command && d.command.counts) || {}, kc = (d.kal && d.kal.counts) || {};
   const waiting = [...(((d.command || {}).lists || {}).waiting || []), ...((((d.kal || {}).lists || {}).waiting || []).map((c) => ({ ...c, lane: c.lane || "Kal" })))];
   const n = (cc.waiting ?? 0) + (kc.waiting ?? 0);
@@ -95,7 +98,8 @@ function holdRow(w, d, max, vertical) {
     txt(e, "NOTHING ON HUNTER · ALL CLEAR", F.sb(8), col("dim"), 1); e.addSpacer(); return;
   }
   const shown = waiting.slice(0, max);
-  for (const c of shown) plate(box, c, { border: "holdink", tag: /^kal$/i.test(c.lane) ? "amber" : "tan" });
+  await preloadAvatars(shown);
+  for (const c of shown) plate(box, c, { border: "holdink", tag: /^kal$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15 });
   if (waiting.length > shown.length) {
     const m = box.addStack(); m.layoutVertically(); m.backgroundColor = col("hold", 0.35); m.borderColor = col("holdink", 0.6); m.borderWidth = 1; m.setPadding(2, 5, 2, 5);
     txt(m, "+" + (waiting.length - shown.length), F.h(9), col("holdink"), 1); txt(m, "WAITING ▸", F.sb(6.5), col("dim"), 1);
@@ -120,9 +124,9 @@ async function build() {
     return w;
   }
   w.addSpacer(5); intel(w, g, false);
-  w.addSpacer(5); aoRow(w, d, large ? 6 : 3, large);
+  w.addSpacer(5); await aoRow(w, d, large ? 6 : 3, large);
   w.addSpacer(4); wireBar(w, "── CROSSING THE WIRE ──", 11, 7);
-  w.addSpacer(4); holdRow(w, d, large ? 6 : 2, large);
+  w.addSpacer(4); await holdRow(w, d, large ? 6 : 2, large);
   w.addSpacer(); w.addSpacer(4);
   ticker(w, d, g, false);
   return w;

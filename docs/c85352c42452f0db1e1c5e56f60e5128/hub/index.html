@@ -12,6 +12,8 @@
 <meta name="theme-color" content="#0B0E0C">
 <link rel="apple-touch-icon" href="../icon.svg">
 <link rel="stylesheet" href="../suite.css">
+<script src="../brand-icons.js"></script>
+<script src="../action-panel.js"></script>
 <title>MW4 // COMMAND SUITE</title>
 <style>
 *{box-sizing:border-box}
@@ -52,7 +54,8 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .go{margin-left:auto;align-self:flex-start;font-family:var(--mono);font-size:10px;font-weight:800;letter-spacing:.18em;color:#0B0E0C;background:var(--amber);padding:7px 10px;border-radius:3px;white-space:nowrap;box-shadow:0 0 14px rgba(232,163,23,.3)}
 .d{color:#b9b3a3;font-size:13px}
 .chips{display:flex;flex-wrap:wrap;gap:5px}
-.chips span{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--tan);border:1px solid var(--line2);padding:2px 6px;border-radius:2px;background:rgba(11,14,12,.6)}
+.chips span{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--tan);border:1px solid var(--line2);padding:2px 6px;border-radius:2px;background:rgba(11,14,12,.6)}
+.stats .l{display:flex;align-items:center;gap:4px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:4px;background:rgba(11,14,12,.7);margin-top:auto}
 .stats>div{padding:6px 8px;border-right:1px solid var(--line);min-width:0}
 .stats>div:last-child{border-right:0}
@@ -62,6 +65,20 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .stats .n.lk{color:#3d463a;letter-spacing:.05em}
 .hint{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:6px;min-height:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hint b{color:var(--amber)}.hint .w{color:var(--holdink)}
+.wireops{position:relative;border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:10px}
+.wireops .hd{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+.wireops .hd b{color:var(--amber)}
+.wireops .lockd{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;padding:8px 0}
+.wrow{display:flex;flex-wrap:wrap;gap:8px}
+.wop{appearance:none;display:flex;align-items:center;gap:8px;min-height:52px;padding:6px 10px 6px 6px;background:#0d110e;border:1px solid rgba(232,163,23,.4);border-radius:4px;color:var(--ink);cursor:pointer;text-align:left}
+.wop img,.wop .ini{width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px var(--amber);background:var(--idle);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:var(--tan)}
+.wop b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.14em}
+.wop i{display:block;font-style:normal;font-size:11px;color:var(--dim);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actsheet{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.62)}
+.actsheet.on{display:flex}
+.actsheet .pn{width:min(560px,100%);max-height:86vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-bottom:0;border-radius:10px 10px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom) + 18px)}
+.actsheet .x{appearance:none;background:transparent;border:1px solid var(--line);color:var(--tan);font-family:var(--mono);font-size:10px;padding:5px 8px;border-radius:2px;cursor:pointer}
+@media(min-width:900px){.actsheet{align-items:center}.actsheet .pn{border-radius:10px;border-bottom:1px solid var(--line)}}
 /* sitrep strip */
 .sit{position:relative;border:1px solid var(--line);border-radius:6px;background:var(--panel);overflow:hidden}
 .sit .hd{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase}
@@ -124,7 +141,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
         <span class="go">OPEN ▸</span>
       </div>
       <div class="d">Every published post back to each channel's first: views, engagement, daily trend and a sortable post log.</div>
-      <div class="chips"><span>TT @KINSORA.CO</span><span>TT @WEARKINSORA</span><span>IG @WEARKINSORA</span><span>PINTEREST</span></div>
+      <div class="chips" id="socChips"></div>
       <div class="hint" id="socHint">▒ Syncing snapshot totals…</div>
       <div class="stats" id="socStats">
         <div><div class="l">TT KCO</div><div class="n a lk">▒▒</div></div>
@@ -134,6 +151,12 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
       </div>
     </a>
   </div>
+
+  <section class="wireops" id="wireops">
+    <span class="sx-brk tl"></span><span class="sx-brk br"></span>
+    <div class="hd"><b>ACROSS THE WIRE</b> · tap a callsign for the in-action readout</div>
+    <div class="wrow" id="wireRow"><div class="lockd">▒ Syncing deployed operators…</div></div>
+  </section>
 
   <section class="sit">
     <span class="sx-brk tl"></span><span class="sx-brk br"></span>
@@ -149,6 +172,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   <div class="foot">Access via Vercel sign-in · feeds decrypted server-side · auto-sync 30s<br><a href="#" id="sync2" style="color:var(--tan);border-bottom:1px dotted var(--tan)">SYNC NOW</a></div>
 </div>
 
+<div class="actsheet" id="act"><div class="pn" id="actp"></div></div>
 <div class="sx-dock"><nav>
   <a class="on" href="./"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>HUB</a>
   <a href="../"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>HUD</a>
@@ -165,6 +189,19 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const safeUrl = (u) => /^https:\/\/trello\.com\//.test(u || '') ? u : '';
   const fmtK = (v) => v == null ? '—' : v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e4 ? Math.round(v / 1e3) + 'K' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : String(v);
+  const mark = (c, px) => (window.MW4Icons ? MW4Icons.markHtml(c, px) : '');
+  const FALLBACK_CH = [
+    { key: 'tt_kco', platform: 'TikTok', short: 'TT KCO', handle: '@kinsora.co' },
+    { key: 'tt_wk', platform: 'TikTok', short: 'TT WK', handle: '@wearkinsora' },
+    { key: 'ig', platform: 'Instagram', short: 'IG', handle: '@wearkinsora' },
+    { key: 'pin', platform: 'Pinterest', short: 'PIN', handle: 'wearkinsora' },
+  ];
+  function paintChannels(channels) {
+    const list = (channels && channels.length ? channels : FALLBACK_CH).slice(0, 4);
+    $('socChips').innerHTML = list.map((c) => `<span>${mark(c, 12)}${esc(String(c.handle || c.short || c.key).replace(/^@/, '@'))}</span>`).join('');
+    const box = $('socStats').children;
+    list.forEach((c, i) => { if (box[i]) box[i].querySelector('.l').innerHTML = mark(c, 11) + esc(c.short || c.key); });
+  }
   const PT = (d, o) => new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', ...o }).format(d);
   const agoShort = (ms) => { const m = Math.round(ms / 60000); return m < 1 ? 'NOW' : m < 60 ? m + 'M' : Math.floor(m / 60) + 'H'; };
   const clock = () => { $('clk').textContent = PT(new Date(), { second: '2-digit' }) + ' PT'; };
@@ -209,19 +246,46 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
       .concat(ev.map((e) => { const [k, tag] = EK[e.kind] || ['rtb', String(e.kind).toUpperCase()]; return `<li><span class="k ${k}">${tag} · ${esc(String(e.op).toUpperCase())}</span><span class="x">${esc(e.mission || '')}</span><span class="w">${agoShort(Date.now() - Date.parse(e.t))}</span></li>`; }));
     $('sit').innerHTML = items.length ? '<ul>' + items.join('') + '</ul>' : '<div class="lockd">No crossings in the last 6h</div>';
     $('sitc').textContent = ev.length + ' CROSSINGS · ' + (d.alerts || []).length + ' ALERTS';
+    paintWire(d);
   }
+  function paintWire(d) {
+    const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal'];
+    const canon = (lane) => OPSH.find((o) => o.toLowerCase() === String(lane || '').toLowerCase()) || lane || 'TF141';
+    const rows = [];
+    for (const [board, B] of [['CMD', d.command], ['KAL', d.kal]]) {
+      for (const c of (((B || {}).lists || {}).doing) || []) rows.push({ ...c, board, lane: canon(c.lane || (board === 'KAL' ? 'Kal' : '')), list: 'doing' });
+    }
+    const by = new Map();
+    rows.forEach((c) => { const k = c.lane || 'TF141'; if (!by.has(k)) by.set(k, []); by.get(k).push(c); });
+    const host = $('wireRow');
+    if (!by.size) { host.innerHTML = '<div class="lockd">AO QUIET · NO OPERATORS DEPLOYED</div>'; return; }
+    host.innerHTML = [...by.entries()].map(([op, cs]) => {
+      const ini = String(op).slice(0, 2).toUpperCase();
+      return `<button type="button" class="wop" data-op="${esc(op)}"><img src="../avatars/${esc(op.toLowerCase())}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(cs[0].short || cs[0].name || '')}</i></span></button>`;
+    }).join('');
+    host.querySelectorAll('.wop').forEach((b) => b.addEventListener('click', () => openAct(b.dataset.op, rows)));
+  }
+  function openAct(op, rows) {
+    const mine = rows.filter((c) => String(c.lane || '') === op);
+    $('actp').innerHTML = window.MW4Action ? MW4Action.html({ op, avatar: '../avatars/' + op.toLowerCase() + '.png', cards: mine, des: MW4Action.designator(op) }) : '';
+    $('act').classList.add('on');
+  }
+  $('act').addEventListener('click', (e) => { if (e.target.id === 'act' || e.target.closest('.x')) $('act').classList.remove('on'); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') $('act').classList.remove('on'); });
   function soc(d) {
+    const channels = d.channels || [];
+    paintChannels(channels);
     const box = $('socStats').children;
-    (d.channels || []).slice(0, 4).forEach((c, i) => {
+    channels.slice(0, 4).forEach((c, i) => {
       const rs = (d.posts || []).filter((r) => r[0] === c.key), v = rs.reduce((a, r) => a + (r[4] ?? 0), 0);
       if (!box[i]) return;
-      box[i].querySelector('.l').textContent = c.short || c.key;
       const n = box[i].querySelector('.n'); n.textContent = fmtK(v); n.classList.remove('lk'); n.title = v.toLocaleString('en-US') + ' ' + (c.reach || 'views').toLowerCase();
     });
     const total = (d.posts || []).length;
     const asOf = new Date((d.asOfDay || '1970-01-01') + 'T23:59:59-07:00').getTime(), stale = Date.now() - asOf > 36 * 3600 * 1000;
     $('socHint').innerHTML = `${stale ? '<span class="w">⚠ SNAPSHOT</span>' : '<b>SNAPSHOT</b>'} ${esc(d.generatedAt || '')} · ${total} posts · views / impressions`;
   }
+  paintChannels(FALLBACK_CH);
   pull(); setInterval(pull, 30000);
 })();
 </script>

@@ -216,6 +216,87 @@ function softFail(w, need, script) {
 }
 const LANE_TAG = (c) => String(c.lane || (c.tag === "KAL" ? "KAL" : "CMD")).toUpperCase();
 
+// Operator portraits — same callsigns and files as the HUD theater (avatars/<callsign>.png).
+const OPS_AV = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal"];
+const avatarMem = {}; // op lower -> Image | null for this run
+function opFromLane(c) {
+  if (!c) return null;
+  const by = (s) => OPS_AV.find((o) => o.toLowerCase() === String(s || "").toLowerCase()) || null;
+  const lane = String(c.lane || "");
+  const hit = by(lane);
+  if (hit) return hit;
+  if (String(c.tag || "").toUpperCase() === "KAL" && !lane) return "Kal";
+  const m = /^\s*([A-Za-z]+)/.exec(String(c.name || ""));
+  return m ? by(m[1]) : null;
+}
+function avatarURL(op) {
+  const q = STATUS_URL.indexOf("?") >= 0 ? STATUS_URL.slice(STATUS_URL.indexOf("?")) : "";
+  return HUD_URL + "avatars/" + String(op).toLowerCase() + ".png" + q;
+}
+// Portrait tap opens the live HUD action panel for this callsign (Doing readout is rendered there).
+function hudOpURL(op) { return HUD_URL + "?op=" + encodeURIComponent(op); }
+function initialsBadge(op, size) {
+  const dc = new DrawContext();
+  dc.size = new Size(size, size);
+  dc.opaque = false;
+  dc.respectScreenScale = true;
+  dc.setFillColor(col("panel"));
+  dc.fillEllipse(new Rect(0, 0, size, size));
+  dc.setStrokeColor(col("tan"));
+  dc.setLineWidth(Math.max(1, size * 0.06));
+  dc.strokeEllipse(new Rect(1, 1, size - 2, size - 2));
+  dc.setFont(F.h(Math.round(size * 0.36)));
+  dc.setTextColor(col("tan"));
+  dc.setTextAlignedCenter();
+  dc.drawText(String(op || "?").slice(0, 2).toUpperCase(), new Point(size / 2, size * 0.28));
+  return dc.getImage();
+}
+async function loadAvatar(op) {
+  if (!op) return null;
+  const key = String(op).toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(avatarMem, key)) return avatarMem[key];
+  const fm = FileManager.local();
+  const file = fm.joinPath(fm.cacheDirectory(), "mw4-avatar-" + key + ".png");
+  let img = null;
+  try {
+    const req = new Request(avatarURL(op));
+    req.timeoutInterval = 8;
+    img = await req.loadImage();
+    try { fm.writeImage(file, img); } catch (e) {}
+  } catch (e) {
+    try { if (fm.fileExists(file)) img = fm.readImage(file); } catch (e2) { img = null; }
+  }
+  avatarMem[key] = img || null;
+  return avatarMem[key];
+}
+async function preloadAvatars(cards) {
+  const ops = [];
+  for (const c of cards || []) {
+    const op = opFromLane(c);
+    if (op && ops.indexOf(op) < 0) ops.push(op);
+  }
+  await Promise.all(ops.map((op) => loadAvatar(op).catch(() => null)));
+}
+// Circular crop is the image view's corner radius (square portrait → circle). Missing file → initials.
+function mountFace(stack, op, size, href) {
+  const key = op ? String(op).toLowerCase() : "";
+  const raw = key ? avatarMem[key] : null;
+  let face = raw || null;
+  if (!face) { try { face = initialsBadge(op || "?", Math.max(28, size * 2)); } catch (e) { face = null; } }
+  const host = href ? stack.addStack() : stack;
+  if (href) { host.url = href; host.size = new Size(size, size); host.cornerRadius = size / 2; }
+  if (face) {
+    const el = host.addImage(face);
+    el.imageSize = new Size(size, size);
+    el.cornerRadius = size / 2;
+    el.borderWidth = 1;
+    el.borderColor = col(raw ? "amber" : "tan", 0.9);
+    return el;
+  }
+  txt(host, String(op || "?").slice(0, 2).toUpperCase(), F.h(Math.max(7, Math.round(size * 0.42))), col("tan"), 1);
+  return null;
+}
+
 // mw4crypto — tiny pure-JS PBKDF2-HMAC-SHA256 + AES-256-GCM decrypt (no deps, no Web Crypto needed).
 // Used by the Scriptable widgets (JavaScriptCore has no crypto.subtle). Inlined into each script by
 // tools/build-scriptable.mjs between the MW4CRYPTO markers. Verified against Node/Web Crypto output.
@@ -340,10 +421,11 @@ function cageRow(w, c, fam) {
   const kal = c.tag === "KAL";
   const r = w.addStack(); r.centerAlignContent(); r.spacing = 6;
   r.backgroundColor = col("panel", 0.94); r.borderColor = col(kal ? "amber" : "hold", kal ? 0.55 : 0.9); r.borderWidth = 1;
-  r.setPadding(2, 0, 2, 6);
-  const bar = r.addStack(); bar.size = new Size(3, 12); bar.backgroundColor = col(kal ? "amber" : "holdink");
-  const tg = r.addStack(); tg.size = new Size(fam === "small" ? 30 : 38, 0);
-  txt(tg, LANE_TAG(c).slice(0, 5), F.h(fam === "small" ? 7.5 : 8), col(kal ? "amber" : "tan"), 1); tg.addSpacer();
+  r.setPadding(3, 6, 3, 6);
+  mountFace(r, opFromLane(c), fam === "small" ? 16 : 22);
+  const bar = r.addStack(); bar.size = new Size(3, 14); bar.backgroundColor = col(kal ? "amber" : "holdink");
+  const tg = r.addStack(); tg.size = new Size(fam === "small" ? 34 : 46, 0);
+  txt(tg, LANE_TAG(c).slice(0, 6), F.h(fam === "small" ? 7.5 : 8), col(kal ? "amber" : "tan"), 1); tg.addSpacer();
   txt(r, c.short || c.name, F.m(fam === "small" ? 8.5 : 9.5), col("ink"), 1);
   r.addSpacer();
   if (c.url && fam !== "small") txt(r, "↗", F.b(8), col("dim"), 1);
@@ -381,6 +463,7 @@ async function build() {
     w.addSpacer(); return w;
   }
   const shown = items.slice(0, max);
+  await preloadAvatars(shown);
   shown.forEach((c, i) => {
     if (i && c.tag === "KAL" && shown[i - 1].tag !== "KAL" && fam === "large") { w.addSpacer(2); zoneLabel(w, "KAL BOARD", "amber", "amber", 7); w.addSpacer(2); }
     cageRow(w, c, fam); w.addSpacer(2);

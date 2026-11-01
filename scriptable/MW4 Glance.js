@@ -216,6 +216,87 @@ function softFail(w, need, script) {
 }
 const LANE_TAG = (c) => String(c.lane || (c.tag === "KAL" ? "KAL" : "CMD")).toUpperCase();
 
+// Operator portraits — same callsigns and files as the HUD theater (avatars/<callsign>.png).
+const OPS_AV = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal"];
+const avatarMem = {}; // op lower -> Image | null for this run
+function opFromLane(c) {
+  if (!c) return null;
+  const by = (s) => OPS_AV.find((o) => o.toLowerCase() === String(s || "").toLowerCase()) || null;
+  const lane = String(c.lane || "");
+  const hit = by(lane);
+  if (hit) return hit;
+  if (String(c.tag || "").toUpperCase() === "KAL" && !lane) return "Kal";
+  const m = /^\s*([A-Za-z]+)/.exec(String(c.name || ""));
+  return m ? by(m[1]) : null;
+}
+function avatarURL(op) {
+  const q = STATUS_URL.indexOf("?") >= 0 ? STATUS_URL.slice(STATUS_URL.indexOf("?")) : "";
+  return HUD_URL + "avatars/" + String(op).toLowerCase() + ".png" + q;
+}
+// Portrait tap opens the live HUD action panel for this callsign (Doing readout is rendered there).
+function hudOpURL(op) { return HUD_URL + "?op=" + encodeURIComponent(op); }
+function initialsBadge(op, size) {
+  const dc = new DrawContext();
+  dc.size = new Size(size, size);
+  dc.opaque = false;
+  dc.respectScreenScale = true;
+  dc.setFillColor(col("panel"));
+  dc.fillEllipse(new Rect(0, 0, size, size));
+  dc.setStrokeColor(col("tan"));
+  dc.setLineWidth(Math.max(1, size * 0.06));
+  dc.strokeEllipse(new Rect(1, 1, size - 2, size - 2));
+  dc.setFont(F.h(Math.round(size * 0.36)));
+  dc.setTextColor(col("tan"));
+  dc.setTextAlignedCenter();
+  dc.drawText(String(op || "?").slice(0, 2).toUpperCase(), new Point(size / 2, size * 0.28));
+  return dc.getImage();
+}
+async function loadAvatar(op) {
+  if (!op) return null;
+  const key = String(op).toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(avatarMem, key)) return avatarMem[key];
+  const fm = FileManager.local();
+  const file = fm.joinPath(fm.cacheDirectory(), "mw4-avatar-" + key + ".png");
+  let img = null;
+  try {
+    const req = new Request(avatarURL(op));
+    req.timeoutInterval = 8;
+    img = await req.loadImage();
+    try { fm.writeImage(file, img); } catch (e) {}
+  } catch (e) {
+    try { if (fm.fileExists(file)) img = fm.readImage(file); } catch (e2) { img = null; }
+  }
+  avatarMem[key] = img || null;
+  return avatarMem[key];
+}
+async function preloadAvatars(cards) {
+  const ops = [];
+  for (const c of cards || []) {
+    const op = opFromLane(c);
+    if (op && ops.indexOf(op) < 0) ops.push(op);
+  }
+  await Promise.all(ops.map((op) => loadAvatar(op).catch(() => null)));
+}
+// Circular crop is the image view's corner radius (square portrait → circle). Missing file → initials.
+function mountFace(stack, op, size, href) {
+  const key = op ? String(op).toLowerCase() : "";
+  const raw = key ? avatarMem[key] : null;
+  let face = raw || null;
+  if (!face) { try { face = initialsBadge(op || "?", Math.max(28, size * 2)); } catch (e) { face = null; } }
+  const host = href ? stack.addStack() : stack;
+  if (href) { host.url = href; host.size = new Size(size, size); host.cornerRadius = size / 2; }
+  if (face) {
+    const el = host.addImage(face);
+    el.imageSize = new Size(size, size);
+    el.cornerRadius = size / 2;
+    el.borderWidth = 1;
+    el.borderColor = col(raw ? "amber" : "tan", 0.9);
+    return el;
+  }
+  txt(host, String(op || "?").slice(0, 2).toUpperCase(), F.h(Math.max(7, Math.round(size * 0.42))), col("tan"), 1);
+  return null;
+}
+
 // mw4crypto — tiny pure-JS PBKDF2-HMAC-SHA256 + AES-256-GCM decrypt (no deps, no Web Crypto needed).
 // Used by the Scriptable widgets (JavaScriptCore has no crypto.subtle). Inlined into each script by
 // tools/build-scriptable.mjs between the MW4CRYPTO markers. Verified against Node/Web Crypto output.
@@ -399,15 +480,17 @@ function zoneTag(row, top, n, kind) {
 }
 function plate(row, c, opts) {
   const p = row.addStack(); p.layoutVertically(); p.backgroundColor = col("panel", 0.95);
-  p.borderColor = col(opts.border, 0.75); p.borderWidth = 1; p.setPadding(2, 5, 2, 5); p.spacing = 0;
-  const top = p.addStack(); top.centerAlignContent(); top.spacing = 3;
-  const bar = top.addStack(); bar.size = new Size(2, 7); bar.backgroundColor = col(opts.border);
-  txt(top, LANE_TAG(c), F.h(7.5), col(opts.tag), 1); top.addSpacer();
-  txt(p, c.short || c.name, F.m(opts.size || 8.5), col("ink"), 1);
+  p.borderColor = col(opts.border, 0.75); p.borderWidth = 1; p.setPadding(3, 5, 3, 5); p.spacing = 1;
+  const top = p.addStack(); top.centerAlignContent(); top.spacing = 4;
+  const bar = top.addStack(); bar.size = new Size(2, 16); bar.backgroundColor = col(opts.border);
+  const op = opFromLane(c);
+  mountFace(top, op, opts.face || 16, opts.action && op ? hudOpURL(op) : "");
+  txt(top, LANE_TAG(c), F.h(7), col(opts.tag), 1); top.addSpacer();
+  txt(p, c.short || c.name, F.m(opts.size || 8.5), col("ink"), 2);
   if (c.url) p.url = c.url;
   return p;
 }
-function aoRow(w, d, max, vertical) {
+async function aoRow(w, d, max, vertical) {
   const doing = [...(((d.command || {}).lists || {}).doing || []), ...((((d.kal || {}).lists || {}).doing || []).map((c) => ({ ...c, lane: c.lane || "Kal" })))];
   const r = w.addStack(); r.spacing = 3;
   zoneTag(r, "AO", doing.length, "ao");
@@ -417,10 +500,11 @@ function aoRow(w, d, max, vertical) {
     txt(e, "NO ONE ACROSS · FOB STANDING BY", F.sb(8), col("dim"), 1); e.addSpacer(); return;
   }
   const shown = doing.length > max ? doing.slice(0, max - 1) : doing;
-  for (const c of shown) plate(box, c, { border: "amber", tag: /^kal$/i.test(c.lane) ? "amber" : "tan" });
+  await preloadAvatars(shown);
+  for (const c of shown) plate(box, c, { border: "amber", tag: /^kal$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15, action: true });
   if (doing.length > max) { const m = box.addStack(); m.backgroundColor = col("panel", 0.9); m.borderColor = col("line"); m.borderWidth = 1; m.setPadding(4, 5, 4, 5); txt(m, "+" + (doing.length - shown.length), F.h(10), col("amber"), 1); }
 }
-function holdRow(w, d, max, vertical) {
+async function holdRow(w, d, max, vertical) {
   const cc = (d.command && d.command.counts) || {}, kc = (d.kal && d.kal.counts) || {};
   const waiting = [...(((d.command || {}).lists || {}).waiting || []), ...((((d.kal || {}).lists || {}).waiting || []).map((c) => ({ ...c, lane: c.lane || "Kal" })))];
   const n = (cc.waiting ?? 0) + (kc.waiting ?? 0);
@@ -432,7 +516,8 @@ function holdRow(w, d, max, vertical) {
     txt(e, "NOTHING ON HUNTER · ALL CLEAR", F.sb(8), col("dim"), 1); e.addSpacer(); return;
   }
   const shown = waiting.slice(0, max);
-  for (const c of shown) plate(box, c, { border: "holdink", tag: /^kal$/i.test(c.lane) ? "amber" : "tan" });
+  await preloadAvatars(shown);
+  for (const c of shown) plate(box, c, { border: "holdink", tag: /^kal$/i.test(c.lane) ? "amber" : "tan", face: vertical ? 18 : 15 });
   if (waiting.length > shown.length) {
     const m = box.addStack(); m.layoutVertically(); m.backgroundColor = col("hold", 0.35); m.borderColor = col("holdink", 0.6); m.borderWidth = 1; m.setPadding(2, 5, 2, 5);
     txt(m, "+" + (waiting.length - shown.length), F.h(9), col("holdink"), 1); txt(m, "WAITING ▸", F.sb(6.5), col("dim"), 1);
@@ -457,9 +542,9 @@ async function build() {
     return w;
   }
   w.addSpacer(5); intel(w, g, false);
-  w.addSpacer(5); aoRow(w, d, large ? 6 : 3, large);
+  w.addSpacer(5); await aoRow(w, d, large ? 6 : 3, large);
   w.addSpacer(4); wireBar(w, "── CROSSING THE WIRE ──", 11, 7);
-  w.addSpacer(4); holdRow(w, d, large ? 6 : 2, large);
+  w.addSpacer(4); await holdRow(w, d, large ? 6 : 2, large);
   w.addSpacer(); w.addSpacer(4);
   ticker(w, d, g, false);
   return w;

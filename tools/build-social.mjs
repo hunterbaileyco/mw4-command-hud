@@ -13,6 +13,9 @@
 // Postiz can list posts but not view counts. Windsor is connected for tiktok_organic, instagram,
 // and pinterest_organic; the series + per-post assembler lives in that off-repo pull. Inventing
 // numbers here would ship a false LIVE board and a key /api/feed cannot open.
+// DAILY VIEWS chips plot series.tt_kco, series.tt_wk, and series.ig from that pull (Windsor views).
+// series.pin stays Postiz platform analytics (impressions, last ~90 days). Do not retarget pin to
+// Windsor pin_impression here until that source change is explicitly requested.
 import fs from 'node:fs';
 import path from 'node:path';
 import { webcrypto as wc } from 'node:crypto';

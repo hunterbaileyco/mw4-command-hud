@@ -14,6 +14,7 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="../suite.css">
 <script src="../brand-icons.js"></script>
+<script src="accounts.js"></script>
 <title>Kinsora social — published metrics</title>
 <style>
 *{box-sizing:border-box}
@@ -75,11 +76,45 @@ h1{margin:0;font-size:17px;font-weight:700;letter-spacing:.01em}
 .kv>div.ka{border-left-color:var(--amber)}.kv>div.kt{border-left-color:var(--tan)}
 .kv .wide{grid-column:1/-1;border-left-color:var(--olive2)}.kv .wide .v{font-family:var(--sans);font-size:13px;font-weight:500;white-space:normal}
 .cap{color:var(--dim);font-size:11.5px;margin:6px 0 0}
+/* DAILY VIEWS account chips — brand marks, not the gold channel tiles */
+.acc{margin:0 0 8px}
+.acch{display:flex;justify-content:space-between;align-items:center;gap:8px;font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:5px}
+.acch b{color:var(--tan);font-weight:800}
+.acch .multi{color:var(--amber);font-weight:700;white-space:nowrap}
+.acch .multi i{font-style:normal;display:inline-block;border:1px solid rgba(232,163,23,.55);border-radius:2px;padding:1px 4px;margin-right:5px;color:#0B0E0C;background:var(--amber)}
+.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.chip{position:relative;appearance:none;text-align:left;min-height:48px;display:grid;grid-template-columns:18px 1fr;align-items:center;gap:2px 8px;background:#0d110e;border:1px solid var(--line);border-radius:5px;padding:6px 8px;color:var(--dim);cursor:pointer;font-family:var(--mono);min-width:0}
+.chip .bx{grid-row:1/3;width:18px;height:18px;border:1px solid var(--line2);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px;line-height:1;color:transparent}
+.chip .t{display:flex;align-items:center;gap:5px;min-width:0;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden}
+.chip .t .tx{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.chip .t .pf{color:var(--tan)}
+.brand-mark{display:inline-flex;flex:0 0 auto;background:transparent!important;box-shadow:none!important;filter:none!important;border:0;padding:0;margin:0;line-height:0}
+.brand-mark svg{display:block}
+.chip .brand-mark{opacity:.55}
+.chip.on .brand-mark{opacity:1}
+.lg .brand-mark{opacity:1}
+.chip .s{display:flex;align-items:center;gap:5px;font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip .sw{flex:0 0 auto;width:14px;height:3px;border-radius:1px;opacity:.45}
+.chip.on{color:var(--ink);border-color:var(--amber);background:linear-gradient(rgba(232,163,23,.12),rgba(13,17,14,.92) 75%);box-shadow:0 0 0 1px rgba(232,163,23,.5),0 0 14px rgba(232,163,23,.14),inset 0 1px 0 rgba(232,226,214,.06)}
+.chip.on .bx{border-color:var(--amber);background:var(--amber);color:#0B0E0C;font-weight:900}
+.chip.on .sw{opacity:1;box-shadow:0 0 6px currentColor}
+.chip.on .s{color:var(--tan)}
+.chip:active{transform:translateY(1px)}
+.lg{display:flex;flex-wrap:wrap;gap:4px 12px;padding:6px 8px 0;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.lg span{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.lg i{display:inline-block;width:12px;height:3px;border-radius:1px}
+.lg b{color:var(--ink);font-variant-numeric:tabular-nums}
+.lg em{font-style:normal;letter-spacing:.08em}
+.lg .flat{color:var(--holdink)}
+.cap .acc-on{color:var(--tan);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.cap .wkn{display:block;margin-top:4px;color:var(--holdink);font-family:var(--mono);font-size:9.5px;letter-spacing:.06em}
 /* chart */
 .cw{position:relative;margin-top:8px;border:1px solid var(--line);border-radius:4px;background:
   linear-gradient(rgba(107,124,58,.07) 1px,transparent 1px) 0 0/100% 25%,#0b0f0c;overflow:hidden}
 .chart{width:100%;height:190px;display:block;touch-action:pan-y}
-@media(min-width:900px){.chart{height:240px}}
+.cw .chart{height:176px}
+.cw .tip{top:30px}
+@media(min-width:900px){.chart{height:240px}.cw .chart{height:176px}}
 .chart text{font-family:var(--mono);font-size:9px;fill:var(--dim)}
 .tip{position:absolute;top:6px;pointer-events:none;background:rgba(11,14,12,.94);border:1px solid rgba(232,163,23,.6);border-radius:2px;padding:3px 6px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;color:var(--ink);white-space:nowrap;display:none;transform:translateX(-50%);z-index:4}
 .tip b{color:var(--amber)}
@@ -145,8 +180,12 @@ details li{margin:4px 0}
   <div class="two">
   <section class="pn"><span class="sx-brk tl"></span><span class="sx-brk br"></span>
     <div class="zh"><b id="charttitle">Trend</b><span id="chartsrc"></span></div>
+    <div class="acc">
+      <div class="acch"><b>◆ Accounts · organic</b><span class="multi"><i>MULTI</i>tap to toggle · <span id="acn">1/4</span> on</span></div>
+      <div class="chips" id="chips" role="group" aria-label="Accounts plotted"></div>
+    </div>
     <div class="ctl"><div class="seg" id="mode"></div></div>
-    <div class="cw" id="cw"><svg class="chart" id="chart" viewBox="0 0 600 190" preserveAspectRatio="none"></svg><div class="xh" id="xh"></div><div class="tip" id="tip"></div></div>
+    <div class="cw" id="cw"><div class="lg" id="lg"></div><svg class="chart" id="chart" viewBox="0 0 600 176" preserveAspectRatio="none"></svg><div class="xh" id="xh"></div><div class="tip" id="tip"></div></div>
     <p class="cap" id="chartcap"></p>
   </section>
 
@@ -224,7 +263,14 @@ details li{margin:4px 0}
   const daysBefore = (iso, n) => new Date(new Date(iso + 'T12:00:00Z').getTime() - n * 86400000).toISOString().slice(0, 10);
   const sum = (rows, i) => rows.reduce((a, r) => a + (r[i] ?? 0), 0);
   const mark = (c, px) => (window.MW4Icons ? MW4Icons.markHtml(c, px) : '');
+  const Acc = window.MW4Accounts;
+  const readStored = () => { try { return localStorage.getItem(Acc.LS_KEY); } catch (_) { return null; } };
+  const writeStored = (keys) => { try { localStorage.setItem(Acc.LS_KEY, keys.join(',')); } catch (_) { /* private mode */ } };
   let D = null, ch = 'tt_kco', range = 'all', mode = 'calendar', sort = 'new', limit = 24, q = '';
+  // Channel tile and account chips are independent. First visit plots tt_kco only.
+  const bootAccounts = Acc.initialKeys(new URLSearchParams(location.search).get('acc'), readStored());
+  let onKeys = bootAccounts.keys;
+  if (bootAccounts.persist) writeStored(onKeys);
 
   function start(d) {
     D = d;
@@ -293,30 +339,35 @@ details li{margin:4px 0}
     ].map(([l, v, c]) => `<div class="${c && c !== 's' ? 'k' + c : ''}"><div class="l">${l}</div><div class="v ${c || ''}">${v}</div></div>`).join('') +
       (top ? `<div class="wide"><div class="l">Top post · ${rlabel}</div><div class="v"><b style="color:var(--amber);font-family:var(--mono)">${fmt(top[4])}</b> · ${esc(top[3])}</div></div>` : '');
 
-    // chart
-    const ser = D.series[ch];
-    const modes = [...(ser ? [['calendar', 'Daily · calendar']] : []), ['posted', 'By day posted']];
-    if (!modes.some((m) => m[0] === mode)) mode = modes[0][0];
+    // DAILY VIEWS follows the account chips. The channel tile above does not.
+    const on = new Set(onKeys);
+    $('chips').innerHTML = Acc.ACC.map((a) => `<button class="chip${on.has(a.key) ? ' on' : ''}" data-a="${a.key}" type="button" aria-pressed="${on.has(a.key)}" title="${esc(a.source)} · ${esc(a.wid)}">
+      <span class="bx">✓</span><span class="t">${Acc.brandMark(a, 16)}<span class="tx"><span class="pf">${esc(a.pfx)} ·</span> ${esc(a.chip)}</span></span><span class="s"><span class="sw" style="background:${a.color};color:${a.color}"></span>${esc(a.sub)}</span></button>`).join('');
+    $('chips').querySelectorAll('.chip').forEach((b) => b.onclick = () => {
+      const next = Acc.toggle(onKeys, b.dataset.a);
+      if (next.join() === onKeys.join()) return;
+      onKeys = next;
+      writeStored(onKeys);
+      render();
+    });
+    $('acn').textContent = on.size + '/' + Acc.ACC.length;
+    const modes = [['calendar', 'Daily (calendar)'], ['posted', 'By day posted']];
+    if (!modes.some((m) => m[0] === mode)) mode = 'calendar';
     $('mode').innerHTML = modes.map(([v, l]) => `<button data-m="${v}" class="${v === mode ? 'on' : ''}" type="button">${l}</button>`).join('');
     $('mode').querySelectorAll('button').forEach((b) => b.onclick = () => { mode = b.dataset.m; render(); });
-    let pts;
-    if (mode === 'calendar') {
-      pts = ser.points.filter(([d]) => d >= cutoff).map(([d, v]) => [d, v]);
-      $('charttitle').innerHTML = '<span class="sec">TRND</span>Daily ' + esc(meta.reach.toLowerCase());
-      $('chartsrc').textContent = ser.source.split(' ').slice(0, 2).join(' ');
-      $('chartcap').textContent = meta.calendarNote;
-    } else {
-      const m = new Map(); rows.filter((r) => r[4] != null).forEach((r) => m.set(r[1], (m.get(r[1]) || 0) + r[4]));
-      pts = [...m.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1));
-      $('charttitle').innerHTML = '<span class="sec">TRND</span>' + esc(meta.reach) + ' by day posted';
-      $('chartsrc').textContent = 'per-post lifetime';
-      $('chartcap').textContent = meta.postedNote;
-    }
-    drawChart(pts, mode === 'posted');
+    const vm = Acc.viewModel({ posts: D.posts, series: D.series || {}, keys: onKeys, range, today, mode });
+    $('charttitle').innerHTML = '<span class="sec">TRND</span>' + esc(vm.title);
+    $('chartsrc').textContent = vm.source;
+    $('lg').innerHTML = vm.series.map(({ account: a, total, flat }) => `<span><i style="background:${a.color}"></i>${Acc.brandMark(a, 12)}${esc(a.chip)}${a.key === 'pin' ? ' <em>IMPR</em>' : ''} <b>${fmt(total)}</b>${flat ? ' <em class="flat">· FLAT</em>' : ''}</span>`).join('');
+    $('chartcap').innerHTML = `<span class="acc-on">Plotting ${vm.count}/${vm.total} · ${esc(vm.plotting)}</span><br>${esc(vm.notes.join(' '))}` +
+      vm.warnings.map((w) => `<span class="wkn">${esc(w)}</span>`).join('') +
+      (vm.overlay ? `<span class="wkn" style="color:var(--dim)">+ Tap to overlay: ${esc(vm.overlay)}.</span>` : '');
+    drawChart(vm.dates, vm.series, mode === 'posted');
 
-    // top 3 in range
-    const t3 = [...withData].sort((a, b) => b[4] - a[4]).slice(0, 3), mxv = Math.max(1, ...withData.map((r) => r[4]));
-    $('top3').innerHTML = t3.map((r, i) => postHtml(r, i + 1, mxv, pin)).join('') || '<div class="cap">No posts with analytics in this range.</div>';
+    // top 3 follows the chips, same window as the chart
+    const topRows = D.posts.filter((r) => on.has(r[0]) && r[1] >= vm.cut && r[4] != null);
+    const t3 = [...topRows].sort((a, b) => b[4] - a[4]).slice(0, 3), mxTop = Math.max(1, ...topRows.map((r) => r[4]));
+    $('top3').innerHTML = t3.map((r, i) => postHtml(r, i + 1, mxTop, r[0] === 'pin')).join('') || '<div class="cap">No posts with analytics in this range.</div>';
 
     // posts
     const ql = q.trim().toLowerCase();
@@ -324,6 +375,7 @@ details li{margin:4px 0}
     $('tbltitle').innerHTML = '<span class="sec">LOG</span>Every published post';
     $('tblcount').textContent = (ql ? filt.length + ' / ' : '') + rows.length + ' POSTS';
     const sorted = sort === 'new' ? filt : [...filt].sort((a, b) => ((sort === 'views' ? b[4] : b[5]) ?? -1) - ((sort === 'views' ? a[4] : a[5]) ?? -1));
+    const mxv = Math.max(1, ...withData.map((r) => r[4]));
     $('rows').innerHTML = sorted.slice(0, limit).map((r, i) => postHtml(r, sort === 'new' ? '' : i + 1, mxv, pin)).join('') || `<div class="cap">${ql ? 'No captions match that filter.' : 'No posts went up in this range.'}</div>`;
     $('more').style.display = sorted.length > limit ? '' : 'none';
     $('more').textContent = `SHOW MORE · ${sorted.length - Math.min(limit, sorted.length)} LEFT`;
@@ -346,41 +398,43 @@ details li{margin:4px 0}
       ${w ? `<span class="vb" style="width:${w}%"></span>` : ''}</${tag}>`;
   }
   let CH = null; // chart geometry for the crosshair
-  function drawChart(pts, bars) {
-    const svg = $('chart'), W = 600, H = 190, P = { l: 4, r: 4, t: 16, b: 18 };
+  function drawChart(dates, S, bars) {
+    const svg = $('chart'), W = 600, H = 176, P = { l: 4, r: 4, t: 12, b: 18 }, n = dates.length;
     CH = null; $('tip').style.display = 'none'; $('xh').style.display = 'none';
-    if (!pts.length) { svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle">NO DATA IN THIS RANGE</text>`; return; }
-    const mx = Math.max(1, ...pts.map((p) => p[1]));
-    const x = (i) => P.l + (pts.length === 1 ? (W - P.l - P.r) / 2 : (i * (W - P.l - P.r)) / (pts.length - 1));
+    if (!n) { svg.innerHTML = `<text x="${W / 2}" y="${H / 2}" text-anchor="middle">NO DATA IN THIS RANGE</text>`; return; }
+    const mx = Math.max(1, ...S.flatMap((s) => s.values));
+    const x = (i) => P.l + (n === 1 ? (W - P.l - P.r) / 2 : (i * (W - P.l - P.r)) / (n - 1));
     const y = (v) => H - P.b - (v / mx) * (H - P.t - P.b);
-    let g = '<defs><linearGradient id="fa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8A317" stop-opacity=".32"/><stop offset="1" stop-color="#E8A317" stop-opacity="0"/></linearGradient></defs>';
+    let g = '<defs>' + S.map(({ account: a }) => `<linearGradient id="f_${a.key}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a.color}" stop-opacity="${S.length > 1 ? .2 : .32}"/><stop offset="1" stop-color="${a.color}" stop-opacity="0"/></linearGradient>`).join('') + '</defs>';
     for (let k = 1; k <= 3; k++) g += `<line x1="0" x2="${W}" y1="${y((mx * k) / 3)}" y2="${y((mx * k) / 3)}" stroke="rgba(107,124,58,.22)" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/>`;
     g += `<line x1="0" x2="${W}" y1="${H - P.b}" y2="${H - P.b}" stroke="rgba(197,165,114,.35)" vector-effect="non-scaling-stroke"/>`;
-    g += `<text x="${W - 2}" y="${P.t - 4}" text-anchor="end">MAX ${fmt(mx)}</text>`;
-    const pk = pts.reduce((b, p, i) => (p[1] > pts[b][1] ? i : b), 0);
+    g += `<text x="${W - 2}" y="${P.t - 2}" text-anchor="end">MAX ${fmt(mx)}</text>`;
     if (bars) {
-      const bw = Math.max(2, ((W - P.l - P.r) / pts.length) * 0.7);
-      g += pts.map((p, i) => `<rect x="${x(i) - bw / 2}" y="${y(p[1])}" width="${bw}" height="${H - P.b - y(p[1])}" fill="${i === pk ? '#F5C04A' : '#E8A317'}" opacity="${i === pk ? 1 : .78}"><title>${fmtDay(p[0])}: ${fmt(p[1])}</title></rect>`).join('');
+      const slot = (W - P.l - P.r) / n, bw = Math.max(1.5, (slot * 0.78) / S.length);
+      S.forEach(({ account: a, values }, si) => {
+        g += values.map((val, i) => (val ? `<rect x="${x(i) - (bw * S.length) / 2 + si * bw}" y="${y(val)}" width="${bw}" height="${H - P.b - y(val)}" fill="${a.color}" opacity=".85"/>` : '')).join('');
+      });
     } else {
-      const line = pts.map((p, i) => `${x(i).toFixed(1)},${y(p[1]).toFixed(1)}`).join(' ');
-      g += `<polygon points="${x(0)},${H - P.b} ${line} ${x(pts.length - 1)},${H - P.b}" fill="url(#fa)"/>`;
-      g += `<polyline points="${line}" fill="none" stroke="#E8A317" stroke-width="1.8" vector-effect="non-scaling-stroke"/>`;
+      [...S].sort((p, q) => q.total - p.total).forEach(({ account: a, values, flat }) => {
+        const line = values.map((val, i) => `${x(i).toFixed(1)},${y(val).toFixed(1)}`).join(' ');
+        g += `<polygon points="${x(0)},${H - P.b} ${line} ${x(n - 1)},${H - P.b}" fill="url(#f_${a.key})"/>`;
+        g += `<polyline points="${line}" fill="none" stroke="${a.color}" stroke-width="${a.key === 'tt_kco' ? 1.8 : 2.2}" ${flat ? 'stroke-dasharray="6 4"' : ''} vector-effect="non-scaling-stroke"/>`;
+      });
     }
-    g += `<text x="2" y="${H - 4}">${fmtDay(pts[0][0])}</text><text x="${W - 2}" y="${H - 4}" text-anchor="end">${fmtDay(pts[pts.length - 1][0])}</text>`;
-    if (pts.length > 4) { const mid = Math.floor(pts.length / 2); g += `<text x="${x(mid)}" y="${H - 4}" text-anchor="middle">${fmtDay(pts[mid][0])}</text>`; }
-    const total = pts.reduce((a, p) => a + p[1], 0);
-    g += `<text x="2" y="${P.t - 4}">TOTAL ${fmt(total)} · PEAK ${fmtDay(pts[pk][0])}</text>`;
+    g += `<text x="2" y="${H - 4}">${fmtDay(dates[0])}</text><text x="${W - 2}" y="${H - 4}" text-anchor="end">${fmtDay(dates[n - 1])}</text>`;
+    if (n > 4) { const mid = Math.floor(n / 2); g += `<text x="${x(mid)}" y="${H - 4}" text-anchor="middle">${fmtDay(dates[mid])}</text>`; }
     svg.innerHTML = g;
-    CH = { pts, x, W };
+    CH = { dates, S, x, W };
   }
   function hover(ev) {
     if (!CH) return;
-    const r = $('cw').getBoundingClientRect(), cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    const r = $('chart').getBoundingClientRect(), cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
     const vx = (cx / r.width) * CH.W; let bi = 0, bd = Infinity;
-    CH.pts.forEach((p, i) => { const d = Math.abs(CH.x(i) - vx); if (d < bd) { bd = d; bi = i; } });
-    const px = (CH.x(bi) / CH.W) * r.width, p = CH.pts[bi];
+    CH.dates.forEach((_, i) => { const d = Math.abs(CH.x(i) - vx); if (d < bd) { bd = d; bi = i; } });
+    const px = (CH.x(bi) / CH.W) * r.width;
     $('xh').style.display = 'block'; $('xh').style.left = px + 'px';
-    const tip = $('tip'); tip.style.display = 'block'; tip.innerHTML = `${fmtDay(p[0])} · <b>${fmt(p[1])}</b>`;
+    const tip = $('tip'); tip.style.display = 'block';
+    tip.innerHTML = fmtDay(CH.dates[bi]) + CH.S.map(({ account: a, values }) => ` · <b style="color:${a.color}">${fmt(values[bi])}</b>`).join('');
     tip.style.left = Math.min(r.width - tip.offsetWidth / 2 - 4, Math.max(tip.offsetWidth / 2 + 4, px)) + 'px';
   }
   const unhover = () => { $('tip').style.display = 'none'; $('xh').style.display = 'none'; };

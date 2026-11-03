@@ -324,15 +324,16 @@ details.log>summary .r{margin-left:auto;font-weight:400;color:var(--dim);font-si
 .orow .tx{min-width:0;flex:1}
 .orow .ct{font-family:var(--mono);font-size:9px;font-variant-numeric:tabular-nums;color:var(--dim);white-space:nowrap}
 .orow .ct b{font-weight:800}
-.orow.z-ao{border-left-color:var(--amber)}.orow.z-ao .nm{color:var(--amber)}.orow.z-ao img{box-shadow:0 0 0 2px var(--amber)}
+.orow.z-ao{border-left-color:var(--amber)}.orow.z-ao .nm,.orow.z-ao .zn{color:var(--amber)}.orow.z-ao img{box-shadow:0 0 0 2px var(--amber)}
 .orow.z-hold{border-left-color:var(--holdink)}.orow.z-hold .zn{color:var(--holdink)}.orow.z-hold img{box-shadow:0 0 0 2px var(--hold)}
 .orow.z-ready{border-left-color:var(--olive)}
 .orow.z-cp{border-left-color:var(--tan)}
 .orow.z-idle{opacity:.7}.orow.z-idle img{filter:grayscale(.7) brightness(.75)}
 .ft{padding-top:2px}
 @media(min-width:900px){
-  .wrap{max-width:1180px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr);grid-template-areas:"top top" "chrome chrome" "intel intel" "stage side" "ft ft";gap:12px 14px;align-items:start}
-  .top{grid-area:top}.chrome{grid-area:chrome}.intel{grid-area:intel}.stage{grid-area:stage}.ft{grid-area:ft}
+  .wrap{max-width:1180px;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr);grid-template-areas:"top top" "chrome chrome" "work work" "intel intel" "stage side" "log log" "ft ft";gap:12px 14px;align-items:start}
+  .top{grid-area:top}.chrome{grid-area:chrome}.workboard{grid-area:work}.intel{grid-area:intel}.stage{grid-area:stage}.ft{grid-area:ft}
+  details.log.atbottom{grid-area:log}
   .sidecol{grid-area:side;display:flex;flex-direction:column;gap:10px}
   .ao{min-height:300px}#zAO{min-height:210px}
   .tok.s-ao{width:140px}.tok.s-ao .plate{font-size:11px}
@@ -430,6 +431,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     <div class="q"><span class="l">QUEUE</span><span class="sub">FOB · READY</span><span class="n" id="nQ">0</span><i class="bar"><b id="bQ"></b></i></div>
     <div class="shp"><span class="l">DONE</span><span class="sub">SHIPPED · TODAY</span><span class="n" id="nShip">0</span><i class="bar"><b id="bShip"></b></i></div>
   </div>
+  <section class="workboard" id="work" aria-label="Work list"></section>
   <div class="intel" id="intel"></div>
 
   <section class="stage" id="stage">
@@ -477,8 +479,9 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   </section>
 
   <div class="ticker"><span class="tl">AAR</span><div class="vp"><div class="rail" id="rail"></div></div></div>
+  </div>
 
-  <details class="log" id="log">
+  <details class="log atbottom" id="log">
     <summary>MISSION LOG<span class="r" id="logc">CMD + TRADING</span></summary>
     <div class="logb">
       <div class="seg" role="tablist">
@@ -490,7 +493,6 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       <div id="feed"></div>
     </div>
   </details>
-  </div>
 
   <div class="ft">
     <div class="boards"><a id="cmdLink" target="_blank" rel="noopener">CMD BOARD ↗</a><a id="kalLink" target="_blank" rel="noopener">TRADING BOARD ↗</a></div>
@@ -520,7 +522,6 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   const POLL_MS = 20000, STALE_MS = 30 * 60 * 1000, FLY_MS = 1200, STEP_MS = FLY_MS + 1100;
   const OPS = window.MW4Roster.OPS.slice();
   const LIST = { doing: { tag: 'ACT', tone: 'act', rank: 0 }, waiting: { tag: 'HOLD', tone: 'hold', rank: 1 }, backlog: { tag: 'QUEUE', tone: 'queue', rank: 2 }, done: { tag: 'DONE', tone: 'done', rank: 3 } };
-  const DES = window.MW4Roster.DES;
   const ZLABEL = { ao: 'DEPLOYED · ACROSS THE WIRE', hold: 'HOLD · AWAITING HUNTER', ready: 'FOB · QUEUED', idle: 'FOB · STANDING BY', cp: 'FOB · COMMAND POST', stand: 'STANDING · ALWAYS ON' };
   const isStanding = (c) => !!(window.MW4Action && MW4Action.isStanding(c));
   const $ = (id) => document.getElementById(id);
@@ -584,6 +585,17 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   const clk = () => { $('clk').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) + ' PT'; };
   clk(); setInterval(clk, 1000);
   if (window.matchMedia && matchMedia('(min-width:900px)').matches) $('log').open = true;
+  if (window.matchMedia) {
+    const bp = matchMedia('(max-width:899px)');
+    const onBp = () => { if (lastData) renderWork(); };
+    if (bp.addEventListener) bp.addEventListener('change', onBp);
+    else bp.addListener(onBp);
+  }
+  $('work').addEventListener('click', (e) => {
+    const more = e.target.closest('a.more');
+    if (!more) return;
+    $('log').open = true;
+  });
   document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => {
     tab = b.dataset.tab; document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b)); renderFeed();
   }));
@@ -704,7 +716,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     el.className = 'tok'; el.dataset.op = op;
     const ini = iniOf(op);
     el.innerHTML = `<span class="flash"></span><div class="bod"><div class="ring"><img src="avatars/${faceFile(op)}.png" alt="${esc(op)}" onerror="this.outerHTML='<div class=&quot;ini&quot;>${ini}</div>'"></div>
-      <div class="pl"><div class="cs">${esc(op.toUpperCase())}</div><div class="dsr"><span class="ds">${esc(DES[op] || '')}</span><span class="tp"></span></div><div class="mk"></div><div class="mt"></div><div class="ftag"></div></div></div>`;
+      <div class="pl"><div class="cs">${esc(op.toUpperCase())}</div><div class="dsr"><span class="tp"></span></div><div class="mk"></div><div class="mt"></div><div class="ftag"></div></div></div>`;
     el.addEventListener('click', () => goFile(op));
     return el;
   }
@@ -729,7 +741,6 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       ageMs = age || 0;
       const stale = age != null && age >= 2 * 3600 * 1000;
       foot = 'HOLD' + (age != null ? ` <span class="age${stale ? ' stale' : ''}">⏱ ${esc(fmtAge(age))}</span>` : '');
-      mt.textContent = card ? fullMission(card) : 'Awaiting Hunter';
       if (echo) {
         const s = document.createElement('span');
         s.className = 'stillao';
@@ -741,11 +752,10 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       const dep = feedEvents.filter((e) => e.op === m.op && e.kind === 'deploy' && !standingEvent(e)).map((e) => Date.parse(e.t)).sort((a, c) => c - a)[0];
       if (tp && dep && !(finite[0] && finite[0].drill)) tp.textContent = 'T+' + agoShort(Date.now() - dep);
       foot = finite[0] && finite[0].drill ? 'AO · SIM' : 'AO';
-      mt.textContent = finite[0] ? fullMission(finite[0]) : 'Deployed';
       if (finite.length > 1) {
         const x = document.createElement('div');
         x.className = 'x2';
-        x.innerHTML = `<b>+${finite.length - 1}</b><span>${esc(fullMission(finite[1]))}</span>`;
+        x.innerHTML = `<b>+${finite.length - 1} MORE</b>`;
         pl.appendChild(x);
       }
       if (m.op === 'Ghost') {
@@ -757,22 +767,16 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     } else if (zone === 'stand') {
       const standing = (m.standing && m.standing.length) ? m.standing : (m.doing || []).filter(isStanding);
       foot = 'STN';
-      mt.textContent = standing[0] ? fullMission(standing[0]) : 'On station';
       if (standing.length > 1) {
         const x = document.createElement('div');
         x.className = 'x2';
-        x.innerHTML = `<b>+${standing.length - 1}</b><span>${esc(fullMission(standing[1]))}</span>`;
+        x.innerHTML = `<b>+${standing.length - 1} MORE</b>`;
         pl.appendChild(x);
       }
     } else if (zone === 'ready') {
       foot = `FOB<span class="q">Q${m.backlog.length}</span>`;
-      mt.textContent = m.backlog[0] ? fullMission(m.backlog[0]) : '';
     } else if (zone === 'cp') {
       foot = 'CMD';
-      const o = document.createElement('div');
-      o.className = 'ov';
-      o.textContent = 'OVERWATCH';
-      pl.appendChild(o);
     }
     if (ftag) ftag.innerHTML = foot;
     el.dataset.age = String(ageMs);
@@ -974,6 +978,11 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     [['bAct', nAct], ['bHold', nHold], ['bQ', nQ], ['bShip', nShip]].forEach(([id, v]) => { $(id).style.width = Math.round((v / tot) * 100) + '%'; });
     $('cmdLink').href = safeUrl(C.boardUrl); $('kalLink').href = safeUrl(K.boardUrl);
 
+    const known = new Set(feedEvents.map((e) => e.t + e.op + e.kind));
+    for (const e of Array.isArray(d.events) ? d.events : []) if (!known.has(e.t + e.op + e.kind)) feedEvents.push({ ...e });
+    feedEvents = feedEvents.filter((e) => Date.now() - Date.parse(e.t) < 6 * 3600 * 1000).sort((a, b) => a.t.localeCompare(b.t));
+    if (playing || queue.length) stageDirty = true; else stageUpdate();
+
     const waits = by('waiting').map((c) => ({ c, age: holdAgeMs(c, c.lane) })).sort((a, b) => (b.age || 0) - (a.age || 0));
     if (waits.length) {
       const top = waits[0], who = String(top.c.lane || 'TF141').toUpperCase();
@@ -990,17 +999,45 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       $('intel').className = 'intel';
       $('intel').innerHTML = (g.line1 || g.line2) ? `${g.badge ? `<span class="bd">${esc(g.badge)}</span>` : ''}<span class="tx">${esc(g.line1 || '')}${g.line2 ? ' · <i>' + esc(g.line2) + '</i>' : ''}</span>` : '';
     }
-
-    const known = new Set(feedEvents.map((e) => e.t + e.op + e.kind));
-    for (const e of Array.isArray(d.events) ? d.events : []) if (!known.has(e.t + e.op + e.kind)) feedEvents.push({ ...e });
-    feedEvents = feedEvents.filter((e) => Date.now() - Date.parse(e.t) < 6 * 3600 * 1000).sort((a, b) => a.t.localeCompare(b.t));
-    if (playing || queue.length) stageDirty = true; else stageUpdate();
     $('tDo').textContent = finiteCards.length; $('tHold').textContent = nHold; $('tQ').textContent = nQ;
     $('tDone').textContent = by('done').length || nShip || '';
     $('logc').textContent = `${nAct + nStand + nHold + nQ} OPEN · CMD + TRADING`;
     renderFeed();
+    renderWork();
     renderOrbat(); heat();
     maybeHash();
+  }
+  function workLimits() {
+    const sm = window.matchMedia && matchMedia('(max-width:899px)').matches;
+    return { QN: sm ? 3 : 5, DN: sm ? 2 : 4 };
+  }
+  function workRow(c, extra) {
+    const op = c.lane || '';
+    const ini = iniOf(op);
+    return `<a class="wr" href="${esc(safeUrl(c.url))}" target="_blank" rel="noopener"><img src="avatars/${esc(faceFile(op))}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${esc(ini)}</span>'"><b>${esc(String(op).toUpperCase())}</b><span class="t">${esc(fullMission(c))}</span>${extra || ''}</a>`;
+  }
+  function renderWork() {
+    const wb = $('work');
+    if (!wb) return;
+    const by = (k) => cards.filter((c) => c.list === k);
+    const doing = by('doing');
+    const waiting = by('waiting').map((c) => ({ c, a: holdAgeMs(c, c.lane) })).sort((x, y) => (y.a || 0) - (x.a || 0));
+    const queue = by('backlog');
+    const done = by('done').slice().sort((a, b) => {
+      if (a.doneAt && b.doneAt) return a.doneAt < b.doneAt ? 1 : a.doneAt > b.doneAt ? -1 : 0;
+      if (a.doneAt) return -1;
+      if (b.doneAt) return 1;
+      return 0;
+    });
+    const { QN, DN } = workLimits();
+    const qn = Math.min(QN, queue.length), dn = Math.min(DN, done.length);
+    const ageChip = (a) => (a == null ? '' : `<span class="k age${a >= 2 * 3600 * 1000 ? ' stale' : ''}">⏱ ${esc(fmtAge(a))}</span>`);
+    const more = (n) => (n > 0 ? `<a class="more" href="#log">+${n} MORE · MISSION LOG ↓</a>` : '');
+    wb.innerHTML =
+      `<div class="wcol act"><div class="wh">DOING · AO<span>${doing.length} CARDS</span></div>${doing.map((c) => workRow(c, isStanding(c) ? '<span class="k">STN</span>' : '')).join('')}</div>` +
+      `<div class="wcol hld"><div class="wh">WAITING · ON HUNTER<span>OLDEST FIRST</span></div>${waiting.map(({ c, a }) => workRow(c, ageChip(a))).join('')}</div>` +
+      `<div class="wcol q"><div class="wh">QUEUE · FOB<span>NEXT ${qn} OF ${queue.length}</span></div>${queue.slice(0, QN).map((c) => workRow(c)).join('')}${more(queue.length - QN)}</div>` +
+      `<div class="wcol shp"><div class="wh">DONE · SHIPPED<span>LATEST ${dn}</span></div>${done.slice(0, DN).map((c) => workRow(c, '<span class="k">✓</span>')).join('')}${more(done.length - DN)}</div>`;
   }
   let hashOpened = '';
   function requestedOp() {
@@ -1077,7 +1114,12 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 
 
   // ---------- ORBAT roster + wire heat ----------
-  const ZN = { ao: 'DEPLOYED · AO', hold: 'HOLD CAGE', ready: 'FOB · QUEUED', idle: 'STANDING BY', cp: 'CMD POST', stand: 'STANDING · ON STATION' };
+  const ZN = { ao: 'AO · DEPLOYED', hold: 'HOLD · WAITING ON HUNTER', ready: 'FOB · QUEUED', idle: 'STANDING BY', cp: 'CMD POST · OVERWATCH', stand: 'STANDING · ON STATION' };
+  function orbatSub(m) {
+    const finite = m.finite || (m.doing || []).filter((c) => !isStanding(c));
+    const sub = ZN[m.zone] || '';
+    return m.zone === 'ao' && finite.length > 1 ? sub + ' · ' + finite.length + ' CARDS' : sub;
+  }
   function renderOrbat() {
     const M = model();
     const rank = { ao: 0, hold: 1, stand: 2, cp: 3, ready: 4, idle: 5 };
@@ -1087,10 +1129,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     $('orbc').textContent = `${OPS.length} OPS · ${nOut} OUT` + (nStn ? ` · ${nStn} STN` : '');
     $('orb').innerHTML = list.map((op) => {
       const m = M[op], ini = iniOf(op);
-      const finite = m.finite || m.doing.filter((c) => !isStanding(c));
-      const standing = m.standing || m.doing.filter(isStanding);
-      const sub = m.zone === 'ao' ? (finite[0] ? fullMission(finite[0]) : '') : m.zone === 'stand' ? (standing[0] ? fullMission(standing[0]) : 'Always on') : m.zone === 'hold' ? (oldestWait(m) ? fullMission(oldestWait(m)) : '') : ZN[m.zone];
-      return `<button class="orow z-${m.zone}${op === 'Ghost' ? ' z-kal' : ''}" type="button" data-op="${esc(op)}"><img src="avatars/${faceFile(op)}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op.toUpperCase())} <i>${esc(DES[op] || '')}</i></div><div class="zn">${esc(sub)}</div></span></button>`;
+      return `<button class="orow z-${m.zone}${op === 'Ghost' ? ' z-kal' : ''}" type="button" data-op="${esc(op)}"><img src="avatars/${faceFile(op)}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span class="tx"><div class="nm">${esc(op.toUpperCase())}</div><div class="zn">${esc(orbatSub(m))}</div></span></button>`;
     }).join('');
     $('orb').querySelectorAll('.orow').forEach((b) => b.addEventListener('click', () => goFile(b.dataset.op)));
   }
@@ -1118,7 +1157,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     const doing = mine.filter((c) => c.list === 'doing');
     if (doing.length && window.MW4Action) {
       $('sheetp').innerHTML = MW4Action.html({
-        op, des: DES[op], avatar: `avatars/${op.toLowerCase()}.png`,
+        op, des: '', avatar: `avatars/${op.toLowerCase()}.png`,
         cards: doing.map((c) => ({ name: c.name || '', short: c.short || '', lane: c.lane || op, url: c.url || '', board: c.board || '', list: 'doing' })),
       });
       $('sheet').classList.add('on');

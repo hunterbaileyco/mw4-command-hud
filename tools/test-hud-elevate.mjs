@@ -216,6 +216,10 @@ const juHtml = A.html({ op: 'Ju Kwon', cards: [{ name: 'Ju Kwon: Intercom refund
 assert.match(juHtml, /EXT-01/);
 assert.match(juHtml, /JU KWON/);
 assert.doesNotMatch(juHtml, /141-/);
+const dropped = A.html({ op: 'Ghost', des: '', cards: [{ name: 'Ghost: FOMO / Dupe', short: 'FOMO / Dupe', lane: 'Ghost', board: 'KAL', list: 'doing', url: 'https://trello.com/c/fomo' }] });
+assert.match(dropped, /GHOST/);
+assert.doesNotMatch(dropped, /141-01/);
+assert.doesNotMatch(dropped, /<i>/);
 const hubHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/hub/index.html', import.meta.url), 'utf8');
 assert.match(hubHtml, /Ju Kwon/);
 assert.match(hubHtml, /ju-kwon/);
@@ -246,5 +250,25 @@ const hudHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/i
 assert.match(hudHtml, /\^duo\$\/i\.test\(m\[1\]\)\) return 'Ko'/);
 assert.doesNotMatch(hudHtml, /ob-box/, 'theater layout is not the FILES outbox');
 assert.doesNotMatch(hudHtml, /class="ob"/, 'theater layout is not the FILES outbox');
+assert.match(hudHtml, /id="work"/);
+assert.match(hudHtml, /class="log atbottom"/);
+assert.match(hudHtml, /"work work"/);
+assert.match(hudHtml, /"log log"/);
+assert.match(hudHtml, /AO · DEPLOYED/);
+assert.match(hudHtml, /HOLD · WAITING ON HUNTER/);
+assert.match(hudHtml, /CMD POST · OVERWATCH/);
+assert.match(hudHtml, /\+\$\{finite\.length - 1\} MORE/);
+assert.doesNotMatch(hudHtml, /DES\[op\]/);
+assert.doesNotMatch(hudHtml, /141-|BRAVO-6/);
+const paint = hudHtml.slice(hudHtml.indexOf('function paintTok'), hudHtml.indexOf('function flashTok'));
+assert.doesNotMatch(paint, /fullMission/);
+assert.doesNotMatch(paint, /textContent = 'OVERWATCH'/);
+assert.match(hudHtml, /MISSION LOG ↓/);
+assert.match(hudHtml, /QN: sm \? 3 : 5, DN: sm \? 2 : 4/);
+assert.match(hudCss, /\.workboard\{/);
+assert.match(filesHtml, /\$\{esc\(f\.des\)\}/, 'FILES still prints designators');
+assert.match(orbatHtml, /141-02/);
+const sidecol = hudHtml.slice(hudHtml.indexOf('class="sidecol"'), hudHtml.indexOf('class="log atbottom"'));
+assert.doesNotMatch(sidecol, /id="log"/, 'mission log is not in the side column');
 
 console.log('hud elevate checks ok');

@@ -22,8 +22,8 @@ body.sx-pad .wrap{
 /* Theater plates share the ORBAT avatar-on-box silhouette.
    --lap is how far the ring sinks into the plate (~1/3, same as .nd).
    The ring paints above the plate, so the gold edge tucks behind the
-   portrait instead of cutting the face. Callsign, 141-XX and T+ start
-   below the ring (--lap + 7px). */
+   portrait instead of cutting the face. Callsign and T+ start
+   below the ring (--lap + 7px). Designators stay in FILES. */
 .tok.s-ao,.tok.s-hold,.tok.s-stand,.tok.s-ready,.tok.s-idle,.tok.s-cp{
   --ring:54px;--lap:18px;
   width:calc(50% - 6px);max-width:100%;padding:0;background:none;border:0;box-shadow:none;border-radius:0;opacity:1;
@@ -362,6 +362,42 @@ ol.do li::before{content:counter(d,decimal-leading-zero);font-family:var(--mono)
   .omap .z-fence .rows{justify-content:space-around}
 }
 
+/* Theater work list: faces stay who, this list is what. Designators are not drawn here. */
+.tok .mt,.tok .ov{display:none}
+.tok .dsr .ds,.orow .nm i{display:none}
+.tok .dsr:not(:has(.tp:not(:empty))){display:none}
+.tok .x2{justify-content:center}
+.workboard{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-top:-4px;min-width:0}
+.workboard .wcol{border:1px solid var(--line);border-top:2px solid var(--wc,var(--line));border-radius:4px;background:rgba(10,14,11,.82);padding:7px 8px 6px;min-width:0}
+.workboard .wcol.act{--wc:var(--amber)}.workboard .wcol.hld{--wc:var(--holdink)}.workboard .wcol.q{--wc:var(--tan)}.workboard .wcol.shp{--wc:var(--olive2)}
+.workboard .wh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-family:var(--mono);font-size:8.5px;font-weight:800;letter-spacing:.16em;color:var(--wc);margin-bottom:5px}
+.workboard .wh span{color:var(--dim);font-weight:600;letter-spacing:.1em;text-align:right}
+.workboard .wcol.hld{background:repeating-linear-gradient(-45deg,rgba(139,58,42,.10) 0 6px,rgba(139,58,42,.03) 6px 12px),rgba(10,14,11,.82)}
+.workboard .wr{display:grid;grid-template-columns:20px 62px minmax(0,1fr) auto;gap:7px;align-items:center;padding:5px 0;border-top:1px solid rgba(42,51,40,.7);text-decoration:none;color:var(--ink);min-width:0}
+.workboard .wr:first-of-type{border-top:0}
+.workboard .wr img,.workboard .wr .ini{width:20px;height:20px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--wc);background:var(--idle)}
+.workboard .wr .ini{display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:8px;font-weight:800;color:var(--tan)}
+.workboard .wr b{font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--wc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.workboard .wr .t{font-size:13px;line-height:1.3;color:var(--ink);overflow-wrap:anywhere}
+.workboard .wr .k{font-family:var(--mono);font-size:7.5px;font-weight:800;letter-spacing:.08em;color:var(--dim);border:1px solid var(--line2);padding:1px 4px;border-radius:2px;white-space:nowrap}
+.workboard .wr .k.age{color:var(--holdink);border-color:rgba(224,122,95,.6)}
+.workboard .wr .k.age.stale{background:var(--holdink);color:#0B0E0C}
+.workboard .more{display:block;padding-top:5px;font-family:var(--mono);font-size:8px;letter-spacing:.14em;color:var(--tan);text-decoration:none;border-top:1px dashed var(--line2)}
+.workboard .wcol.shp .wr .t{color:#b9b3a3}
+details.log.atbottom{margin-top:2px}
+@media(min-width:900px){
+  .workboard{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:-12px}
+  .workboard .wcol{border-radius:0 0 4px 4px;border-top:0;border-left-width:0;box-shadow:inset 0 1px 0 rgba(197,165,114,.12)}
+  .workboard .wcol:first-child{border-left-width:1px}
+  .workboard .wr{grid-template-columns:20px minmax(0,1fr) auto;row-gap:1px}
+  .workboard .wr img,.workboard .wr .ini{grid-row:1 / span 2}
+  .workboard .wr b{grid-column:2}
+  .workboard .wr .k{grid-column:3;grid-row:1}
+  .workboard .wr .t{grid-column:2 / span 2;font-size:12.5px}
+  details.log.atbottom #feed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:14px;align-items:start}
+  details.log.atbottom #feed .card{min-width:0}
+  details.log.atbottom #feed .logh,details.log.atbottom #feed .empty{grid-column:1 / -1}
+}
 @media(max-width:480px){
   .omap .ln .rl{font-size:11px}
   .omap .tk.price{width:142px}

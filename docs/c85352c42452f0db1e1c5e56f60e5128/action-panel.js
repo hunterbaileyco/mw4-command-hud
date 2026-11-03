@@ -50,7 +50,7 @@
     const cards = ((opts && opts.cards) || []).filter((c) => !c.list || c.list === "doing");
     const finite = cards.filter((c) => !isStanding(c));
     const standing = cards.filter(isStanding);
-    const des = (opts && opts.des) || designator(op);
+    const des = opts && Object.prototype.hasOwnProperty.call(opts, "des") ? opts.des : designator(op);
     const ini = op === "Ju Kwon" ? "JK" : op.slice(0, 2).toUpperCase();
     const avatar = (opts && opts.avatar) || ("avatars/" + op.toLowerCase() + ".png");
     const face = `<img class="actx-face" src="${esc(avatar)}" alt="" onerror="this.outerHTML='<b class=&quot;actx-face ini&quot;>${esc(ini)}</b>'">`;

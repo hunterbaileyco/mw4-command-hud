@@ -2,12 +2,15 @@
 // The repo (and therefore GitHub Pages) only ever holds the AES-256-GCM envelopes; this function decrypts them
 // server-side with the MW4_FEED_PASS project env var (f=ledger tries MW4_LEDGER_PASS first, then MW4_FEED_PASS).
 // f=status prefers a newer webhook envelope in Vercel Blob when one is stored (see live-status.js).
+// f=social prefers a newer blob envelope at mw4/social-live.json (see live-social.js) and falls back
+// to the committed social/metrics.json. The box publishes that blob on the 4h cadence.
 // The whole Vercel deployment is behind Vercel Authentication,
 // so after Vercel sign-in there's no second code, and nothing readable is ever committed or served by Pages.
 const fs = require('node:fs');
 const path = require('node:path');
 const { webcrypto: wc } = require('node:crypto');
 const live = require('./live-status');
+const liveSocial = require('./live-social');
 
 // literal paths so Vercel's file tracing bundles the feeds with the function
 const FILES = {
@@ -58,6 +61,11 @@ async function handler(req, res) {
   try {
     if (f === 'status') {
       const pt = await live.readStatusPlain();
+      res.statusCode = 200;
+      return res.end(Buffer.from(pt));
+    }
+    if (f === 'social') {
+      const pt = await liveSocial.readSocialPlain();
       res.statusCode = 200;
       return res.end(Buffer.from(pt));
     }

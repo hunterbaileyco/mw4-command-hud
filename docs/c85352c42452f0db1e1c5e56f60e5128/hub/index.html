@@ -399,12 +399,10 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
       const n = box[i].querySelector('.n'); n.textContent = fmtK(v); n.classList.remove('lk'); n.title = v.toLocaleString('en-US') + ' ' + (c.reach || 'views').toLowerCase();
     });
     const total = (d.posts || []).length;
-    // TODO(Price→Jae): social/metrics.json is still the 2026-10-31 envelope (as-of day 2026-10-30).
-    // Do not invent metrics. A live rebuild needs the off-repo pull
-    // kinsora-video/multi_channel_metrics_latest.json plus MW4_FEED_PASS and cache/kdf.json
-    // (neither is in this environment — a new key would break /api/feed). Postiz can list posts
-    // but not view counts. Windsor is connected (tiktok_organic, instagram, pinterest_organic);
-    // the daily series + per-post assembler is Jae's pull, not this page.
+    // TODO(Price→Jae): do not invent metrics. This tile reads /api/feed?f=social, which prefers a
+    // newer private blob (mw4/social-live.json) and otherwise serves the committed envelope.
+    // Jae's Windsor/Postiz pull is the only source; the 4h box routine publishes when that drop exists.
+    // Postiz can list posts but not view counts.
     const asOf = new Date((d.asOfDay || '1970-01-01') + 'T23:59:59-07:00').getTime();
     const stale = !d.asOfDay || Date.now() - asOf > 36 * 3600 * 1000;
     const when = d.asOfDay || d.generatedAt || '';

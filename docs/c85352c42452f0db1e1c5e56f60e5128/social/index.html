@@ -224,8 +224,9 @@ details li{margin:4px 0}
 <script>
 (() => {
   'use strict';
-  // Feed: GET /api/feed?f=social — a Vercel function behind Vercel Authentication decrypts the committed AES-GCM
-  // social/metrics.json server-side. No second code after Vercel sign-in; GitHub Pages has no /api, so it shows LINK DOWN.
+  // Feed: GET /api/feed?f=social — Vercel Authentication, then the function decrypts with MW4_FEED_PASS.
+  // Prefers a newer private blob (mw4/social-live.json) and falls back to the committed social/metrics.json.
+  // GitHub Pages has no /api, so it shows LINK DOWN.
   const STALE_MS = 36 * 3600 * 1000;
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

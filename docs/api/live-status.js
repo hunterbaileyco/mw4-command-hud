@@ -88,13 +88,17 @@ async function loadFile(pass, readFile) {
   return fileCache;
 }
 
-function blobStore() {
+function blobStoreFor(pathname) {
   const token = blobToken();
   if (!token) return null;
   return {
-    async read() { return blobGet(token, LIVE_PATH); },
-    async write(text) { await blobPut(token, LIVE_PATH, text); },
+    async read() { return blobGet(token, pathname); },
+    async write(text) { await blobPut(token, pathname, text); },
   };
+}
+
+function blobStore() {
+  return blobStoreFor(LIVE_PATH);
 }
 
 async function blobPut(token, pathname, body) {
@@ -312,6 +316,9 @@ module.exports = {
   BOARDS,
   LIVE_PATH,
   storeIdFromToken,
+  blobStoreFor,
+  readLiveRecord: readRecord,
+  feedPass,
   pickStatusEnvelope,
   readStatusPlain,
   refreshLive,

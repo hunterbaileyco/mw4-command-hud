@@ -24,8 +24,8 @@ Developers: edit `scriptable/src/*`, run `node tools/build-scriptable.mjs`, merg
 ## Dashboard hub
 - `docs/<token>/hub/` — phone-first index with tiles for the MW4 Command HUD, LEDGER, and the Social (Jae) board. The Care desk tile (Laswell, care@ only) stays SAMPLE until care@kinsora.co is wired. Intercom is not on that desk.
 - `docs/<token>/social/` — static "Kinsora social — published metrics" board (TikTok @kinsora.co, TikTok @wearkinsora,
-  IG @wearkinsora, Pinterest). Its feed `social/metrics.json` is an encrypted envelope built by `tools/build-social.mjs`
-  from the Postiz/Windsor pull, with the same auth code + salt as `status.json`, so one unlock opens both pages in a tab.
+  IG @wearkinsora, Pinterest). The page reads `GET /api/feed?f=social`. `social/metrics.json` is the committed
+  AES-GCM fallback, built by `tools/build-social.mjs` from the Postiz/Windsor pull, with the same auth code + salt as `status.json`.
 
 ## Command suite chrome (v2)
 - `docs/<token>/suite.css` — shared TF141 chrome for the suite pages: classification band with live PT clock, bottom dock nav (HUB · HUD · LEDGER · ORBAT · FILES), corner brackets, rulers.
@@ -34,6 +34,17 @@ Developers: edit `scriptable/src/*`, run `node tools/build-scriptable.mjs`, merg
 - Hub: inline unlock; once unlocked it decrypts status.json + social/metrics.json in the browser for live counts and a 6 h SITREP. Nothing readable is published.
 - LEDGER (`docs/<token>/ledger/`): sales / spend / contribution. Hero is REV − COGS − SPEND. A live `GET /api/feed?f=ledger` payload with `source: "live"` drops the MOCK/SAMPLE badges. `ledger/model.js` SAMPLE is the fallback only when that envelope is missing or not live. Shipping, payment fees, and app costs are not subtracted. COGS gaps count as $0 and stay flagged. Runway is Mercury balance ÷ |30-day net burn|. The top strip CM / REV / SPEND follow the TODAY / 7D / MTD chip. CASH stays the Mercury balance (on hand), which is not a period flow.
 
+## Social feed
+`GET /api/feed?f=social` decrypts with `MW4_FEED_PASS` and serves the newer envelope: a private Vercel Blob at `mw4/social-live.json` (`BLOB_READ_WRITE_TOKEN`), or the committed `social/metrics.json` when the blob is missing, older, or will not decrypt. A deploy with no blob still serves the git snapshot. Freshness is `generatedAt` when that value is ISO-8601; otherwise it is `asOfDay` plus the raw `generatedAt` string, so a later day wins and a same-day rebuild still orders.
+
+Jae owns the Windsor/Postiz pull and drops the metrics JSON on the box. The 4h routine (squad board cron `0 */4 * * *` PT) is Ko's and lives outside this repo. After merge it should run:
+
+```
+node tools/publish-social-live.mjs --metrics /workspace/kinsora-video/multi_channel_metrics_latest.json --pass-file .pass
+```
+
+`--data` is optional and matches `build-social.mjs`. `MW4_SOCIAL_METRICS` overrides the default drop path; `MW4_FEED_PASS` is used when `--pass-file` is omitted. If the drop path is missing, the command exits 0 and writes nothing. If the drop is present and newer than both the blob and the committed file, the tool builds the same model as `build-social.mjs`, encrypts it with the salt already in `social/metrics.json`, and puts `{ meta, env }` on the blob. Cleartext is not written to git. `build-social.mjs --out docs/<token>/social/metrics.json` is still how the committed fallback is refreshed.
+
 ## LEDGER feed
 `ledger/model.js` is the contract. `tools/ledger-live.mjs` maps a normalized Shopify + ads + Mercury pull into that shape and sets `source` to `"live"`. `tools/build-ledger.mjs` encrypts it (AES-256-GCM, salt reused from `status.json`) and writes `ledger/feed.json`. The repo holds the envelope only — never the cleartext books. `/api/feed?f=ledger` tries `MW4_LEDGER_PASS` first, then `MW4_FEED_PASS`, so the box rebuild (`build-ledger.mjs --pass-file .pass`, same pass as status) opens on Vercel either way. The page derives contribution, CM%, breakeven ROAS, after-COGS dollars, and runway.
 
@@ -41,8 +52,9 @@ Connected on the current envelope: Shopify net sales, orders, and unit-cost COGS
 
 ## Access (no second code on Vercel)
 - The Vercel deployment is behind Vercel Authentication. The HUD, Social and Hub pages have **no unlock form**: they fetch
-  `GET /api/feed?f=status` / `?f=social` / `?f=ledger` (`docs/api/feed.js`, a Vercel function), which decrypts the committed envelopes
+  `GET /api/feed?f=status` / `?f=social` / `?f=ledger` (`docs/api/feed.js`, a Vercel function), which decrypts
   server-side with the `MW4_FEED_PASS` project env var and returns JSON with `Cache-Control: no-store`.
+  `f=status` and `f=social` each prefer a newer private blob when one is stored, and otherwise serve the committed file.
 - The repo still only holds AES-256-GCM envelopes for the ops, social, and ledger feeds — `status.json`, `social/metrics.json`,
   and `ledger/feed.json` are written encrypted by `build-status.mjs` / `build-social.mjs` / `build-ledger.mjs`. LEDGER sample dollars in `ledger/model.js` are invented figures labeled SAMPLE, used only when the live envelope is absent.
 - Scriptable widgets fetch the encrypted `status.json` from Vercel and still decrypt on-device with the Keychain auth code (AES-GCM is unchanged). `STATUS_URL` in `scriptable/src/common.js` is the Vercel `status.json` URL plus the Deployment Protection bypass query param. Widgets do not call `/api/feed` (that cleartext endpoint stays SSO-gated). Phone install is the two loaders above; do not re-paste the full scripts after a merge.

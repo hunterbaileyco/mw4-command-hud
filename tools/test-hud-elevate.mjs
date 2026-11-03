@@ -10,22 +10,22 @@ const by = Object.fromEntries(R.FILES.map((f) => [f.id, f]));
 const ids = (ends) => ends.map((e) => e.id).filter(Boolean);
 const labels = (ends) => ends.map((e) => e.label).filter(Boolean);
 
-assert.equal(R.FILES.length, 12, 'twelve operator files');
-for (const name of ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal', 'Ju Kwon']) {
+assert.equal(R.FILES.length, 13, 'thirteen operator files');
+for (const name of ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Dunn', 'Soap', 'Gaz', 'Kal', 'Ju Kwon', 'Laswell']) {
   assert.ok(R.FILES.some((f) => f.name === name), name);
 }
 
-assert.deepEqual(ids(by.cho.from).sort(), ['jae', 'ju', 'park', 'west']);
+assert.deepEqual(ids(by.cho.from).sort(), ['gaz', 'jae', 'ju', 'park', 'west']);
 assert.ok(labels(by.cho.to).includes('SHIP') && labels(by.cho.to).includes('SEND BACK'));
 assert.equal(ids(by.cho.to).length, 0, 'Cho does not assign people');
-for (const id of ['west', 'jae', 'park', 'ju']) {
+for (const id of ['west', 'jae', 'park', 'ju', 'gaz']) {
   assert.ok(ids(by[id].to).includes('cho'), id + ' flows to the Cho gate');
   assert.ok(ids(by[id].from).includes('price'), id + ' is dispatched by Price');
   assert.ok(!ids(by[id].from).includes('cho'), id + ' is not managed by Cho');
 }
 assert.deepEqual(ids(by.kal.to), ['price']);
 assert.equal(ids(by.kal.to).length, 1);
-assert.ok(labels(by.price.to).includes('ALL 9 LANES'));
+assert.ok(labels(by.price.to).includes('8 LANES + CHO'));
 assert.equal(ids(by.price.to).length, 0, 'Price file does not draw a management tree');
 assert.ok(ids(by.price.from).includes('kal'));
 assert.ok(!ids(by.ghost.from).includes('price') && !ids(by.ghost.to).includes('price'));
@@ -38,7 +38,21 @@ assert.equal(R.boardTag('CMD'), 'CMD');
 assert.ok(labels(by.ghost.to).includes('TRADING BOARD'));
 assert.equal(labels(by.ghost.to).includes('KAL BOARD'), false);
 assert.equal(by.ghost.map, 'Trading');
-assert.equal(by.ju.map, 'Kinsora ops');
+assert.equal(by.ju.map, 'Kinsora ops · back-office');
+assert.equal(by.ju.face, 'ju-kwon');
+assert.equal(R.faceFile('Ju Kwon'), 'ju-kwon');
+assert.equal(R.faceFile('Laswell'), 'laswell');
+assert.equal(by.laswell.des, '141-11');
+assert.equal(by.laswell.stamp, 'CARE');
+assert.ok(ids(by.laswell.from).includes('price'));
+assert.ok(!ids(by.laswell.to).includes('cho') && !ids(by.laswell.from).includes('cho'));
+assert.ok(!by.laswell.off && R.OPS.includes('Laswell'));
+assert.match(by.laswell.role + by.laswell.does.join(' '), /care@/);
+assert.doesNotMatch(by.laswell.role + by.laswell.does.join(' '), /intercom/i);
+assert.match(by.laswell.not, /Intercom/);
+assert.doesNotMatch(by.ju.role + by.ju.does.join(' '), /intercom/i);
+assert.match(by.ju.not, /Intercom/);
+assert.ok(ids(by.gaz.to).includes('soap'));
 assert.equal(by.dunn.map, 'Personal');
 assert.equal(/ops/i.test(by.dunn.role + by.dunn.unit + by.dunn.stamp + by.dunn.map), false);
 assert.ok(by.dunn.off && !R.OPS.includes('Dunn'));
@@ -52,38 +66,88 @@ assert.ok(text.length > 28);
 assert.equal(R.missionText({ name: 'Ghost: AM intake (standing)', short: 'AM intake (standing)' }).includes('(standing)'), false);
 
 function box(l, t, w, h) { return { l, t, r: l + w, b: t + h }; }
-function layout(W) {
-  const nw = Math.min(124, Math.floor((W - 70) / 2));
-  const left = 22;
-  const right = W - 22 - nw;
+function layoutMobile(W) {
+  const laneL = 48;
+  const laneW = W - 78;
+  const row = (y) => box(laneL, y, laneW, 58);
   return {
-    hunter: box(right, 8, nw, 88),
-    kal: box(left, 118, nw, 104),
-    price: box(right, 112, nw, 112),
-    cho: box((W - nw) / 2, 292, nw, 96),
-    west: box(left, 430, nw - 8, 96),
-    jae: box(right + 8, 430, nw - 8, 96),
-    park: box(left, 560, nw - 8, 96),
-    ju: box(right + 8, 560, nw - 8, 96),
-    ko: box(left + 6, 710, nw - 10, 92),
-    gaz: box(right - 20, 710, Math.floor(nw * 0.62), 92),
-    soap: box(right + Math.floor(nw * 0.48), 710, Math.floor(nw * 0.5), 92),
-    ghost: box(left, 860, nw, 88),
-    dunn: box(right, 860, nw, 88),
+    hunter: box(W - 180, 10, 140, 86),
+    kal: box(16, 118, 120, 96),
+    price: box(W - 190, 112, 160, 108),
+    west: row(270),
+    jae: row(344),
+    park: row(418),
+    gaz: row(492),
+    ju: row(566),
+    cho: box(laneL, 650, laneW, 70),
+    ko: row(760),
+    soap: row(834),
+    laswell: row(908),
+    ghost: box(16, 1040, (W - 48) / 2, 64),
+    dunn: box(W / 2, 1040, (W - 48) / 2, 64),
   };
 }
-for (const width of [390, 430]) {
-  const sample = layout(width);
+function layoutDesktop(W) {
+  const card = (x, y) => box(x, y, 96, 110);
+  const y = 300;
+  return {
+    hunter: box(W / 2 - 70, 8, 140, 90),
+    kal: box(80, 120, 120, 100),
+    price: box(W / 2 - 80, 116, 170, 112),
+    west: card(40, y),
+    jae: card(148, y),
+    park: card(256, y),
+    gaz: card(364, y),
+    ju: card(472, y),
+    cho: box(36, 440, 540, 64),
+    ko: card(640, y),
+    soap: card(748, y),
+    laswell: card(856, y),
+    ghost: box(40, 560, 140, 80),
+    dunn: box(200, 560, 140, 80),
+  };
+}
+function nearPlate(segs, n) {
+  const hits = [];
+  for (const s of segs) {
+    for (let i = 1; i < s.pts.length; i++) {
+      for (const p of [s.pts[i - 1], s.pts[i]]) {
+        if (p[0] > n.l + 1 && p[0] < n.r - 1 && p[1] > n.t + 1 && p[1] < n.b - 1) hits.push(s.cls);
+      }
+    }
+  }
+  return hits;
+}
+for (const width of [390, 430, 1180]) {
+  const sample = width >= 900 ? layoutDesktop(width) : layoutMobile(width);
   const segs = R.routeOrbat(sample, width);
   const cross = R.crossings(segs);
   const hits = R.interiorHits(segs, sample);
   assert.deepEqual(cross, [], 'crossings at ' + width + ': ' + cross.join(','));
   assert.deepEqual(hits, [], 'interior hits at ' + width + ': ' + hits.join(','));
+  assert.deepEqual(nearPlate(segs, sample.ghost), [], 'ghost wired at ' + width);
+  assert.deepEqual(nearPlate(segs, sample.dunn), [], 'dunn wired at ' + width);
   const wired = new Set(segs.flatMap((s) => s.cls === 'disp' ? ['disp'] : [s.cls]));
   assert.ok(wired.has('disp') && segs.some((s) => s.cls === 'intake') && segs.some((s) => s.cls === 'review'));
   const blob = JSON.stringify(segs);
-  assert.equal(blob.includes('kal') , false);
+  assert.equal(blob.includes('kal'), false);
+  const tapped = (n) => segs.some((s) => s.cls === 'disp' && s.pts.some((p) => {
+    const midY = (n.t + n.b) / 2;
+    const cx = (n.l + n.r) / 2;
+    return (Math.abs(p[0] - (n.l - 1)) < 2 && Math.abs(p[1] - midY) < 2)
+      || (Math.abs(p[1] - (n.t - 1)) < 2 && Math.abs(p[0] - cx) < 2);
+  }));
+  assert.ok(tapped(sample.laswell), 'laswell gets a Price wire at ' + width);
+  assert.ok(tapped(sample.cho), 'cho gets a Price wire at ' + width);
+  assert.ok(!tapped(sample.ghost) && !tapped(sample.dunn), 'outside the wire at ' + width);
 }
+const desk = layoutDesktop(1180);
+const narrow = R.routeOrbat(desk, 828);
+assert.deepEqual(R.crossings(narrow), [], 'desktop row on a narrow map: ' + R.crossings(narrow).join(','));
+assert.deepEqual(R.interiorHits(narrow, desk), [], 'desktop row interior: ' + R.interiorHits(narrow, desk).join(','));
+const phone = layoutMobile(430);
+const widePhone = R.routeOrbat(phone, 1100);
+assert.deepEqual(R.interiorHits(widePhone, phone), [], 'stacked lanes stay on the side rail');
 
 const hudCss = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/theater.css', import.meta.url), 'utf8');
 const filesHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/files/index.html', import.meta.url), 'utf8');
@@ -93,6 +157,13 @@ assert.match(hudCss, /\.tok\.s-hold \.pl\{[\s\S]*?repeating-linear-gradient\(-45
 assert.match(hudCss, /\.rt \.face img\{[^}]*object-position:center top;transform:scale\(1\.35\);transform-origin:center top\}/, 'FILES callsign crop stays top-anchored');
 assert.match(filesHtml, /class="face"/, 'FILES rail still wraps the callsign photo');
 assert.doesNotMatch(hudCss, /margin-bottom:4px/, 'Doing ring is not lifted clear of the plate');
+assert.doesNotMatch(hudCss, /rotate\(/, 'stamps stay axis-aligned');
+const orbatHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/orbat/index.html', import.meta.url), 'utf8');
+assert.match(orbatHtml, /data-pin="laswell"/);
+assert.match(orbatHtml, /data-pin="gaz"/);
+assert.match(orbatHtml, /NOT A MANAGER/);
+assert.match(orbatHtml, /ju-kwon\.png/);
+assert.doesNotMatch(orbatHtml, /rotate\(/);
 
 const actionSrc = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/action-panel.js', import.meta.url), 'utf8');
 const actionCtx = vm.createContext({ window: {} });
@@ -102,12 +173,18 @@ assert.equal(A.designator('Ju Kwon'), 'EXT-01');
 assert.equal(A.designator('Ghost'), '141-01');
 assert.equal(A.designator('Kal'), '141-10');
 assert.equal(A.designator('Price'), 'BRAVO-6');
+assert.equal(A.designator('Laswell'), '141-11');
 const juHtml = A.html({ op: 'Ju Kwon', cards: [{ name: 'Ju Kwon: Intercom refunds', short: 'Intercom refunds', lane: 'Ju Kwon', board: 'CMD', list: 'doing', url: 'https://trello.com/c/jurefund' }] });
 assert.match(juHtml, /EXT-01/);
 assert.match(juHtml, /JU KWON/);
 assert.doesNotMatch(juHtml, /141-/);
 const hubHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/hub/index.html', import.meta.url), 'utf8');
 assert.match(hubHtml, /Ju Kwon/);
+assert.match(hubHtml, /ju-kwon/);
+assert.match(hubHtml, /CARE DESK/);
+assert.match(hubHtml, /Laswell/);
+assert.match(hubHtml, /NOT LIVE/);
+assert.doesNotMatch(hubHtml, /Intercom/);
 assert.match(hubHtml, /TRADING BOARD/);
 assert.doesNotMatch(hubHtml, /KAL BOARD/);
 assert.doesNotMatch(hubHtml, /'Dunn'/);

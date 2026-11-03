@@ -678,7 +678,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   }
 
   function goFile(op) { location.href = 'files/#' + (window.MW4Roster ? MW4Roster.slugOf(op) : String(op || '').toLowerCase()); }
-  function faceFile(op) { return window.MW4Roster ? MW4Roster.slugOf(op) : String(op || '').toLowerCase(); }
+  function faceFile(op) { return window.MW4Roster && MW4Roster.faceFile ? MW4Roster.faceFile(op) : String(op || '').toLowerCase().replace(/\s+/g, '-'); }
   function iniOf(op) { return op === 'Ju Kwon' ? 'JK' : String(op || '').slice(0, 2).toUpperCase(); }
   function fullMission(c) { return window.MW4Roster ? MW4Roster.missionText(c) : String((c && (c.name || c.short)) || '—'); }
   function holdAgeMs(card, op) {

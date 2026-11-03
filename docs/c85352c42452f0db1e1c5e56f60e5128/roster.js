@@ -1,18 +1,22 @@
 /* TF141 operator files + ORBAT wire router.
-   Cho is a creative checkpoint, not a manager. Price is the only dispatcher.
-   Flow is Kal → Price → lane. Do not add reporting lines.
-   Kal = intake. Ghost = trading. Ju Kwon = Kinsora ops. Dunn = personal (no Ops suffix). */
+   Flat chain: Hunter → Kal → Price → lanes. One dispatcher.
+   Cho is a creative checkpoint, not a manager. No manager line from Cho to lanes.
+   Laswell 141-11 owns care@ only (no Intercom). Ju Kwon is Kinsora ops back-office.
+   Ghost = trading. Dunn = personal (no Ops suffix). */
 (function (root, factory) {
   const api = factory();
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.MW4Roster = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function () {
-  const OPS = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Ju Kwon', 'Soap', 'Gaz', 'Kal'];
+  const OPS = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Ju Kwon', 'Soap', 'Gaz', 'Kal', 'Laswell'];
   const DES = {
     Price: 'BRAVO-6', Ghost: '141-01', Cho: '141-02', West: '141-03', Ko: '141-04',
     Park: '141-05', Jae: '141-06', Dunn: '141-07', Soap: '141-08', Gaz: '141-09', Kal: '141-10',
-    'Ju Kwon': 'EXT-01',
+    Laswell: '141-11', 'Ju Kwon': 'EXT-01',
   };
+  /* Price taps these. Ghost and Dunn stay outside the wire. */
+  const WIRE_IDS = ['west', 'jae', 'park', 'gaz', 'ju', 'ko', 'soap', 'laswell', 'cho'];
+  const GATE_IDS = ['west', 'jae', 'park', 'gaz', 'ju'];
 
   const p = (id) => ({ id });
   const lab = (label) => ({ label });
@@ -28,7 +32,7 @@
       ],
       not: 'Doesn’t do lane work himself — and nobody else assigns work.',
       from: [{ id: 'hunter', name: 'HUNTER', star: true }, p('kal')],
-      to: [lab('ALL 9 LANES')],
+      to: [lab('8 LANES + CHO')],
       map: 'Sole dispatcher',
     },
     {
@@ -46,14 +50,14 @@
     },
     {
       id: 'cho', name: 'Cho', des: '141-02', unit: 'CREATIVE GATE', board: 'CMD', stamp: 'CREATIVE GATE',
-      role: 'Creative gate — the checkpoint West, Jae, Park and Ju Kwon’s creative passes before it ships',
+      role: 'Creative gate — the checkpoint West, Jae, Park, Gaz and Ju Kwon pass before it ships',
       does: [
-        'Reviews CF / creative output from West, Jae, Park and Ju Kwon',
+        'Reviews creative from West, Jae, Park, Gaz and Ju Kwon',
         'Passes it or sends it back with notes — brand + voice are the bar',
         'One checkpoint on the way out, not a reporting line',
       ],
-      not: 'Doesn’t manage, assign or re-prioritise West / Jae / Park / Ju Kwon. Price dispatches them.',
-      from: [p('west'), p('jae'), p('park'), p('ju')],
+      not: 'Doesn’t manage, assign or re-prioritise West / Jae / Park / Gaz / Ju Kwon. Price dispatches them.',
+      from: [p('west'), p('jae'), p('park'), p('gaz'), p('ju')],
       to: [lab('SHIP'), lab('SEND BACK')],
       map: 'Creative gate · review',
     },
@@ -141,12 +145,12 @@
       does: [
         'Builds paid creative: hooks, UGC cuts, statics',
         'Feeds tested variants to Soap',
-        'Iterates off Soap’s performance reads',
+        'Creative clears Cho’s gate before Soap buys it',
       ],
       not: 'Doesn’t set budgets or buy media (Soap).',
       from: [p('price'), lab('SOAP READS')],
-      to: [p('soap')],
-      map: 'Ads creative',
+      to: [{ id: 'cho', name: 'CHO GATE' }, p('soap')],
+      map: 'Ads creative ▸ Soap',
     },
     {
       id: 'kal', name: 'Kal', des: '141-10', unit: 'INTAKE', board: 'CMD', stamp: 'INTAKE',
@@ -163,16 +167,30 @@
     },
     {
       id: 'ju', name: 'Ju Kwon', des: 'EXT-01', unit: 'KINSORA OPS', board: 'CMD', stamp: 'KINSORA OPS',
-      role: 'Kinsora ops — Intercom, refunds, order exceptions',
+      face: 'ju-kwon',
+      role: 'Kinsora ops — back-office order exceptions, fulfilment, stock',
       does: [
-        'Intercom queue, replies, refunds per policy',
         'Order exceptions, fulfilment issues, stock checks',
-        'Customer-facing macro copy clears Cho’s gate',
+        'Back-office only — no customer replies',
+        'Ops notes clear Cho’s gate on the way out',
       ],
-      not: 'Doesn’t build site fixes — routes them to Ko through Price.',
-      from: [p('price'), lab('CUSTOMERS')],
+      not: 'Doesn’t own care@ — Laswell does — and doesn’t own Intercom. Doesn’t build site fixes — routes them to Ko through Price.',
+      from: [p('price')],
       to: [{ id: 'cho', name: 'CHO GATE' }, lab('RESOLVED')],
-      map: 'Kinsora ops',
+      map: 'Kinsora ops · back-office',
+    },
+    {
+      id: 'laswell', name: 'Laswell', des: '141-11', unit: 'CARE', board: 'CMD', stamp: 'CARE',
+      role: 'Customer care — owns care@ only',
+      does: [
+        'Owns care@kinsora.co — replies, returns, refunds',
+        'Hands wholesale and site fixes to Price; does not dispatch',
+        'Care desk on the hub stays SAMPLE until care@ is wired',
+      ],
+      not: 'Doesn’t own Intercom. Doesn’t run Kinsora back-office (Ju Kwon) or clear Cho’s gate.',
+      from: [p('price'), lab('CARE@')],
+      to: [lab('REPLIED')],
+      map: 'Customer care · care@',
     },
   ];
 
@@ -190,72 +208,96 @@
     return hit ? hit.id : String(op || '').toLowerCase();
   }
 
-  /* Orthogonal wires. Dispatch stays on the outer rails and enters each lane from the top.
-     Cho's review channels sit on the inner edges and run up to the gate. They do not cross. */
+  /* Portrait file under avatars/. Ju Kwon's id stays ju; the photo is ju-kwon.png. */
+  function faceFile(op) {
+    const hit = FILES.find((f) => f.name.toLowerCase() === String(op || '').toLowerCase() || f.id === String(op || '').toLowerCase());
+    if (!hit) return String(op || '').toLowerCase().replace(/\s+/g, '-');
+    return hit.face || hit.id;
+  }
+
+  /* Orthogonal wires only. Mobile: one amber rail down the left gutter, a tap into
+     each Price wire. Gated output leaves on the right and drops into Cho.
+     Desktop: one horizontal bus, a drop into each card, dotted review down to Cho.
+     Cho never draws back toward a lane. Ghost and Dunn are not tapped. */
   function routeOrbat(box, width) {
     const W = width || 368;
     const segs = [];
-    const add = (cls, pts) => segs.push({ cls, pts });
+    const add = (cls, pts) => {
+      const clean = [pts[0]];
+      for (let i = 1; i < pts.length; i++) {
+        const prev = clean[clean.length - 1];
+        if (Math.abs(pts[i][0] - prev[0]) < 0.5 && Math.abs(pts[i][1] - prev[1]) < 0.5) continue;
+        clean.push(pts[i]);
+      }
+      if (clean.length > 1) segs.push({ cls, pts: clean });
+    };
     const cx = (b) => (b.l + b.r) / 2;
     const midY = (b) => (b.t + b.b) / 2;
     const hunter = box.hunter, price = box.price, intake = box.kal, cho = box.cho;
-    if (!hunter || !price || !intake || !cho) return segs;
+    if (!hunter || !price || !intake) return segs;
 
-    const yCmd = Math.min(hunter.b + 12, price.t - 6);
-    add('cmd', [[cx(hunter), hunter.b], [cx(hunter), yCmd], [cx(price), yCmd], [cx(price), price.t]]);
+    const yJoin = Math.min(price.t - 4, Math.max(hunter.b + 6, (hunter.b + price.t) / 2));
+    if (yJoin <= hunter.b + 1) add('cmd', [[cx(hunter), hunter.b], [cx(price), price.t]]);
+    else add('cmd', [[cx(hunter), hunter.b], [cx(hunter), yJoin], [cx(price), yJoin], [cx(price), price.t]]);
 
-    const overlapT = Math.max(intake.t, price.t) + 14;
-    const overlapB = Math.min(intake.b, price.b) - 10;
+    const overlapT = Math.max(intake.t, price.t) + 8;
+    const overlapB = Math.min(intake.b, price.b) - 8;
     const yIn = overlapT < overlapB ? (overlapT + overlapB) / 2 : midY(price);
-    add('intake', [[intake.r + 1, yIn], [price.l - 1, yIn]]);
+    if (price.l > intake.r + 2) add('intake', [[intake.r + 1, yIn], [price.l - 1, yIn]]);
 
-    const railL = 7;
-    const railR = W - 7;
-    const gapTop = cho.t - price.b;
-    const busY = gapTop > 16 ? price.b + Math.min(18, gapTop * 0.45) : price.b + 12;
-    add('disp', [[cx(price), price.b], [cx(price), Math.min(busY, cho.t - 4)]]);
-    const busDraw = Math.min(busY, cho.t - 4);
-    add('disp', [[railL, busDraw], [railR, busDraw]]);
-    if (cho.t > busDraw + 2) add('disp', [[cx(cho), busDraw], [cx(cho), cho.t]]);
+    const wired = WIRE_IDS.map((id) => box[id]).filter(Boolean);
+    const gated = GATE_IDS.map((id) => box[id]).filter(Boolean);
+    if (!wired.length) return segs;
 
-    const taps = [
-      ['west', railL], ['park', railL], ['ko', railL],
-      ['jae', railR], ['ju', railR], ['gaz', railR], ['soap', railR],
-    ];
-    const tapYs = taps.map(([id]) => box[id] && (box[id].t - 7)).filter((y) => y != null);
-    if (tapYs.length) {
-      const railBottom = Math.max(...tapYs);
-      add('disp', [[railL, busDraw], [railL, railBottom]]);
-      add('disp', [[railR, busDraw], [railR, railBottom]]);
+    const lanes = wired.filter((n) => n !== cho);
+    const lefts = lanes.map((n) => n.l);
+    const tops = lanes.map((n) => n.t);
+    /* The care column makes the map narrower than the viewport, so width is
+       not a layout signal. A row of cards (desktop) spreads in x; a stack
+       (phone) spreads in y. */
+    const row = lanes.length > 1 && (Math.max(...lefts) - Math.min(...lefts)) > (Math.max(...tops) - Math.min(...tops));
+    if (!row) {
+      const railX = Math.max(6, Math.min(...wired.map((b) => b.l)) - 14);
+      const busY = box.busgap ? (box.busgap.t + box.busgap.b) / 2 : Math.max(price.b, intake.b) + 16;
+      const lastY = Math.max(...wired.map(midY));
+      add('disp', [[cx(price), price.b], [cx(price), busY], [railX, busY], [railX, lastY]]);
+      for (const node of wired) add('disp', [[railX, midY(node)], [node.l - 1, midY(node)]]);
+      if (cho && gated.length && gated.every((n) => n.b < cho.t - 6)) {
+        const railR = Math.min(W - 4, Math.max(...gated.map((b) => b.r), cho.r) + 8);
+        const top = Math.min(...gated.map(midY));
+        const yAbove = cho.t - 12;
+        for (const node of gated) add('review', [[node.r + 1, midY(node)], [railR, midY(node)]]);
+        const xIn = Math.max(cho.l + 16, Math.min(cho.r - 22, railR - 10));
+        add('review', [[railR, top], [railR, yAbove], [xIn, yAbove], [xIn, cho.t]]);
+      }
+      return segs;
     }
-    for (const [id, railX] of taps) {
-      const node = box[id];
-      if (!node) continue;
-      const y = node.t - 7;
-      add('disp', [[railX, y], [cx(node), y], [cx(node), node.t]]);
-    }
 
-    const leftEdge = Math.max(box.west ? box.west.r : 0, box.park ? box.park.r : 0);
-    const rightEdge = Math.min(box.jae ? box.jae.l : W, box.ju ? box.ju.l : W);
-    const gutter = rightEdge - leftEdge;
-    const xL = gutter > 12 ? leftEdge + Math.min(10, gutter * 0.3) : leftEdge + 6;
-    const xR = gutter > 12 ? rightEdge - Math.min(10, gutter * 0.3) : rightEdge - 6;
-    const yJoin = cho.b + 3;
-    function review(node, xChan, fromRight) {
-      if (!node) return;
-      const y = midY(node);
-      const x0 = fromRight ? node.l : node.r;
-      const xMeet = fromRight ? Math.min(cho.r - 8, Math.max(xChan, cx(cho) + 8)) : Math.max(cho.l + 8, Math.min(xChan, cx(cho) - 8));
-      add('review', [[x0, y], [xChan, y], [xChan, yJoin], [xMeet, yJoin]]);
+    const busY = box.busgap ? (box.busgap.t + box.busgap.b) / 2 : Math.max(price.b, intake.b) + 18;
+    const xs = lanes.map(cx);
+    let gutter = null;
+    if (cho && lanes.length) {
+      const probe = cho.l + 14;
+      const blocked = lanes.some((n) => probe > n.l + 2 && probe < n.r - 2 && n.t < cho.t);
+      gutter = blocked ? Math.max(4, Math.min(...lanes.map((n) => n.l), cho.l) - 12) : null;
     }
-    review(box.west, xL, false);
-    review(box.park, xL, false);
-    review(box.jae, xR, true);
-    review(box.ju, xR, true);
-
-    if (box.gaz && box.soap) {
-      const yFeed = (midY(box.gaz) + midY(box.soap)) / 2;
-      add('feed', [[box.gaz.r + 1, yFeed], [box.soap.l - 1, yFeed]]);
+    const busXs = xs.slice();
+    if (cho) busXs.push(gutter == null ? cho.l + 14 : gutter);
+    const busL = Math.min(...busXs, cx(price));
+    const busR = Math.max(...busXs, cx(price));
+    add('disp', [[cx(price), price.b], [cx(price), busY]]);
+    add('disp', [[busL, busY], [busR, busY]]);
+    for (const node of lanes) add('disp', [[cx(node), busY], [cx(node), node.t - 1]]);
+    if (cho) {
+      if (gutter == null) add('disp', [[cho.l + 14, busY], [cho.l + 14, cho.t - 1]]);
+      else add('disp', [[gutter, busY], [gutter, midY(cho)], [cho.l - 1, midY(cho)]]);
+    }
+    if (cho) {
+      for (const node of gated) {
+        if (node.b < cho.t - 4 && cx(node) > cho.l + 4 && cx(node) < cho.r - 4) {
+          add('review', [[cx(node), node.b + 1], [cx(node), cho.t - 1]]);
+        }
+      }
     }
     return segs;
   }
@@ -323,6 +365,6 @@
   }
 
   return {
-    OPS, DES, FILES, BY_ID, missionText, slugOf, routeOrbat, crossings, interiorHits, flowPersonIds, boardTag,
+    OPS, DES, FILES, BY_ID, missionText, slugOf, faceFile, routeOrbat, crossings, interiorHits, flowPersonIds, boardTag,
   };
 });

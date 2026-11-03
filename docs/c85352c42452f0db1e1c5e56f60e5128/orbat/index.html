@@ -20,7 +20,7 @@
 html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.35 var(--sans);-webkit-text-size-adjust:100%}
 body{min-height:100vh;min-height:100dvh;background:radial-gradient(ellipse at 50% -10%,rgba(107,124,58,.1),transparent 60%),var(--bg)}
 a{color:inherit;text-decoration:none}
-.wrap{max-width:860px;margin:0 auto;padding:12px 10px 24px;display:flex;flex-direction:column;gap:10px}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 10px 24px;display:flex;flex-direction:column;gap:10px}
 .top{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
 .kick{font-family:var(--mono);font-size:8.5px;letter-spacing:.2em;color:var(--olive2);text-transform:uppercase;margin-bottom:3px}
 .brand{font-family:var(--mono);font-size:20px;font-weight:800;letter-spacing:.16em;color:var(--tan)}
@@ -40,47 +40,75 @@ a{color:inherit;text-decoration:none}
       <div class="brand">MW4 <span class="sl">//</span> ORBAT</div>
       <div class="mastsub">Chain of command · dispatch wire · creative gate · outside fence</div>
     </div>
-    <div class="asof"><span class="dot"></span><span id="nfile">12 ON FILE</span></div>
+    <div class="asof"><span class="dot"></span><span id="nfile">13 ON FILE</span></div>
   </div>
-  <div class="brief"><b>BRIEF ▸</b> <b>Price is the only dispatcher.</b> Kal feeds intake into Price. Cho gates creative — doesn’t manage, assign, or re-prioritise. West, Jae, Park and Ju Kwon pass Cho’s checkpoint, then ship or send back. Ghost and Dunn sit outside the wire.</div>
+  <div class="chain"><span>HUNTER</span><em>▼</em><span class="o">KAL</span><em>▸</em><span>PRICE</span><em>▸</em><span class="a">9 WIRES · 8 LANES + CHO</span></div>
+  <div class="brief"><b>BRIEF ▸</b> <b>Price is the only dispatcher.</b> Kal feeds intake into Price. Cho is a checkpoint — West, Jae, Park, Gaz and Ju Kwon pass it; Cho assigns nothing. Laswell (141-11) owns care@ only. Ghost and Dunn sit outside the wire.</div>
+  <div class="battle">
+  <div>
   <div class="omap" id="omap">
+    <span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
     <svg class="owires" id="owires" aria-hidden="true"></svg>
-    <div class="spine">
-      <div class="nd big t-tan cmdr hunter" data-pin="hunter"><div class="ring"><span class="ini">★</span></div><div class="pl"><div class="cs">HUNTER</div><div class="ds">ACTUAL · OWNER</div><div class="rl">Commander · approves every ask</div></div></div>
-      <a class="nd t-olive kal" data-pin="kal" href="../files/#kal"><div class="ring"><img src="../avatars/kal.png" alt=""></div><div class="pl"><div class="cs">KAL</div><div class="ds">141-10</div><div class="rl">Intake → Price</div><div class="live" data-live="kal"></div></div></a>
-      <a class="nd big t-tan price" data-pin="price" href="../files/#price"><div class="ring"><img src="../avatars/price.png" alt=""></div><div class="pl"><span class="st">SOLE DISPATCH</span><div class="cs">PRICE</div><div class="ds">BRAVO-6</div><div class="rl">Sole dispatcher</div><div class="live" data-live="price"></div></div></a>
+    <div class="mhead"><div class="zhead"><b><span class="sec">MAP</span>CHAIN OF COMMAND</b><span>1 DISPATCHER</span></div></div>
+    <div class="tier"><b>1</b>COMMAND</div>
+    <div class="cmdtop"><div class="tk hunter" data-pin="hunter"><div class="ring"><span class="ini">★</span></div><div class="pl"><div class="cs">HUNTER</div><div class="ds">ACTUAL · OWNER</div><div class="rl">Commander · approves every ask</div></div></div></div>
+    <div class="cmdpair">
+      <a class="tk kal" data-pin="kal" href="../files/#kal"><div class="ring"><img src="../avatars/kal.png" alt=""></div><div class="pl"><div class="cs">KAL</div><div class="ds">141-10</div><div class="rl">Intake → Price</div><span class="chip olive">INTAKE</span><div class="live" data-live="kal"></div></div></a>
+      <a class="tk price" data-pin="price" href="../files/#price"><div class="ring"><img src="../avatars/price.png" alt=""></div><div class="pl"><div class="cs">PRICE</div><div class="ds">BRAVO-6</div><div class="rl">Sole dispatcher</div><span class="chip solid">SOLE DISPATCH</span><div class="live" data-live="price"></div></div></a>
     </div>
-    <div class="gate">
-      <a class="nd t-amber gatek cho" data-pin="cho" href="../files/#cho"><div class="ring"><img src="../avatars/cho.png" alt=""></div><div class="pl"><span class="st">GATE</span><div class="cs">CHO</div><div class="ds">141-02</div><div class="rl">Creative gate · review</div><div class="live" data-live="cho"></div></div></a>
-      <a class="nd t-amber" data-pin="west" href="../files/#west"><div class="ring"><img src="../avatars/west.png" alt=""></div><div class="pl"><div class="cs">WEST</div><div class="ds">141-03</div><div class="rl">Email/SMS + onsite</div><div class="live" data-live="west"></div></div></a>
-      <a class="nd t-amber" data-pin="jae" href="../files/#jae"><div class="ring"><img src="../avatars/jae.png" alt=""></div><div class="pl"><div class="cs">JAE</div><div class="ds">141-06</div><div class="rl">Organic social</div><div class="live" data-live="jae"></div></div></a>
-      <a class="nd t-amber" data-pin="park" href="../files/#park"><div class="ring"><img src="../avatars/park.png" alt=""></div><div class="pl"><div class="cs">PARK</div><div class="ds">141-05</div><div class="rl">SEO + articles</div><div class="live" data-live="park"></div></div></a>
-      <a class="nd t-olive" data-pin="ju" href="../files/#ju"><div class="ring"><span class="ini">JK</span></div><div class="pl"><div class="cs">JU KWON</div><div class="ds">EXT-01</div><div class="rl">Kinsora ops</div><div class="live" data-live="ju"></div></div></a>
-      <div class="gl">CHO · CREATIVE GATE<i>Checkpoint · not a manager · Price still wires each lane</i></div>
-    </div>
-    <div class="sectors">
-      <div class="sector"><span class="sl">SECTOR // BUILD</span>
-        <a class="nd t-amber" data-pin="ko" href="../files/#ko"><div class="ring"><img src="../avatars/ko.png" alt=""></div><div class="pl"><div class="cs">KO</div><div class="ds">141-04</div><div class="rl">Theme + tooling</div><div class="live" data-live="ko"></div></div></a>
+    <div class="tier lane-tier"><b>2</b>WIRES EACH LANE</div>
+    <div class="busgap" data-pin="busgap"></div>
+    <div class="lanes">
+      <div class="zone z-gate">
+        <div class="zl"><span>CREATIVE GATE</span><i>Cho checks output only</i></div>
+        <div class="rows">
+          <a class="ln" data-pin="west" href="../files/#west"><div class="ring"><img src="../avatars/west.png" alt=""></div><div class="pl"><div class="cs">WEST<small>141-03</small></div><div class="rl">Email/SMS + onsite</div><div class="live" data-live="west"></div><div class="cx"><span class="chip amber">RETENTION</span><span class="chip gate">▼ CHO GATE</span></div></div></a>
+          <a class="ln" data-pin="jae" href="../files/#jae"><div class="ring"><img src="../avatars/jae.png" alt=""></div><div class="pl"><div class="cs">JAE<small>141-06</small></div><div class="rl">Organic social</div><div class="live" data-live="jae"></div><div class="cx"><span class="chip amber">SOCIAL</span><span class="chip gate">▼ CHO GATE</span></div></div></a>
+          <a class="ln" data-pin="park" href="../files/#park"><div class="ring"><img src="../avatars/park.png" alt=""></div><div class="pl"><div class="cs">PARK<small>141-05</small></div><div class="rl">SEO + articles</div><div class="live" data-live="park"></div><div class="cx"><span class="chip amber">SEO</span><span class="chip gate">▼ CHO GATE</span></div></div></a>
+          <a class="ln" data-pin="gaz" href="../files/#gaz"><div class="ring"><img src="../avatars/gaz.png" alt=""></div><div class="pl"><div class="cs">GAZ<small>141-09</small></div><div class="rl">Ads creative ▸ Soap</div><div class="live" data-live="gaz"></div><div class="cx"><span class="chip amber">ADS CREATIVE</span><span class="chip gate">▼ CHO GATE</span></div></div></a>
+          <a class="ln t-olive2" data-pin="ju" href="../files/#ju"><div class="ring"><img src="../avatars/ju-kwon.png" alt=""></div><div class="pl"><div class="cs">JU KWON<small>EXT-01</small></div><div class="rl">Kinsora ops · back-office</div><div class="live" data-live="ju"></div><div class="cx"><span class="chip olive">KINSORA OPS</span><span class="chip gate">▼ CHO GATE</span></div></div></a>
+        </div>
+        <a class="cho" data-pin="cho" href="../files/#cho"><div class="ring"><img src="../avatars/cho.png" alt=""></div><div><div class="cs">CHO <span class="chip amber">CREATIVE GATE</span></div><div class="ds">141-02 · CHECKPOINT · NOT A MANAGER</div><div class="what">Reviews creative on the way out. Assigns nothing.</div><div class="live" data-live="cho"></div></div><div class="out"><span class="chip ship">▸ SHIP</span><span class="chip back">◂ SEND BACK</span></div></a>
       </div>
-      <div class="sector"><span class="sl">SECTOR // PAID</span>
-        <a class="nd t-amber" data-pin="gaz" href="../files/#gaz"><div class="ring"><img src="../avatars/gaz.png" alt=""></div><div class="pl"><div class="cs">GAZ</div><div class="ds">141-09</div><div class="rl">Ads creative</div><div class="live" data-live="gaz"></div></div></a>
-        <a class="nd t-amber" data-pin="soap" href="../files/#soap"><div class="ring"><img src="../avatars/soap.png" alt=""></div><div class="pl"><div class="cs">SOAP</div><div class="ds">141-08</div><div class="rl">Media buy</div><div class="live" data-live="soap"></div></div></a>
+      <div class="zone z-sec">
+        <div class="zl"><span>KINSORA LANES</span><i>no gate</i></div>
+        <div class="rows">
+          <a class="ln" data-pin="ko" href="../files/#ko"><div class="ring"><img src="../avatars/ko.png" alt=""></div><div class="pl"><div class="cs">KO<small>141-04</small></div><div class="rl">Theme + tooling</div><div class="live" data-live="ko"></div><div class="cx"><span class="chip amber">BUILD</span></div></div></a>
+          <a class="ln" data-pin="soap" href="../files/#soap"><div class="ring"><img src="../avatars/soap.png" alt=""></div><div class="pl"><div class="cs">SOAP<small>141-08</small></div><div class="rl">Media buy</div><div class="live" data-live="soap"></div><div class="cx"><span class="chip amber">MEDIA BUY</span></div></div></a>
+          <a class="ln t-olive2 isnew" data-pin="laswell" href="../files/#laswell"><div class="ring"><img src="../avatars/laswell.png" alt=""></div><div class="pl"><div class="cs">LASWELL<small>141-11</small></div><div class="rl">Customer care · care@</div><div class="live" data-live="laswell"></div><div class="cx"><span class="chip olive">CARE</span><span class="chip new">NEW</span></div></div></a>
+        </div>
       </div>
     </div>
-    <div class="fence">
-      <span class="fl">OUTSIDE KINSORA DISPATCH</span>
-      <a class="nd t-coyote" data-pin="ghost" href="../files/#ghost"><div class="ring"><img src="../avatars/ghost.png" alt=""></div><div class="pl"><span class="st">TRADING</span><div class="cs">GHOST</div><div class="ds">141-01</div><div class="rl">Trading</div><div class="live" data-live="ghost"></div></div></a>
-      <a class="nd t-dim" data-pin="dunn" href="../files/#dunn"><div class="ring"><img src="../avatars/dunn.png" alt=""></div><div class="pl"><span class="st">PERSONAL</span><div class="cs">DUNN</div><div class="ds">141-07</div><div class="rl">Personal</div></div></a>
-      <div class="fn">No wire from Price · own boards</div>
+    <div class="zone z-fence">
+      <div class="zl"><span>OUTSIDE THE WIRE</span><i>Price doesn’t dispatch</i></div>
+      <div class="rows">
+        <a class="ln t-coyote" data-pin="ghost" href="../files/#ghost"><div class="ring"><img src="../avatars/ghost.png" alt=""></div><div class="pl"><div class="cs">GHOST<small>141-01</small></div><div class="rl">Trading · own signals</div><div class="live" data-live="ghost"></div><div class="cx"><span class="chip">TRADING</span></div></div></a>
+        <a class="ln t-dim" data-pin="dunn" href="../files/#dunn"><div class="ring"><img src="../avatars/dunn.png" alt=""></div><div class="pl"><div class="cs">DUNN<small>141-07</small></div><div class="rl">Personal · from Hunter</div><div class="cx"><span class="chip dim">PERSONAL</span></div></div></a>
+      </div>
     </div>
   </div>
   <div class="legend">
     <span><i></i>command</span>
-    <span><i class="d"></i>dispatch wire · Price only</span>
     <span><i class="n"></i>intake into Price</span>
-    <span><i class="r"></i>creative review → Cho gate</span>
-    <span><i class="g"></i>gate = checkpoint, not a manager</span>
-    <span><i class="f"></i>outside Kinsora dispatch</span>
+    <span><i class="d"></i>dispatch wire · Price only</span>
+    <span><i class="r"></i>creative → Cho checkpoint</span>
+    <span><i class="g"></i>gate zone = checkpoint, not a manager</span>
+    <span><i class="f"></i>outside the wire</span>
+  </div>
+  </div>
+  <section class="care" id="care-desk">
+    <div class="sampleband"><span>HUB · CARE DESK</span><span><span class="chip">SAMPLE</span> NOT LIVE · MOCK NUMBERS</span></div>
+    <a class="hd" href="../files/#laswell"><div class="ring"><img src="../avatars/laswell.png" alt=""></div><div><div class="t">CARE · LASWELL</div><div class="s">care@ tickets · owner 141-11</div></div><div class="src"><span class="chip amber">● SAMPLE</span><span class="chip off">○ LIVE · not wired</span></div></a>
+    <div class="kpis"><div><b class="a">7</b><span>Open</span></div><div><b class="h">3</b><span>Waiting on us</span></div><div><b class="h">4h12</b><span>Oldest</span></div><div><b>38m</b><span>Median 1st reply</span></div></div>
+    <div class="spark"><i style="height:9px"></i><i class="o" style="height:9px"></i><i style="height:6px"></i><i class="o" style="height:12px"></i><i style="height:24px"></i><i class="o" style="height:6px"></i><i style="height:21px"></i><i class="o" style="height:21px"></i><i style="height:15px"></i><i class="o" style="height:3px"></i><i style="height:18px"></i><i class="o" style="height:6px"></i><i style="height:24px"></i><i class="o" style="height:24px"></i><i style="height:18px"></i><i class="o" style="height:9px"></i><i style="height:21px"></i><i class="o" style="height:6px"></i><i style="height:9px"></i><i class="o" style="height:12px"></i><i style="height:15px"></i><i class="o" style="height:18px"></i><i style="height:18px"></i><i class="o" style="height:6px"></i></div>
+    <div class="sparkl"><span>care@ last 24h · <b style="color:var(--olive2)">■</b> in 18 · <b style="color:var(--tan)">■</b> out 15</span><span>SAMPLE</span></div>
+    <div class="q">
+      <div><span class="id">C-1042</span><span class="sub">Where’s my order? · ships 11/04<small>care@ · 4h12 · SAMPLE</small></span><span class="age h">⏱ 4h12</span></div>
+      <div><span class="id">C-1039</span><span class="sub">Return — wrong size, exchange<small>care@ · 2h40 · SAMPLE</small></span><span class="age">⏱ 2h40</span></div>
+      <div><span class="id">C-1037</span><span class="sub">Refund status after return<small>care@ · 1h05 · SAMPLE</small></span><span class="age">⏱ 1h05</span></div>
+    </div>
+    <div class="ft">Every number on this tile is <b>SAMPLE</b>. Goes <b>LIVE</b> only when wired to care@kinsora.co — the chip flips to ● LIVE with an as-of time. Owner: Laswell only.</div>
+  </section>
   </div>
 </div>
 <div class="sx-dock"><nav>
@@ -97,11 +125,12 @@ a{color:inherit;text-decoration:none}
   const $ = (id) => document.getElementById(id);
   const clk = () => { $('clk').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) + ' PT'; };
   clk(); setInterval(clk, 1000);
+  $('nfile').textContent = MW4Roster.FILES.length + ' ON FILE';
 
   function readBoxes() {
     const root = $('omap').getBoundingClientRect();
     const box = {};
-    document.querySelectorAll('[data-pin]').forEach((el) => {
+    $('omap').querySelectorAll('[data-pin]').forEach((el) => {
       const r = el.getBoundingClientRect();
       box[el.dataset.pin] = { l: r.left - root.left, t: r.top - root.top, r: r.right - root.left, b: r.bottom - root.top };
     });
@@ -115,7 +144,7 @@ a{color:inherit;text-decoration:none}
     svg.setAttribute('width', String(w));
     svg.setAttribute('height', String(h));
     const dAttr = (pts) => pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-    const mark = { intake: 'url(#arO)', feed: 'url(#arA)', cmd: 'url(#arT)' };
+    const mark = { intake: 'url(#arO)', disp: 'url(#arA)', feed: 'url(#arA)', cmd: 'url(#arT)', review: 'url(#arT)' };
     let body = '<defs>'
       + '<marker id="arO" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="#9bb05a"/></marker>'
       + '<marker id="arA" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8z" fill="#E8A317"/></marker>'
@@ -128,14 +157,12 @@ a{color:inherit;text-decoration:none}
     if (box.kal && box.price) {
       const x = (box.kal.r + box.price.l) / 2;
       const y = (Math.max(box.kal.t, box.price.t) + Math.min(box.kal.b, box.price.b)) / 2;
-      body += '<text class="owlab o" x="' + x.toFixed(1) + '" y="' + (y - 7).toFixed(1) + '" text-anchor="middle">IN ▸</text>';
-    }
-    if (box.price && box.cho) {
-      const y = (box.price.b + box.cho.t) / 2;
-      body += '<text class="owlab" x="18" y="' + (y - 6).toFixed(1) + '">DISPATCH · SOLE</text>';
+      body += '<text class="owlab o" x="' + x.toFixed(1) + '" y="' + (y - 7).toFixed(1) + '" text-anchor="middle">INTAKE</text>';
     }
     svg.innerHTML = body;
-    const faults = MW4Roster.crossings(segs).concat(MW4Roster.interiorHits(segs, box));
+    const plates = { ...box };
+    delete plates.busgap;
+    const faults = MW4Roster.crossings(segs).concat(MW4Roster.interiorHits(segs, plates));
     svg.dataset.faults = faults.join('|');
     svg.dataset.wires = String(segs.length);
   }

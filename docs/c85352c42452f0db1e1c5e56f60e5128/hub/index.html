@@ -107,6 +107,38 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .links a span{color:var(--amber)}
 .foot{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);text-align:center;text-transform:uppercase;line-height:1.8}
 @media (prefers-reduced-motion:reduce){.tile.hud .bg,.ilk.live .st i{animation:none}}
+.care{position:relative;border:1px solid rgba(155,176,90,.5);border-radius:6px;background:linear-gradient(180deg,rgba(107,124,58,.14),rgba(8,10,9,.96) 40%);overflow:hidden}
+.care .sampleband{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;background:repeating-linear-gradient(90deg,#3a2a08 0 14px,#2c2007 14px 28px);border-bottom:1px solid var(--amber);font-family:var(--mono);font-size:9px;font-weight:800;letter-spacing:.16em;color:var(--amber)}
+.care .chip{display:inline-flex;align-items:center;font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;padding:3px 5px;border:1px solid currentColor;border-radius:2px;background:rgba(11,14,12,.92);color:var(--tan);white-space:nowrap}
+.care .sampleband .chip{color:#0B0E0C;background:var(--amber);border-color:var(--amber)}
+.care .chip.amber{color:var(--amber)}.care .chip.off{color:#77735f}
+.care .hd{display:flex;align-items:center;gap:10px;padding:10px 10px 6px;color:inherit;text-decoration:none}
+.care .hd .ring{width:40px;height:40px;border-radius:50%;padding:2px;background:conic-gradient(#9bb05a,#3d4a22,#9bb05a);flex:0 0 auto}
+.care .hd .ring img{width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center 18%;display:block}
+.care .hd .t{font-family:var(--mono);font-size:12px;font-weight:800;letter-spacing:.16em;color:var(--olive2)}
+.care .hd .s{margin-top:4px;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.care .src{margin-left:auto;display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.care .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);margin:4px 10px;border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.care .kpis div{background:#0d110e;padding:7px 4px;text-align:center}
+.care .kpis b{display:block;font-family:var(--mono);font-size:17px;font-weight:800;line-height:1;color:var(--ink)}
+.care .kpis b.h{color:var(--holdink)}.care .kpis b.a{color:var(--amber)}
+.care .kpis span{display:block;margin-top:4px;font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase}
+.care .spark{display:flex;align-items:flex-end;gap:2px;height:30px;margin:6px 10px 2px;padding:0 2px;border-bottom:1px solid var(--line2)}
+.care .spark i{flex:1;background:var(--olive2);opacity:.75;border-radius:1px 1px 0 0}
+.care .spark i.o{background:var(--tan);opacity:.55}
+.care .sparkl{display:flex;justify-content:space-between;gap:8px;margin:0 10px;font-family:var(--mono);font-size:7.5px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.care .mix{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 10px 0}
+.care .mix div{display:flex;justify-content:space-between;padding:5px 7px;border:1px solid var(--line);border-radius:2px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.care .mix b{color:var(--ink)}
+.care .q{margin:8px 10px 0;display:flex;flex-direction:column;gap:5px}
+.care .q div{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:3px;background:rgba(18,22,18,.85)}
+.care .q .id{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--coyote)}
+.care .q .sub{font-size:12px;font-weight:600;line-height:1.25;color:var(--ink)}
+.care .q .sub small{display:block;margin-top:2px;font-family:var(--mono);font-size:9px;font-weight:500;color:var(--dim)}
+.care .q .age{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--amber);white-space:nowrap}
+.care .q .age.h{color:var(--holdink)}
+.care .ft{margin:8px 10px 10px;padding-top:7px;border-top:1px dashed var(--line2);font-family:var(--mono);font-size:8px;letter-spacing:.08em;line-height:1.5;color:var(--dim);text-transform:uppercase}
+.care .ft b{color:var(--olive2)}
 </style>
 </head>
 <body class="sx-pad">
@@ -120,6 +152,24 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     <span class="st"><i></i><span id="ist">SYNCING…</span></span>
     <span class="sync" id="isync">—</span>
   </div>
+
+  <section class="care" id="care-desk">
+    <div class="sampleband"><span>HUB · CARE DESK</span><span><span class="chip">SAMPLE</span> NOT LIVE · MOCK NUMBERS</span></div>
+    <a class="hd" href="../files/#laswell"><div class="ring"><img src="../avatars/laswell.png" alt=""></div><div><div class="t">CARE · LASWELL</div><div class="s">care@ tickets · owner 141-11</div></div><div class="src"><span class="chip amber">● SAMPLE</span><span class="chip off">○ LIVE · not wired</span></div></a>
+    <div class="kpis"><div><b class="a">7</b><span>Open</span></div><div><b class="h">3</b><span>Waiting on us</span></div><div><b class="h">4h12</b><span>Oldest</span></div><div><b>38m</b><span>Median 1st reply</span></div></div>
+    <div class="spark"><i style="height:9px"></i><i class="o" style="height:9px"></i><i style="height:6px"></i><i class="o" style="height:12px"></i><i style="height:24px"></i><i class="o" style="height:6px"></i><i style="height:21px"></i><i class="o" style="height:21px"></i><i style="height:15px"></i><i class="o" style="height:3px"></i><i style="height:18px"></i><i class="o" style="height:6px"></i><i style="height:24px"></i><i class="o" style="height:24px"></i><i style="height:18px"></i><i class="o" style="height:9px"></i><i style="height:21px"></i><i class="o" style="height:6px"></i><i style="height:9px"></i><i class="o" style="height:12px"></i><i style="height:15px"></i><i class="o" style="height:18px"></i><i style="height:18px"></i><i class="o" style="height:6px"></i></div>
+    <div class="sparkl"><span>care@ last 24h · <b style="color:var(--olive2)">■</b> in 18 · <b style="color:var(--tan)">■</b> out 15</span><span>SAMPLE</span></div>
+    <div class="mix"><div>WISMO<b>41%</b></div><div>RETURNS<b>22%</b></div><div>REFUNDS<b>17%</b></div><div>PRODUCT Q<b>12%</b></div><div>WHOLESALE<b>5%</b></div><div>OTHER<b>3%</b></div></div>
+    <div class="q">
+      <div><span class="id">C-1042</span><span class="sub">Where’s my order? · ships 11/04<small>care@ · 4h12 · SAMPLE</small></span><span class="age h">⏱ 4h12</span></div>
+      <div><span class="id">C-1039</span><span class="sub">Return — wrong size, exchange<small>care@ · 2h40 · SAMPLE</small></span><span class="age">⏱ 2h40</span></div>
+      <div><span class="id">C-1037</span><span class="sub">Refund status after return<small>care@ · 1h05 · SAMPLE</small></span><span class="age">⏱ 1h05</span></div>
+      <div><span class="id">C-1035</span><span class="sub">Wholesale enquiry → Price<small>care@ · 52m · SAMPLE</small></span><span class="age">⏱ 52m</span></div>
+      <div><span class="id">C-1033</span><span class="sub">Product Q · ingredients<small>care@ · 31m · SAMPLE</small></span><span class="age">⏱ 31m</span></div>
+      <div><span class="id">C-1031</span><span class="sub">Address change before ship<small>care@ · 12m · SAMPLE</small></span><span class="age">⏱ 12m</span></div>
+    </div>
+    <div class="ft">Every number on this tile is <b>SAMPLE</b>. Goes <b>LIVE</b> only when wired to care@kinsora.co — the chip flips to ● LIVE with an as-of time. Owner: Laswell only.</div>
+  </section>
 
   <div class="tiles">
     <a class="tile hud" href="../">
@@ -292,10 +342,11 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     $('sitc').textContent = ev.length + ' CROSSINGS · ' + (d.alerts || []).length + ' ALERTS';
     paintWire(d);
   }
-  const slugOf = (op) => op === 'Ju Kwon' ? 'ju' : String(op || '').toLowerCase();
+  const fileId = (op) => op === 'Ju Kwon' ? 'ju' : String(op || '').toLowerCase();
+  const faceId = (op) => op === 'Ju Kwon' ? 'ju-kwon' : fileId(op);
   const iniOf = (op) => op === 'Ju Kwon' ? 'JK' : String(op || '').slice(0, 2).toUpperCase();
   function doingRows(d) {
-    const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Ju Kwon', 'Soap', 'Gaz', 'Kal'];
+    const OPSH = ['Price', 'Ghost', 'Cho', 'West', 'Ko', 'Park', 'Jae', 'Ju Kwon', 'Soap', 'Gaz', 'Kal', 'Laswell'];
     const canon = (lane) => OPSH.find((o) => o.toLowerCase() === String(lane || '').toLowerCase()) || lane || 'TF141';
     const rows = [];
     for (const [board, B] of [['CMD', d.command], ['KAL', d.kal]]) {
@@ -322,7 +373,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     const btn = (op, cs, stn) => {
       const ini = iniOf(op);
       const line = (stn ? cs.filter(stand) : cs.filter((c) => !stand(c)))[0] || cs[0];
-      return `<button type="button" class="wop${stn ? ' stn' : ''}" data-op="${esc(op)}" data-file="${esc(slugOf(op))}"><img src="../avatars/${esc(slugOf(op))}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(line.short || line.name || '')}</i></span></button>`;
+      return `<button type="button" class="wop${stn ? ' stn' : ''}" data-op="${esc(op)}" data-file="${esc(fileId(op))}"><img src="../avatars/${esc(faceId(op))}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"><span><b>${esc(op)}</b><i>${esc(line.short || line.name || '')}</i></span></button>`;
     };
     const host = $('wireRow');
     const parts = [];
@@ -333,7 +384,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   }
   function openAct(op, rows) {
     const mine = rows.filter((c) => String(c.lane || '') === op);
-    $('actp').innerHTML = window.MW4Action ? MW4Action.html({ op, avatar: '../avatars/' + (op === 'Ju Kwon' ? 'ju' : op.toLowerCase()) + '.png', cards: mine, des: MW4Action.designator(op) }) : '';
+    $('actp').innerHTML = window.MW4Action ? MW4Action.html({ op, avatar: '../avatars/' + faceId(op) + '.png', cards: mine, des: MW4Action.designator(op) }) : '';
     $('act').classList.add('on');
   }
   $('act').addEventListener('click', (e) => { if (e.target.id === 'act' || e.target.closest('.x')) $('act').classList.remove('on'); });

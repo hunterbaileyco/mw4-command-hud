@@ -229,7 +229,7 @@ function doingSplit(d) {
 }
 
 // Operator portraits — same callsigns and files as the HUD theater (avatars/<callsign>.png).
-const OPS_AV = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal", "Ju Kwon"];
+const OPS_AV = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal", "Ju Kwon", "Laswell"];
 const avatarMem = {}; // op lower -> Image | null for this run
 function opFromLane(c) {
   if (!c) return null;

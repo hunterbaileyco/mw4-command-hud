@@ -60,6 +60,31 @@ assert.ok(!by.ju.off && R.OPS.includes('Ju Kwon'));
 assert.match(by.cho.not, /manage, assign or re-prioritise/);
 assert.doesNotMatch(by.cho.not, /assign work to/);
 
+const OUTBOX = {
+  cho: { gate: 'gate', line: 'Cho gate → Hunter approve', then: 'Passes go out on the lane’s live channel · misses go back to the lane with notes', actions: ['ship', 'back'] },
+  west: { gate: 'gated', line: 'Cho gate → Hunter approve', then: 'then live: email / SMS sends' },
+  jae: { gate: 'gated', line: 'Cho gate → Hunter approve', then: 'then live: posted to social' },
+  park: { gate: 'gated', line: 'Cho gate → Hunter approve', then: 'then live: published (News / blog)' },
+  gaz: { gate: 'gated', line: 'Cho gate → Hunter approve', then: 'then live: Soap buys it' },
+  ju: { gate: 'gated', line: 'Cho gate → Hunter approve', then: 'then: resolved (back-office)' },
+  ko: { gate: 'none', line: 'Live site (no Cho gate)', then: 'Mobile QA + speed check before it goes live' },
+  soap: { gate: 'none', line: 'Live ad sets · Hunter yes on spend', then: 'Buys only creative that already cleared Cho (from Gaz)' },
+  laswell: { gate: 'none', line: 'Reply to customer (care@) · no Cho gate', then: 'Wholesale + site fixes go to Price, not out' },
+  price: { gate: 'cmd', line: 'Dispatch to lanes (sole dispatcher)', then: '8 lanes + Cho · nobody else assigns work' },
+  kal: { gate: 'cmd', line: 'Price (intake only)', then: 'Never assigns · never does the work' },
+  ghost: { gate: 'off', line: 'Trading board (own signals · no Price wire)', then: 'Paper size until the risk check clears' },
+  dunn: { gate: 'off', line: 'Hunter only (personal · off theater)', then: 'Kept off Kinsora boards' },
+};
+assert.deepEqual(Object.keys(OUTBOX).sort(), R.FILES.map((f) => f.id).sort(), 'every file has an outbox spec');
+for (const f of R.FILES) {
+  const spec = OUTBOX[f.id];
+  assert.equal(f.outbox.line, spec.line, f.id + ' outbox line');
+  assert.equal(f.outbox.then, spec.then, f.id + ' outbox then');
+  assert.equal(f.outbox.gate, spec.gate, f.id + ' outbox gate');
+  assert.deepEqual(f.outbox.actions || [], spec.actions || [], f.id + ' outbox actions');
+}
+assert.deepEqual(R.FILES.filter((f) => f.outbox.actions).map((f) => f.id), ['cho'], 'SHIP / SEND BACK are Cho only');
+
 const text = R.missionText({ name: 'West — BFCM email/SMS — 3-touch early-access sequence + onsite popup copy', short: 'BFCM email/SMS', lane: 'West' });
 assert.ok(!text.endsWith('…'), 'mission text is not the short clamp');
 assert.ok(text.length > 28);
@@ -156,6 +181,19 @@ assert.match(hudCss, /margin-bottom:calc\(var\(--lap\) \* -1\)/, 'avatar sits on
 assert.match(hudCss, /\.tok\.s-hold \.pl\{[\s\S]*?repeating-linear-gradient\(-45deg,var\(--amber\)/, 'HOLD plates keep the Cho hazard stripe');
 assert.match(hudCss, /\.rt \.face img\{[^}]*object-position:center top;transform:scale\(1\.35\);transform-origin:center top\}/, 'FILES callsign crop stays top-anchored');
 assert.match(filesHtml, /class="face"/, 'FILES rail still wraps the callsign photo');
+assert.match(filesHtml, /<span>§4<\/span>Flow/, '§4 header stays Flow');
+assert.match(filesHtml, /outboxBlock\(f\)/, 'FILES §4 renders the outbox');
+assert.match(filesHtml, /f\.from\.map\(chip\)/, 'IN chips stay the live from list');
+assert.match(filesHtml, /THIS IS THE CHO GATE/);
+assert.match(filesHtml, /PASSES CHO GATE/);
+assert.match(filesHtml, /NO CHO GATE/);
+assert.match(filesHtml, /COMMAND CHAIN/);
+assert.match(filesHtml, /OFF THE PRICE WIRE/);
+assert.match(filesHtml, /✓ SHIP/);
+assert.match(filesHtml, /SEND BACK/);
+assert.match(filesHtml, /two calls on every piece/);
+assert.doesNotMatch(filesHtml, /wirearrow/, 'FILES no longer draws the FROM wire');
+assert.doesNotMatch(filesHtml, /class="self"/, 'FILES no longer draws the self ring');
 assert.doesNotMatch(hudCss, /margin-bottom:4px/, 'Doing ring is not lifted clear of the plate');
 assert.doesNotMatch(hudCss, /rotate\(/, 'stamps stay axis-aligned');
 const orbatHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/orbat/index.html', import.meta.url), 'utf8');
@@ -206,5 +244,7 @@ assert.match(hubHtml, /⚠ SNAPSHOT/);
 assert.match(hubHtml, /TODO\(Price→Jae\)/);
 const hudHtml = readFileSync(new URL('../docs/c85352c42452f0db1e1c5e56f60e5128/index.html', import.meta.url), 'utf8');
 assert.match(hudHtml, /\^duo\$\/i\.test\(m\[1\]\)\) return 'Ko'/);
+assert.doesNotMatch(hudHtml, /ob-box/, 'theater layout is not the FILES outbox');
+assert.doesNotMatch(hudHtml, /class="ob"/, 'theater layout is not the FILES outbox');
 
 console.log('hud elevate checks ok');

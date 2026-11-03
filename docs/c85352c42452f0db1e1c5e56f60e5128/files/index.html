@@ -31,7 +31,27 @@ a{color:inherit}
 .panel{position:relative;border:1px solid var(--line);border-radius:6px;background:linear-gradient(180deg,rgba(18,22,18,.96),rgba(10,13,11,.96));box-shadow:inset 0 1px 0 rgba(197,165,114,.1)}
 .zhead{display:flex;justify-content:space-between;gap:8px;padding:8px 10px 0;font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
 .zhead b{color:var(--tan);font-weight:800}
-@media(min-width:900px){.brand{font-size:26px}}
+.ob-sub{margin:-2px 0 10px;font-size:12.5px;line-height:1.35;color:var(--dim)}
+.ob{display:grid;gap:10px}
+.ob-row{display:grid;grid-template-columns:62px minmax(0,1fr);gap:8px;align-items:start}
+.ob-row>.ob-l{padding-top:7px}
+.ob-l{font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.18em;color:var(--dim)}
+.ob-v{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ob-in .chip{font-size:8.5px;opacity:.92}
+.ob-box{position:relative;padding:11px 12px 12px;border:1px solid var(--line2);border-left:3px solid var(--zc,var(--amber));border-radius:2px;background:linear-gradient(90deg,rgba(232,163,23,.07),rgba(11,14,12,.6) 60%)}
+.ob-box .sx-brk{width:9px;height:9px;opacity:.55}
+.ob-box.g-none,.ob-box.g-off{background:linear-gradient(90deg,rgba(155,176,90,.07),rgba(11,14,12,.6) 60%)}
+.ob-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.ob-box .ob-l{color:var(--zc,var(--amber))}
+.gtag{font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.12em;padding:3px 6px;border:1px solid currentColor;border-radius:2px;white-space:nowrap}
+.gtag.amber{color:var(--amber)}.gtag.gate{color:var(--amber);border-style:dashed}.gtag.dim{color:#b9b3a3}.gtag.tan{color:var(--tan)}
+.ob-line{margin:0;font-family:var(--sans);font-size:15px;font-weight:700;line-height:1.3;color:var(--ink)}
+.ob-then{margin:5px 0 0;font-size:12.5px;line-height:1.35;color:#b9b3a3}
+.ob-then::before{content:"↳ ";color:var(--coyote)}
+.act{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1.5px solid var(--amber);border-radius:3px;background:rgba(232,163,23,.08);font-family:var(--mono);font-size:9.5px;font-weight:800;letter-spacing:.14em;color:var(--amber)}
+.act.back{border-color:var(--holdink);color:var(--holdink);background:rgba(224,122,95,.07)}
+.ob-hint{flex-basis:100%;font-size:11.5px;color:var(--dim)}
+@media(min-width:900px){.brand{font-size:26px}.ob-row{grid-template-columns:76px minmax(0,1fr)}.ob-line{font-size:16px}.ob-hint{flex-basis:auto;margin-left:6px}}
 </style>
 </head>
 <body class="sx-pad">
@@ -89,6 +109,47 @@ a{color:inherit}
     const f = R.BY_ID[end.id];
     const label = end.name || (f ? f.name.toUpperCase() : end.id.toUpperCase());
     return `<a class="chip" href="#${esc(end.id)}">${face(end.id, 18)}${esc(label)}</a>`;
+  }
+  function gateMark(gate) {
+    switch (gate) {
+      case 'gate': return { cls: 'amber', tag: '◆ THIS IS THE CHO GATE' };
+      case 'gated': return { cls: 'gate', tag: '▼ PASSES CHO GATE' };
+      case 'none': return { cls: 'dim', tag: 'NO CHO GATE' };
+      case 'cmd': return { cls: 'tan', tag: 'COMMAND CHAIN' };
+      case 'off': return { cls: 'dim', tag: 'OFF THE PRICE WIRE' };
+      default: {
+        const unknown = gate;
+        throw new Error('unknown outbox gate: ' + unknown);
+      }
+    }
+  }
+  function actionChip(kind) {
+    switch (kind) {
+      case 'ship': return '<span class="act ship">✓ SHIP</span>';
+      case 'back': return '<span class="act back">↩ SEND BACK</span>';
+      default: {
+        const unknown = kind;
+        throw new Error('unknown outbox action: ' + unknown);
+      }
+    }
+  }
+  function outboxBlock(f) {
+    const o = f.outbox;
+    if (!o) throw new Error('missing outbox: ' + f.id);
+    const mark = gateMark(o.gate);
+    const acts = o.actions || [];
+    const actRow = acts.length
+      ? `<div class="ob-row ob-acts"><span class="ob-l">ACTIONS</span><span class="ob-v">${acts.map(actionChip).join('')}<span class="ob-hint">Cho’s two calls on every piece — not people</span></span></div>`
+      : '';
+    const then = o.then ? `<p class="ob-then">${esc(o.then)}</p>` : '';
+    return `<p class="ob-sub">Where ${esc(f.name)}’s finished work goes — in plain words.</p>
+      <div class="ob" data-flow="${esc(f.id)}" data-from="${esc(f.from.map((e) => e.id || e.label).join(','))}" data-to="${esc(f.to.map((e) => e.id || e.label).join(','))}">
+        <div class="ob-row ob-in"><span class="ob-l">IN</span><span class="ob-v">${f.from.map(chip).join('')}</span></div>
+        <div class="ob-box g-${esc(o.gate)}"><span class="sx-brk tl"></span><span class="sx-brk tr"></span><span class="sx-brk bl"></span><span class="sx-brk br"></span>
+          <div class="ob-top"><span class="ob-l">OUTBOX</span><span class="gtag ${mark.cls}">${esc(mark.tag)}</span></div>
+          <p class="ob-line">${esc(o.line)}</p>${then}
+        </div>${actRow}
+      </div>`;
   }
   function mine(opName) {
     return feedCards.filter((c) => String(c.lane || '').toLowerCase() === opName.toLowerCase());
@@ -157,7 +218,6 @@ a{color:inherit}
     shown = f.id;
     const z = zoneKey(f);
     const ring = `<div class="pic"><img src="${faceSrc(f)}" alt=""><span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span></div>`;
-    const selfRing = `<span class="ring"><img src="${faceSrc(f)}" alt=""></span>`;
     $('dos').className = 'panel dos z-' + z;
     $('dos').innerHTML = `
       <div class="fh"><b>OPERATOR FILE // ${esc(f.des)}</b><span>TF141 · EYES ONLY</span></div>
@@ -176,13 +236,7 @@ a{color:inherit}
       <section class="dsec"><h4><span>§2</span>What they do</h4><ol class="do">${f.does.map((t) => `<li>${esc(t)}</li>`).join('')}</ol></section>
       <section class="dsec"><h4><span>§3</span>Lane boundary</h4><div class="nobox"><span class="x">✕ NOT THEIR JOB</span>${esc(f.not)}</div></section>
       <section class="dsec" id="flow"><h4><span>§4</span>Flow</h4>
-        <div class="flow" data-flow="${esc(f.id)}" data-from="${esc(f.from.map((e) => e.id || e.label).join(','))}" data-to="${esc(f.to.map((e) => e.id || e.label).join(','))}">
-          <div class="fcol"><span class="fl">FROM</span>${f.from.map(chip).join('')}</div>
-          <span class="wirearrow"></span>
-          <div class="self">${selfRing}<b>${esc(f.name.toUpperCase())}</b></div>
-          <span class="wirearrow"></span>
-          <div class="fcol"><span class="fl">TO</span>${f.to.map(chip).join('')}</div>
-        </div>
+        ${outboxBlock(f)}
       </section>
       <div class="dfoot">REF · BOARD ${esc(R.boardTag(f.board))} · <a href="../orbat/">◂ ORBAT MAP</a> · <a href="../">◂ THEATER</a></div>`;
     renderRail();

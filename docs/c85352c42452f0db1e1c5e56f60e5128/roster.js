@@ -20,6 +20,8 @@
 
   const p = (id) => ({ id });
   const lab = (label) => ({ label });
+  /* FILES §4 reads outbox. from/to stay for ORBAT routing (flowPersonIds). */
+  const CHO_GATE_LINE = 'Cho gate → Hunter approve';
 
   const FILES = [
     {
@@ -33,6 +35,11 @@
       not: 'Doesn’t do lane work himself — and nobody else assigns work.',
       from: [{ id: 'hunter', name: 'HUNTER', star: true }, p('kal')],
       to: [lab('8 LANES + CHO')],
+      outbox: {
+        line: 'Dispatch to lanes (sole dispatcher)',
+        then: '8 lanes + Cho · nobody else assigns work',
+        gate: 'cmd',
+      },
       map: 'Sole dispatcher',
     },
     {
@@ -46,6 +53,11 @@
       not: 'Not a Kinsora store lane. Doesn’t pull squad cards; Price doesn’t dispatch it.',
       from: [lab('OWN SIGNALS'), lab('RISK LIMITS')],
       to: [lab('TRADING BOARD')],
+      outbox: {
+        line: 'Trading board (own signals · no Price wire)',
+        then: 'Paper size until the risk check clears',
+        gate: 'off',
+      },
       map: 'Trading',
     },
     {
@@ -59,6 +71,12 @@
       not: 'Doesn’t manage, assign or re-prioritise West / Jae / Park / Gaz / Ju Kwon. Price dispatches them.',
       from: [p('west'), p('jae'), p('park'), p('gaz'), p('ju')],
       to: [lab('SHIP'), lab('SEND BACK')],
+      outbox: {
+        line: CHO_GATE_LINE,
+        then: 'Passes go out on the lane’s live channel · misses go back to the lane with notes',
+        gate: 'gate',
+        actions: ['ship', 'back'],
+      },
       map: 'Creative gate · review',
     },
     {
@@ -72,6 +90,7 @@
       not: 'Doesn’t run paid acquisition (Soap) or touch theme code (Ko).',
       from: [p('price')],
       to: [{ id: 'cho', name: 'CHO GATE' }, lab('LIVE')],
+      outbox: { line: CHO_GATE_LINE, then: 'then live: email / SMS sends', gate: 'gated' },
       map: 'Email/SMS + onsite',
     },
     {
@@ -85,6 +104,11 @@
       not: 'Doesn’t own copy or creative calls.',
       from: [p('price')],
       to: [lab('LIVE SITE')],
+      outbox: {
+        line: 'Live site (no Cho gate)',
+        then: 'Mobile QA + speed check before it goes live',
+        gate: 'none',
+      },
       map: 'Theme + tooling',
     },
     {
@@ -98,6 +122,7 @@
       not: 'Doesn’t do social (Jae) or paid (Gaz / Soap).',
       from: [p('price')],
       to: [{ id: 'cho', name: 'CHO GATE' }, lab('PUBLISHED')],
+      outbox: { line: CHO_GATE_LINE, then: 'then live: published (News / blog)', gate: 'gated' },
       map: 'SEO + articles',
     },
     {
@@ -111,6 +136,7 @@
       not: 'Doesn’t run paid ads (Gaz makes, Soap buys).',
       from: [p('price')],
       to: [{ id: 'cho', name: 'CHO GATE' }, lab('POSTED')],
+      outbox: { line: CHO_GATE_LINE, then: 'then live: posted to social', gate: 'gated' },
       map: 'Organic social',
     },
     {
@@ -123,6 +149,11 @@
       not: 'Doesn’t take Kinsora squad cards or appear in the theater.',
       from: [{ id: 'hunter', name: 'HUNTER', star: true }],
       to: [{ id: 'hunter', name: 'HUNTER', star: true }],
+      outbox: {
+        line: 'Hunter only (personal · off theater)',
+        then: 'Kept off Kinsora boards',
+        gate: 'off',
+      },
       map: 'Personal',
       off: true,
     },
@@ -137,6 +168,11 @@
       not: 'Doesn’t make the creative (Gaz).',
       from: [p('price'), p('gaz')],
       to: [lab('LIVE AD SETS')],
+      outbox: {
+        line: 'Live ad sets · Hunter yes on spend',
+        then: 'Buys only creative that already cleared Cho (from Gaz)',
+        gate: 'none',
+      },
       map: 'Media buy',
     },
     {
@@ -150,6 +186,7 @@
       not: 'Doesn’t set budgets or buy media (Soap).',
       from: [p('price'), lab('SOAP READS')],
       to: [{ id: 'cho', name: 'CHO GATE' }, p('soap')],
+      outbox: { line: CHO_GATE_LINE, then: 'then live: Soap buys it', gate: 'gated' },
       map: 'Ads creative ▸ Soap',
     },
     {
@@ -163,6 +200,11 @@
       not: 'Doesn’t assign or do the work. Intake goes INTO Price, not around him.',
       from: [lab('INBOX'), lab('SLACK'), lab('GRANOLA')],
       to: [p('price')],
+      outbox: {
+        line: 'Price (intake only)',
+        then: 'Never assigns · never does the work',
+        gate: 'cmd',
+      },
       map: 'Intake → Price',
     },
     {
@@ -177,6 +219,7 @@
       not: 'Doesn’t own care@ — Laswell does — and doesn’t own Intercom. Doesn’t build site fixes — routes them to Ko through Price.',
       from: [p('price')],
       to: [{ id: 'cho', name: 'CHO GATE' }, lab('RESOLVED')],
+      outbox: { line: CHO_GATE_LINE, then: 'then: resolved (back-office)', gate: 'gated' },
       map: 'Kinsora ops · back-office',
     },
     {
@@ -190,6 +233,11 @@
       not: 'Doesn’t own Intercom. Doesn’t run Kinsora back-office (Ju Kwon) or clear Cho’s gate.',
       from: [p('price'), lab('CARE@')],
       to: [lab('REPLIED')],
+      outbox: {
+        line: 'Reply to customer (care@) · no Cho gate',
+        then: 'Wholesale + site fixes go to Price, not out',
+        gate: 'none',
+      },
       map: 'Customer care · care@',
     },
   ];

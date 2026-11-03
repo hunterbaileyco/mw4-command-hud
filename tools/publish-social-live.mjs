@@ -3,7 +3,7 @@
 // The 4h box routine (squad cron 0 */4 * * * PT) runs this. Ko owns that routine; it is not in this repo.
 //   node tools/publish-social-live.mjs --metrics /workspace/kinsora-video/multi_channel_metrics_latest.json --pass-file .pass
 // Optional --data matches build-social.mjs. MW4_SOCIAL_METRICS overrides the default drop path.
-// MW4_FEED_PASS is used when --pass-file is omitted. BLOB_READ_WRITE_TOKEN writes the blob.
+// MW4_FEED_PASS is used when --pass-file is omitted. BLOB_READ_WRITE_TOKEN writes the blob when present; missing store exits 0 (envelope-on-main is standard).
 // If the drop path is missing, exit 0 and write nothing.
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
@@ -36,6 +36,12 @@ try {
   const result = await live.publishSocialModel(model, { pass });
   if (!result.skipped) console.error(`social-live: asOf ${result.asOfDay || '—'} ${result.updatedAt}`);
 } catch (err) {
-  console.error('social-live: ' + String((err && err.message) || err).slice(0, 120));
+  const msg = String((err && err.message) || err);
+  // Hunter lock 2026-11-03: committed envelope is standard; blob optional/skipped on box.
+  if ((err && err.code === 'NO_STORE') || /live store not configured/i.test(msg)) {
+    console.error('social-live: blob skipped (no store); envelope path is standard');
+    process.exit(0);
+  }
+  console.error('social-live: ' + msg.slice(0, 120));
   process.exit(1);
 }

@@ -23,6 +23,8 @@ function readRaw(req) {
   if (req.rawBody != null) return Promise.resolve(Buffer.isBuffer(req.rawBody) ? req.rawBody : Buffer.from(req.rawBody));
   if (Buffer.isBuffer(req.body)) return Promise.resolve(req.body);
   if (typeof req.body === 'string') return Promise.resolve(Buffer.from(req.body));
+  // Vercel parses application/json onto req.body and still leaves the original
+  // bytes buffered. HMAC has to cover those bytes, not a re-stringified object.
   const pending = req._readableState && req._readableState.length;
   if (pending) {
     return new Promise((resolve, reject) => {
@@ -77,8 +79,7 @@ function webResult(status, body) {
   return new Response(body == null ? null : body, { status, headers: JSON_HEADERS });
 }
 
-// Rest args keep function.length at 0 so the Vercel Node runtime passes a Web
-// Request (raw body). Tests still call handler(req, res).
+// Node (req, res) is what Vercel calls. A Web Request is accepted for tests.
 async function handler(...args) {
   if (args[1] && typeof args[1].end === 'function') return nodeHandler(args[0], args[1]);
   return webHandler(args[0]);
@@ -134,19 +135,7 @@ async function nodeHandler(req, res) {
   let raw;
   try { raw = await readRaw(req); }
   catch (err) {
-    const interesting = {};
-    for (const key of Object.getOwnPropertyNames(req)) {
-      if (!/body|raw|payload|buf/i.test(key)) continue;
-      const value = req[key];
-      interesting[key] = value == null ? 'null' : Buffer.isBuffer(value) ? 'buffer:' + value.length : typeof value;
-    }
-    return send(res, err && err.code === 'PARSED_BODY' ? 500 : 400, JSON.stringify({
-      error: err && err.code === 'PARSED_BODY' ? 'raw body' : 'body',
-      interesting,
-      readableLength: req._readableState && req._readableState.length,
-      ended: Boolean(req.readableEnded),
-      dumped: Boolean(req._dumped),
-    }));
+    return send(res, err && err.code === 'PARSED_BODY' ? 500 : 400, JSON.stringify({ error: err && err.code === 'PARSED_BODY' ? 'raw body' : 'body' }));
   }
   return finishPost(board, raw, headerSig(req), (status, body) => send(res, status, body));
 }

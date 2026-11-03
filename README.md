@@ -22,7 +22,7 @@ Each run downloads the matching built script from GitHub Raw (`main`) and runs i
 Developers: edit `scriptable/src/*`, run `node tools/build-scriptable.mjs`, merge to `main`. The build rewrites the full widgets and both loaders. Loaders do not contain the feed URL. The widget they run still requests the encrypted Vercel `status.json` (bypass query included) and decrypts it on the phone. It does not call `/api/feed`.
 
 ## Dashboard hub
-- `docs/<token>/hub/` — phone-first index with tiles for the MW4 Command HUD, LEDGER, and the Social (Jae) board. The Care desk tile (Laswell, care@ only) stays SAMPLE until care@kinsora.co is wired. Intercom is not on that desk.
+- `docs/<token>/hub/` — phone-first index with tiles for the MW4 Command HUD, LEDGER, the Social (Jae) board, and the Care desk (Laswell, care@kinsora.co only). The Care tile stays on its SAMPLE markup until `GET /api/feed?f=care` returns `source: "live"`. Intercom is not on that desk.
 - `docs/<token>/social/` — static "Kinsora social — published metrics" board (TikTok @kinsora.co, TikTok @wearkinsora,
   IG @wearkinsora, Pinterest). The page reads `GET /api/feed?f=social`. `social/metrics.json` is the committed
   AES-GCM fallback, built by `tools/build-social.mjs` from the Postiz/Windsor pull, with the same auth code + salt as `status.json`.
@@ -45,6 +45,25 @@ node tools/publish-social-live.mjs --metrics /workspace/kinsora-video/multi_chan
 
 `--data` is optional and matches `build-social.mjs`. `MW4_SOCIAL_METRICS` overrides the default drop path; `MW4_FEED_PASS` is used when `--pass-file` is omitted. If the drop path is missing, the command exits 0 and writes nothing. If the drop is present and newer than both the blob and the committed file, the tool builds the same model as `build-social.mjs`, encrypts it with the salt already in `social/metrics.json`, and puts `{ meta, env }` on the blob. Cleartext is not written to git. `build-social.mjs --out docs/<token>/social/metrics.json` is still how the committed fallback is refreshed.
 
+## Care feed
+`GET /api/feed?f=care` decrypts with `MW4_FEED_PASS` and serves the newer envelope: a private Vercel Blob at `mw4/care-live.json` (`BLOB_READ_WRITE_TOKEN`), or the committed `care/feed.json` when the blob is missing, older, or will not decrypt. Freshness is `generatedAt` when that value is ISO-8601; otherwise an ISO `asOf`, then that day plus the raw `generatedAt` string. The hub paints the Care tile only when the plaintext has `source: "live"`, `lane: "care"`, and `mailbox: "care@kinsora.co"`. Any other payload, or a failed fetch, leaves the SAMPLE markup in place. A null KPI renders as an em dash. The desk does not mention Intercom.
+
+The Gmail pull is not in this repo. Ko writes the clear drop (default `/workspace/mw4-hud/cache/care/care-in.clear.json`, override `MW4_CARE_DROP`). The 4h routine (squad board cron `0 */4 * * *` PT) is Price's once a LIVE envelope exists, and it is outside this repo. After merge it should run:
+
+```
+node tools/publish-care-live.mjs --in /workspace/mw4-hud/cache/care/care-in.clear.json --pass-file .pass
+```
+
+`MW4_FEED_PASS` is used when `--pass-file` is omitted. If the drop path is missing, the command exits 0 and writes nothing. If the drop is present, newer, and a live care@ model, the tool encrypts it with the salt already in `care/feed.json` and puts `{ meta, env }` on the blob. Cleartext is not written to git.
+
+`build-care.mjs` is the optional commit path. It uses the same drop and the salt on `status.json`, and writes `care/feed.json`:
+
+```
+node tools/build-care.mjs --in /workspace/mw4-hud/cache/care/care-in.clear.json --pass-file .pass
+```
+
+The envelope checked in with this wire uses that status salt so the blob path can encrypt before the first readable commit. Until a blob or that rebuilt file decrypts, `/api/feed?f=care` returns `source: "sample"` (null KPIs, empty queue) and the hub keeps the SAMPLE tile. Rewrite `care/feed.json` with `build-care.mjs` when the first clear drop exists if a git fallback should open without the blob.
+
 ## LEDGER feed
 `ledger/model.js` is the contract. `tools/ledger-live.mjs` maps a normalized Shopify + ads + Mercury pull into that shape and sets `source` to `"live"`. `tools/build-ledger.mjs` encrypts it (AES-256-GCM, salt reused from `status.json`) and writes `ledger/feed.json`. The repo holds the envelope only — never the cleartext books. `/api/feed?f=ledger` tries `MW4_LEDGER_PASS` first, then `MW4_FEED_PASS`, so the box rebuild (`build-ledger.mjs --pass-file .pass`, same pass as status) opens on Vercel either way. The page derives contribution, CM%, breakeven ROAS, after-COGS dollars, and runway.
 
@@ -52,11 +71,11 @@ Connected on the current envelope: Shopify net sales, orders, and unit-cost COGS
 
 ## Access (no second code on Vercel)
 - The Vercel deployment is behind Vercel Authentication. The HUD, Social and Hub pages have **no unlock form**: they fetch
-  `GET /api/feed?f=status` / `?f=social` / `?f=ledger` (`docs/api/feed.js`, a Vercel function), which decrypts
+  `GET /api/feed?f=status` / `?f=social` / `?f=ledger` / `?f=care` (`docs/api/feed.js`, a Vercel function), which decrypts
   server-side with the `MW4_FEED_PASS` project env var and returns JSON with `Cache-Control: no-store`.
-  `f=status` and `f=social` each prefer a newer private blob when one is stored, and otherwise serve the committed file.
-- The repo still only holds AES-256-GCM envelopes for the ops, social, and ledger feeds — `status.json`, `social/metrics.json`,
-  and `ledger/feed.json` are written encrypted by `build-status.mjs` / `build-social.mjs` / `build-ledger.mjs`. LEDGER sample dollars in `ledger/model.js` are invented figures labeled SAMPLE, used only when the live envelope is absent.
+  `f=status`, `f=social`, and `f=care` each prefer a newer private blob when one is stored, and otherwise serve the committed file.
+- The repo still only holds AES-256-GCM envelopes for the ops, social, ledger, and care feeds — `status.json`, `social/metrics.json`,
+  `ledger/feed.json`, and `care/feed.json` are written encrypted by `build-status.mjs` / `build-social.mjs` / `build-ledger.mjs` / `build-care.mjs`. LEDGER sample dollars in `ledger/model.js` are invented figures labeled SAMPLE, used only when the live envelope is absent. Care SAMPLE numbers stay in the hub markup and are not a live feed.
 - Scriptable widgets fetch the encrypted `status.json` from Vercel and still decrypt on-device with the Keychain auth code (AES-GCM is unchanged). `STATUS_URL` in `scriptable/src/common.js` is the Vercel `status.json` URL plus the Deployment Protection bypass query param. Widgets do not call `/api/feed` (that cleartext endpoint stays SSO-gated). Phone install is the two loaders above; do not re-paste the full scripts after a merge.
 - `api/feed.js` at the repo root is a shim that only matters if the Vercel Root Directory is the repo root.
 

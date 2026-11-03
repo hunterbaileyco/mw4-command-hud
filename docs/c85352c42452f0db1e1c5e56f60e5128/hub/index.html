@@ -18,6 +18,7 @@
 <script src="../brand-icons.js"></script>
 <script src="../action-panel.js"></script>
 <script src="../ledger/model.js"></script>
+<script src="care.js"></script>
 <title>MW4 // COMMAND SUITE</title>
 <style>
 *{box-sizing:border-box}
@@ -139,6 +140,9 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .care .q .age.h{color:var(--holdink)}
 .care .ft{margin:8px 10px 10px;padding-top:7px;border-top:1px dashed var(--line2);font-family:var(--mono);font-size:8px;letter-spacing:.08em;line-height:1.5;color:var(--dim);text-transform:uppercase}
 .care .ft b{color:var(--olive2)}
+.care.live .sampleband{background:rgba(107,124,58,.22);color:var(--olive2);border-bottom-color:rgba(155,176,90,.55)}
+.care.live .sampleband .chip{color:#0B0E0C;background:var(--olive2);border-color:var(--olive2)}
+.care.live .src .chip{color:var(--olive2)}
 </style>
 </head>
 <body class="sx-pad">
@@ -154,13 +158,13 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   </div>
 
   <section class="care" id="care-desk">
-    <div class="sampleband"><span>HUB · CARE DESK</span><span><span class="chip">SAMPLE</span> NOT LIVE · MOCK NUMBERS</span></div>
-    <a class="hd" href="../files/#laswell"><div class="ring"><img src="../avatars/laswell.png" alt=""></div><div><div class="t">CARE · LASWELL</div><div class="s">care@ tickets · owner 141-11</div></div><div class="src"><span class="chip amber">● SAMPLE</span><span class="chip off">○ LIVE · not wired</span></div></a>
-    <div class="kpis"><div><b class="a">7</b><span>Open</span></div><div><b class="h">3</b><span>Waiting on us</span></div><div><b class="h">4h12</b><span>Oldest</span></div><div><b>38m</b><span>Median 1st reply</span></div></div>
-    <div class="spark"><i style="height:9px"></i><i class="o" style="height:9px"></i><i style="height:6px"></i><i class="o" style="height:12px"></i><i style="height:24px"></i><i class="o" style="height:6px"></i><i style="height:21px"></i><i class="o" style="height:21px"></i><i style="height:15px"></i><i class="o" style="height:3px"></i><i style="height:18px"></i><i class="o" style="height:6px"></i><i style="height:24px"></i><i class="o" style="height:24px"></i><i style="height:18px"></i><i class="o" style="height:9px"></i><i style="height:21px"></i><i class="o" style="height:6px"></i><i style="height:9px"></i><i class="o" style="height:12px"></i><i style="height:15px"></i><i class="o" style="height:18px"></i><i style="height:18px"></i><i class="o" style="height:6px"></i></div>
-    <div class="sparkl"><span>care@ last 24h · <b style="color:var(--olive2)">■</b> in 18 · <b style="color:var(--tan)">■</b> out 15</span><span>SAMPLE</span></div>
-    <div class="mix"><div>WISMO<b>41%</b></div><div>RETURNS<b>22%</b></div><div>REFUNDS<b>17%</b></div><div>PRODUCT Q<b>12%</b></div><div>WHOLESALE<b>5%</b></div><div>OTHER<b>3%</b></div></div>
-    <div class="q">
+    <div class="sampleband"><span>HUB · CARE DESK</span><span id="careBandMeta"><span class="chip">SAMPLE</span> NOT LIVE · MOCK NUMBERS</span></div>
+    <a class="hd" href="../files/#laswell"><div class="ring"><img src="../avatars/laswell.png" alt=""></div><div><div class="t">CARE · LASWELL</div><div class="s">care@ tickets · owner 141-11</div></div><div class="src"><span class="chip amber" id="careChip">● SAMPLE</span><span class="chip off" id="careChipOff">○ LIVE · not wired</span></div></a>
+    <div class="kpis" id="careKpis"><div><b class="a">7</b><span>Open</span></div><div><b class="h">3</b><span>Waiting on us</span></div><div><b class="h">4h12</b><span>Oldest</span></div><div><b>38m</b><span>Median 1st reply</span></div></div>
+    <div class="spark" id="careSpark"><i style="height:9px"></i><i class="o" style="height:9px"></i><i style="height:6px"></i><i class="o" style="height:12px"></i><i style="height:24px"></i><i class="o" style="height:6px"></i><i style="height:21px"></i><i class="o" style="height:21px"></i><i style="height:15px"></i><i class="o" style="height:3px"></i><i style="height:18px"></i><i class="o" style="height:6px"></i><i style="height:24px"></i><i class="o" style="height:24px"></i><i style="height:18px"></i><i class="o" style="height:9px"></i><i style="height:21px"></i><i class="o" style="height:6px"></i><i style="height:9px"></i><i class="o" style="height:12px"></i><i style="height:15px"></i><i class="o" style="height:18px"></i><i style="height:18px"></i><i class="o" style="height:6px"></i></div>
+    <div class="sparkl" id="careSparkL"><span>care@ last 24h · <b style="color:var(--olive2)">■</b> in 18 · <b style="color:var(--tan)">■</b> out 15</span><span>SAMPLE</span></div>
+    <div class="mix" id="careMix"><div>WISMO<b>41%</b></div><div>RETURNS<b>22%</b></div><div>REFUNDS<b>17%</b></div><div>PRODUCT Q<b>12%</b></div><div>WHOLESALE<b>5%</b></div><div>OTHER<b>3%</b></div></div>
+    <div class="q" id="careQ">
       <div><span class="id">C-1042</span><span class="sub">Where’s my order? · ships 11/04<small>care@ · 4h12 · SAMPLE</small></span><span class="age h">⏱ 4h12</span></div>
       <div><span class="id">C-1039</span><span class="sub">Return — wrong size, exchange<small>care@ · 2h40 · SAMPLE</small></span><span class="age">⏱ 2h40</span></div>
       <div><span class="id">C-1037</span><span class="sub">Refund status after return<small>care@ · 1h05 · SAMPLE</small></span><span class="age">⏱ 1h05</span></div>
@@ -168,7 +172,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
       <div><span class="id">C-1033</span><span class="sub">Product Q · ingredients<small>care@ · 31m · SAMPLE</small></span><span class="age">⏱ 31m</span></div>
       <div><span class="id">C-1031</span><span class="sub">Address change before ship<small>care@ · 12m · SAMPLE</small></span><span class="age">⏱ 12m</span></div>
     </div>
-    <div class="ft">Every number on this tile is <b>SAMPLE</b>. Goes <b>LIVE</b> only when wired to care@kinsora.co — the chip flips to ● LIVE with an as-of time. Owner: Laswell only.</div>
+    <div class="ft" id="careFt">Every number on this tile is <b>SAMPLE</b>. Goes <b>LIVE</b> only when wired to care@kinsora.co — the chip flips to ● LIVE with an as-of time. Owner: Laswell only.</div>
   </section>
 
   <div class="tiles">
@@ -263,8 +267,9 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 <script>
 (() => {
   'use strict';
-  // Live hints come from /api/feed (Vercel function behind Vercel Authentication; decrypts the committed AES-GCM feeds
+  // Live hints come from /api/feed (Vercel function behind Vercel Authentication; decrypts the AES-GCM feeds
   // server-side). No second code after Vercel sign-in. On GitHub Pages there is no /api, so tiles show LINK DOWN.
+  // Care stays on the SAMPLE markup unless f=care returns source "live" for care@kinsora.co.
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const safeUrl = (u) => /^https:\/\/trello\.com\//.test(u || '') ? u : '';
@@ -304,6 +309,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     try { hud(await get('status')); ok = true; } catch (err) { $('hudHint').innerHTML = '<span class="w">⚠ HUD FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; down(String(err.message || err).toUpperCase()); }
     try { soc(await get('social')); } catch (err) { $('socHint').innerHTML = '<span class="w">⚠ SOCIAL FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
     try { ledger(await get('ledger')); } catch (_) { ledger(null); }
+    try { care(await get('care')); } catch (_) { care(null); }
     if (ok) { $('ilk').classList.add('live'); $('ist').textContent = 'INTEL LIVE'; }
   }
   $('sync2').addEventListener('click', (e) => { e.preventDefault(); pull(); });
@@ -421,6 +427,31 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     $('lgCash').textContent = L.format.moneyK(m.mercury.balance);
     $('lgChip').textContent = live ? 'LIVE' : 'SAMPLE';
     $('lgHint').textContent = live ? ('LIVE · ' + L.format.asOf(m.asOf)) : 'SAMPLE · not a live feed';
+  }
+  const careSample = $('care-desk').innerHTML;
+  function care(d) {
+    const root = $('care-desk');
+    const C = window.MW4Care;
+    if (!C || !C.liveModel(d)) {
+      if (root.classList.contains('live')) {
+        root.classList.remove('live');
+        root.innerHTML = careSample;
+      }
+      return;
+    }
+    const f = C.fragments(d);
+    root.classList.add('live');
+    $('careBandMeta').innerHTML = f.bandMeta;
+    $('careChip').className = 'chip';
+    $('careChip').textContent = f.chip;
+    $('careChipOff').className = 'chip';
+    $('careChipOff').textContent = f.asOf;
+    $('careKpis').innerHTML = f.kpis;
+    $('careSpark').innerHTML = f.spark;
+    $('careSparkL').innerHTML = f.sparkl;
+    $('careMix').innerHTML = f.mix;
+    $('careQ').innerHTML = f.queue;
+    $('careFt').innerHTML = f.footer;
   }
   paintChannels(FALLBACK_CH);
   pull(); setInterval(pull, 30000);

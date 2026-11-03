@@ -167,6 +167,7 @@ test('committed feeds stay AES-GCM envelopes and scriptable does not point at Pa
     `docs/${token}/status.json`,
     `docs/${token}/social/metrics.json`,
     `docs/${token}/ledger/feed.json`,
+    `docs/${token}/care/feed.json`,
   ]) {
     const env = JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8'));
     assert.equal(env.alg, 'AES-GCM');

@@ -1,9 +1,11 @@
-// GET /api/feed?f=status|social|ledger — serves the dashboard feeds to the HUD, Social, Hub, and LEDGER pages on Vercel.
+// GET /api/feed?f=status|social|ledger|care — serves the dashboard feeds to the HUD, Social, Hub, and LEDGER pages on Vercel.
 // The repo (and therefore GitHub Pages) only ever holds the AES-256-GCM envelopes; this function decrypts them
 // server-side with the MW4_FEED_PASS project env var (f=ledger tries MW4_LEDGER_PASS first, then MW4_FEED_PASS).
 // f=status prefers a newer webhook envelope in Vercel Blob when one is stored (see live-status.js).
 // f=social prefers a newer blob envelope at mw4/social-live.json (see live-social.js) and falls back
 // to the committed social/metrics.json. The box publishes that blob on the 4h cadence.
+// f=care prefers a newer blob envelope at mw4/care-live.json (see live-care.js) and falls back
+// to the committed care/feed.json. The hub keeps its SAMPLE tile unless that plaintext has source "live".
 // The whole Vercel deployment is behind Vercel Authentication,
 // so after Vercel sign-in there's no second code, and nothing readable is ever committed or served by Pages.
 const fs = require('node:fs');
@@ -11,12 +13,14 @@ const path = require('node:path');
 const { webcrypto: wc } = require('node:crypto');
 const live = require('./live-status');
 const liveSocial = require('./live-social');
+const liveCare = require('./live-care');
 
 // literal paths so Vercel's file tracing bundles the feeds with the function
 const FILES = {
   status: path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/status.json'),
   social: path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/social/metrics.json'),
   ledger: path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/ledger/feed.json'),
+  care: path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/care/feed.json'),
 };
 const keys = new Map(); // `${passSlot}|${salt}|${iter}` -> CryptoKey; PBKDF2 is slow, derive once per warm instance
 
@@ -68,6 +72,31 @@ async function handler(req, res) {
       const pt = await liveSocial.readSocialPlain();
       res.statusCode = 200;
       return res.end(Buffer.from(pt));
+    }
+    if (f === 'care') {
+      try {
+        const pt = await liveCare.readCarePlain();
+        res.statusCode = 200;
+        return res.end(Buffer.from(pt));
+      } catch (err) {
+        // No readable envelope yet (salt anchor, or blob missing). The hub keeps SAMPLE markup
+        // unless source is live, so this is not a LIVE tile and it does not 500 every poll.
+        if (!err || err.code !== 'UNREADABLE') throw err;
+        res.statusCode = 200;
+        return res.end(JSON.stringify({
+          source: 'sample',
+          owner: 'Laswell',
+          lane: 'care',
+          mailbox: 'care@kinsora.co',
+          asOf: null,
+          generatedAt: null,
+          kpis: { open: null, waitingOnUs: null, oldestLabel: null, medianFirstReplyLabel: null },
+          spark24h: { in: null, out: null, bars: [] },
+          mix: [],
+          queue: [],
+          notes: [],
+        }));
+      }
     }
     const env = JSON.parse(fs.readFileSync(file, 'utf8'));
     if (!env || !env.ct) throw new Error('feed is not an encrypted envelope');

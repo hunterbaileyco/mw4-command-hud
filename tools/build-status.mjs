@@ -167,7 +167,7 @@ export function doneAtOf(card, moves) {
 // Gap 5: lanes for cards (incl. Done cards) that carry no lane prefix. Order: label → "Lane: X" in
 // description (explicit wins) → name prefix → keyword map.
 const LANE_KEYWORDS = [
-  [/\bATC\b/i, 'Ko'], [/News I07/i, 'Park'], [/P0 picker/i, 'West'], [/\bCart [A-E]\b/i, 'West'],
+  [/\bATC\b/i, 'Ko'], [/^\s*HUD\b/i, 'Ko'], [/News I07/i, 'Park'], [/P0 picker/i, 'West'], [/\bCart [A-E]\b/i, 'West'],
   [/\b(avatar|portrait)s?\b/i, 'Dunn'], [/\btheme\b|\bClarity\b/i, 'Ko'], [/\bSEO\b/i, 'Park'],
   [/Postiz|Reels?|TikTok|Windsor/i, 'Jae'], [/retention|BFCM email/i, 'West'], [/packaging/i, 'Cho'],
 ];

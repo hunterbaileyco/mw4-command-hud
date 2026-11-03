@@ -55,6 +55,7 @@ assert.equal(cmd.out.counts.doneToday, 1, 'only the move into Done on the PT day
 assert.equal(cmd.out.counts.waiting, 0);
 
 assert.equal(laneOf({ name: 'Duo: Hub LEDGER tile', description: '' }), 'Ko');
+assert.equal(laneOf({ name: 'HUD: command strip', description: '' }), 'Ko');
 assert.equal(laneOf({ name: 'Ko: HUD Duo elevate visual bugs', description: 'Lane: Ko' }), 'Ko');
 assert.equal(laneOf({ name: 'Meet Kevin', description: 'Lane: Ghost.' }), 'Ghost');
 assert.equal(laneOf({ name: 'Price: scrub history', description: 'Lane: Price' }), 'Price');

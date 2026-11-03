@@ -1,11 +1,13 @@
 // GET /api/feed?f=status|social|ledger — serves the dashboard feeds to the HUD, Social, Hub, and LEDGER pages on Vercel.
 // The repo (and therefore GitHub Pages) only ever holds the AES-256-GCM envelopes; this function decrypts them
 // server-side with the MW4_FEED_PASS project env var (f=ledger tries MW4_LEDGER_PASS first, then MW4_FEED_PASS).
+// f=status prefers a newer webhook envelope in Vercel Blob when one is stored (see live-status.js).
 // The whole Vercel deployment is behind Vercel Authentication,
 // so after Vercel sign-in there's no second code, and nothing readable is ever committed or served by Pages.
 const fs = require('node:fs');
 const path = require('node:path');
 const { webcrypto: wc } = require('node:crypto');
+const live = require('./live-status');
 
 // literal paths so Vercel's file tracing bundles the feeds with the function
 const FILES = {
@@ -54,6 +56,11 @@ async function handler(req, res) {
   const file = FILES[f];
   if (!file) { res.statusCode = 404; return res.end('{"error":"unknown feed"}'); }
   try {
+    if (f === 'status') {
+      const pt = await live.readStatusPlain();
+      res.statusCode = 200;
+      return res.end(Buffer.from(pt));
+    }
     const env = JSON.parse(fs.readFileSync(file, 'utf8'));
     if (!env || !env.ct) throw new Error('feed is not an encrypted envelope');
     const pt = await open(env, f);

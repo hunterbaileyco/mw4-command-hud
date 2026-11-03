@@ -2,11 +2,12 @@
    Standing work is cards whose name or short already says "standing" — not a new feed field. */
 (function (root) {
   // Dunn is personal-only. Listed here solely so designator() keeps 141-07 numbering.
-  const OPS = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal", "Ju Kwon"];
+  const OPS = ["Price", "Ghost", "Cho", "West", "Ko", "Park", "Jae", "Dunn", "Soap", "Gaz", "Kal", "Ju Kwon", "Laswell"];
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   function designator(op) {
     if (op === "Price") return "BRAVO-6";
     if (op === "Ju Kwon") return "EXT-01";
+    if (op === "Laswell") return "141-11";
     const i = OPS.indexOf(op);
     return i < 0 ? "" : "141-" + String(i).padStart(2, "0");
   }
@@ -18,7 +19,7 @@
   function safeUrl(u) { return /^https:\/\/trello\.com\//.test(u || "") ? u : ""; }
   function norm(t) {
     let s = String(t || "").toLowerCase().trim();
-    const lane = "ju kwon|price|ghost|cho|west|ko|park|jae|dunn|soap|gaz|kal";
+    const lane = "ju kwon|price|ghost|cho|west|ko|park|jae|dunn|soap|gaz|kal|laswell";
     s = s.replace(new RegExp("^(" + lane + ")\\s*[:\\u2014\\u2013-]\\s*"), "");
     s = s.replace(new RegExp("^(" + lane + ")\\s+"), "");
     return s.replace(/[^a-z0-9]+/g, "");

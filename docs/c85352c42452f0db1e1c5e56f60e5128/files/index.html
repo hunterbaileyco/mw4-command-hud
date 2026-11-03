@@ -43,11 +43,11 @@ a{color:inherit}
       <div class="brand">MW4 <span class="sl">//</span> FILES</div>
       <div class="mastsub">Operator dossiers · callsign · lane · boundary · flow</div>
     </div>
-    <div class="asof"><span class="dot"></span>12 FILES</div>
+    <div class="asof"><span class="dot"></span><span id="nfile">13 FILES</span></div>
   </div>
   <div class="files">
     <section class="panel" id="roster">
-      <div class="zhead"><b>CALLSIGNS</b><span>12 ON ROSTER</span></div>
+      <div class="zhead"><b>CALLSIGNS</b><span id="nroster">13 ON ROSTER</span></div>
       <div class="rail" id="rail"></div>
     </section>
     <article class="panel dos" id="dos"></article>
@@ -76,12 +76,12 @@ a{color:inherit}
   let shown = 'price';
 
   function mark(f) { return f && f.id === 'ju' ? 'JK' : (f ? f.name.slice(0, 2).toUpperCase() : '★'); }
+  function faceSrc(f) { return '../avatars/' + esc((f && (f.face || f.id)) || '') + '.png'; }
   function face(id, px) {
     const f = R.BY_ID[id];
     if (!f) return `<span class="ring" style="width:${px}px;height:${px}px"><span class="ini">★</span></span>`;
-    if (f.id === 'ju') return `<span class="ring" style="width:${px}px;height:${px}px"><span class="ini">JK</span></span>`;
     const ini = mark(f);
-    return `<span class="ring" style="width:${px}px;height:${px}px"><img src="../avatars/${esc(f.id)}.png" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"></span>`;
+    return `<span class="ring" style="width:${px}px;height:${px}px"><img src="${faceSrc(f)}" alt="" onerror="this.outerHTML='<span class=&quot;ini&quot;>${ini}</span>'"></span>`;
   }
   function chip(end) {
     if (end.label && !end.id) return `<span class="chip np">${esc(end.label)}</span>`;
@@ -137,11 +137,12 @@ a{color:inherit}
     }).join('') + '</div>';
   }
   function renderRail() {
+    const n = R.FILES.length;
+    $('nfile').textContent = n + ' FILES';
+    $('nroster').textContent = n + ' ON ROSTER';
     $('rail').innerHTML = R.FILES.map((f) => {
       const z = zoneKey(f);
-      const ring = f.id === 'ju'
-        ? '<span class="ring"><span class="ini">JK</span></span>'
-        : `<span class="ring"><span class="face"><img src="../avatars/${esc(f.id)}.png" alt=""></span></span>`;
+      const ring = `<span class="ring"><span class="face"><img src="${faceSrc(f)}" alt=""></span></span>`;
       const zl = z === 'cp' ? 'CMD' : z === 'off' ? 'OFF' : z === 'kal' ? 'TRADING' : z.toUpperCase();
       return `<a class="rt z-${z}" href="#${esc(f.id)}" data-id="${esc(f.id)}" aria-selected="${f.id === shown}">${ring}<span class="pl"><div class="cs">${esc(f.name.split(' ')[0].toUpperCase())}</div><div class="ds">${esc(f.des)}</div><div class="zn">${esc(zl)}</div></span></a>`;
     }).join('');
@@ -155,12 +156,8 @@ a{color:inherit}
     const f = R.BY_ID[id] || R.BY_ID.price;
     shown = f.id;
     const z = zoneKey(f);
-    const ring = f.id === 'ju'
-      ? '<div class="pic"><span class="ini">JK</span><span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span></div>'
-      : `<div class="pic"><img src="../avatars/${esc(f.id)}.png" alt=""><span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span></div>`;
-    const selfRing = f.id === 'ju'
-      ? '<span class="ring"><span class="ini">JK</span></span>'
-      : `<span class="ring"><img src="../avatars/${esc(f.id)}.png" alt=""></span>`;
+    const ring = `<div class="pic"><img src="${faceSrc(f)}" alt=""><span class="brk tl"></span><span class="brk tr"></span><span class="brk bl"></span><span class="brk br"></span></div>`;
+    const selfRing = `<span class="ring"><img src="${faceSrc(f)}" alt=""></span>`;
     $('dos').className = 'panel dos z-' + z;
     $('dos').innerHTML = `
       <div class="fh"><b>OPERATOR FILE // ${esc(f.des)}</b><span>TF141 · EYES ONLY</span></div>

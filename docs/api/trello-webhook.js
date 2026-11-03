@@ -120,7 +120,12 @@ async function nodeHandler(req, res) {
   let raw;
   try { raw = await readRaw(req); }
   catch (err) {
-    return send(res, err && err.code === 'PARSED_BODY' ? 500 : 400, JSON.stringify({ error: err && err.code === 'PARSED_BODY' ? 'raw body' : 'body' }));
+    const names = Object.getOwnPropertyNames(req).slice(0, 40);
+    return send(res, err && err.code === 'PARSED_BODY' ? 500 : 400, JSON.stringify({
+      error: err && err.code === 'PARSED_BODY' ? 'raw body' : 'body',
+      names,
+      bodyType: req.body == null ? 'null' : (Buffer.isBuffer(req.body) ? 'buffer' : typeof req.body),
+    }));
   }
   return finishPost(board, raw, headerSig(req), (status, body) => send(res, status, body));
 }

@@ -53,7 +53,60 @@ function send(res, status, body) {
   res.end(body == null ? '' : body);
 }
 
-async function handler(req, res) {
+const JSON_HEADERS = {
+  'cache-control': 'private, no-store, max-age=0',
+  'x-robots-tag': 'noindex, nofollow',
+  'content-type': 'application/json; charset=utf-8',
+};
+
+function webResult(status, body) {
+  return new Response(body == null ? null : body, { status, headers: JSON_HEADERS });
+}
+
+// Rest args keep function.length at 0 so the Vercel Node runtime passes a Web
+// Request (raw body). Tests still call handler(req, res).
+async function handler(...args) {
+  if (args[1] && typeof args[1].end === 'function') return nodeHandler(args[0], args[1]);
+  return webHandler(args[0]);
+}
+
+async function finishPost(board, raw, sig, reply) {
+  const secret = String(process.env.TRELLO_SECRET || '').replace(/[\r\n]+$/, '');
+  const callbackURL = callbackFor(board);
+  const expected = secret && callbackURL ? signTrello(secret, raw, callbackURL) : '';
+  if (!signaturesMatch(expected, sig)) return reply(401, '{"error":"unauthorized"}');
+
+  let payload = {};
+  try { payload = JSON.parse(raw.toString('utf8') || '{}'); } catch { payload = {}; }
+  const modelId = payload.model && payload.model.id;
+  if (modelId && modelId !== live.BOARDS[board].id) return reply(200, '{"ok":true,"skipped":"model"}');
+
+  try {
+    const result = await live.refreshLive({ actionId: (payload.action && payload.action.id) || '', board });
+    return reply(200, JSON.stringify({ ok: true, skipped: result.skipped || '' }));
+  } catch (err) {
+    const code = err && err.code === 'NO_STORE' ? 'store' : 'refresh';
+    return reply(500, JSON.stringify({ error: code }));
+  }
+}
+
+async function webHandler(request) {
+  const method = request.method || 'GET';
+  const board = boardOf(request.url || '/');
+  if (method === 'HEAD') return webResult(200, null);
+  if (method === 'GET') {
+    if (board && !BOARDS.has(board)) return webResult(400, '{"error":"board"}');
+    const state = await live.publicState(board);
+    return webResult(200, JSON.stringify(state));
+  }
+  if (method !== 'POST') return webResult(405, '{"error":"method"}');
+  if (!BOARDS.has(board)) return webResult(400, '{"error":"board"}');
+  const raw = Buffer.from(await request.arrayBuffer());
+  const sig = request.headers.get('x-trello-webhook') || '';
+  return finishPost(board, raw, sig, (status, body) => webResult(status, body));
+}
+
+async function nodeHandler(req, res) {
   const method = req.method || 'GET';
   const board = boardOf(req.url || '/');
   if (method === 'HEAD') return send(res, 200, '');
@@ -64,29 +117,12 @@ async function handler(req, res) {
   }
   if (method !== 'POST') return send(res, 405, '{"error":"method"}');
   if (!BOARDS.has(board)) return send(res, 400, '{"error":"board"}');
-
-  const secret = String(process.env.TRELLO_SECRET || '').replace(/[\r\n]+$/, '');
-  const callbackURL = callbackFor(board);
   let raw;
   try { raw = await readRaw(req); }
   catch (err) {
     return send(res, err && err.code === 'PARSED_BODY' ? 500 : 400, JSON.stringify({ error: err && err.code === 'PARSED_BODY' ? 'raw body' : 'body' }));
   }
-  const expected = secret && callbackURL ? signTrello(secret, raw, callbackURL) : '';
-  if (!signaturesMatch(expected, headerSig(req))) return send(res, 401, '{"error":"unauthorized"}');
-
-  let payload = {};
-  try { payload = JSON.parse(raw.toString('utf8') || '{}'); } catch { payload = {}; }
-  const modelId = payload.model && payload.model.id;
-  if (modelId && modelId !== live.BOARDS[board].id) return send(res, 200, '{"ok":true,"skipped":"model"}');
-
-  try {
-    const result = await live.refreshLive({ actionId: (payload.action && payload.action.id) || '', board });
-    return send(res, 200, JSON.stringify({ ok: true, skipped: result.skipped || '' }));
-  } catch (err) {
-    const code = err && err.code === 'NO_STORE' ? 'store' : 'refresh';
-    return send(res, 500, JSON.stringify({ error: code }));
-  }
+  return finishPost(board, raw, headerSig(req), (status, body) => send(res, status, body));
 }
 
 handler.config = { api: { bodyParser: false } };

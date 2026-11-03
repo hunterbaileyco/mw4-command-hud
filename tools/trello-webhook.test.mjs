@@ -55,6 +55,16 @@ assert.equal(signTrello(SECRET, raw, TRADING_URL) === good, false);
   assert.equal(res.statusCode, 200);
 }
 {
+  const head = await handler(new Request('http://x/api/trello-webhook?board=command', { method: 'HEAD' }));
+  assert.equal(head.status, 200);
+  const denied = await handler(new Request('http://x/api/trello-webhook?board=command', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-trello-webhook': 'bad' },
+    body: '{}',
+  }));
+  assert.equal(denied.status, 401);
+}
+{
   const res = resOf();
   await handler(reqOf('POST', '/api/trello-webhook?board=nope', { 'x-trello-webhook': good }, raw), res);
   assert.equal(res.statusCode, 400);

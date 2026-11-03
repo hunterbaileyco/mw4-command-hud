@@ -23,6 +23,20 @@ function readRaw(req) {
   if (req.rawBody != null) return Promise.resolve(Buffer.isBuffer(req.rawBody) ? req.rawBody : Buffer.from(req.rawBody));
   if (Buffer.isBuffer(req.body)) return Promise.resolve(req.body);
   if (typeof req.body === 'string') return Promise.resolve(Buffer.from(req.body));
+  const pending = req._readableState && req._readableState.length;
+  if (pending) {
+    return new Promise((resolve, reject) => {
+      const chunks = [];
+      let size = 0;
+      req.on('data', (chunk) => {
+        size += chunk.length;
+        if (size > 1_000_000) { reject(new Error('body')); req.destroy(); return; }
+        chunks.push(chunk);
+      });
+      req.on('end', () => resolve(Buffer.concat(chunks)));
+      req.on('error', reject);
+    });
+  }
   if (req.body && typeof req.body === 'object') {
     const err = new Error('parsed body');
     err.code = 'PARSED_BODY';
@@ -120,11 +134,18 @@ async function nodeHandler(req, res) {
   let raw;
   try { raw = await readRaw(req); }
   catch (err) {
-    const names = Object.getOwnPropertyNames(req).slice(0, 40);
+    const interesting = {};
+    for (const key of Object.getOwnPropertyNames(req)) {
+      if (!/body|raw|payload|buf/i.test(key)) continue;
+      const value = req[key];
+      interesting[key] = value == null ? 'null' : Buffer.isBuffer(value) ? 'buffer:' + value.length : typeof value;
+    }
     return send(res, err && err.code === 'PARSED_BODY' ? 500 : 400, JSON.stringify({
       error: err && err.code === 'PARSED_BODY' ? 'raw body' : 'body',
-      names,
-      bodyType: req.body == null ? 'null' : (Buffer.isBuffer(req.body) ? 'buffer' : typeof req.body),
+      interesting,
+      readableLength: req._readableState && req._readableState.length,
+      ended: Boolean(req.readableEnded),
+      dumped: Boolean(req._dumped),
     }));
   }
   return finishPost(board, raw, headerSig(req), (status, body) => send(res, status, body));

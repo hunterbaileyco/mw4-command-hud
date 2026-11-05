@@ -4,7 +4,7 @@
 // replace the other leg with an empty board. Nothing in this module writes
 // the status blob or a status file. persist is always false.
 
-import { composeStatus } from './status-model.mjs';
+import { composeStatus } from '../api/status-model.mjs';
 import { mapOperationalRows } from './notion-command.mjs';
 import { movesFromEntries, noteTransitions } from './done-ledger.mjs';
 

@@ -4,15 +4,15 @@ import { createRequire } from 'node:module';
 import { board, composeStatus } from '../docs/api/status-model.mjs';
 import {
   DATA_SOURCE_ID, NOTION_VERSION, loadNotionCommand, mapOperationalRows, notionApiKey,
-} from '../docs/api/notion-command.mjs';
+} from '../docs/lib/notion-command.mjs';
 import {
   MemoryLedgerStore, createLedgerStore, movesFromEntries, noteTransitions,
-} from '../docs/api/done-ledger.mjs';
-import { produceTrelloStatus, runPreviewCycle } from '../docs/api/command-assemble.mjs';
+} from '../docs/lib/done-ledger.mjs';
+import { produceTrelloStatus, runPreviewCycle } from '../docs/lib/command-assemble.mjs';
 import { diffCommand, renderReport, shadowFromDumps } from './shadow-diff.mjs';
 
 const require = createRequire(import.meta.url);
-const { commandSourceMode } = require('../docs/api/command-flag.js');
+const { commandSourceMode } = require('../docs/lib/command-flag.js');
 const live = require('../docs/api/live-status.js');
 
 const SECRET = 'ntn_test_secret_should_not_leak_zzz';

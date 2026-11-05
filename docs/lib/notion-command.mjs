@@ -17,7 +17,7 @@
 // - Source as-of, Last edited, Started, and import time are not completion
 //   times and are not freshness.
 
-import { LANES, hitLane } from './status-model.mjs';
+import { LANES, hitLane } from '../api/status-model.mjs';
 import { trelloIdTail } from './done-ledger.mjs';
 
 export const NOTION_VERSION = '2025-09-03';

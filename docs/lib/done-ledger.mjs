@@ -10,7 +10,7 @@
 // This module never writes mw4/status-live.json or a status.json file.
 // The persistent store interface is disabled: append refuses.
 
-import { listsOf } from './status-model.mjs';
+import { listsOf } from '../api/status-model.mjs';
 
 const PRODUCTION_BLOB = 'mw4/status-live.json';
 

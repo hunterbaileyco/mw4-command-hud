@@ -8,8 +8,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { composeStatus } from '../docs/api/status-model.mjs';
-import { coerceRow, mapOperationalRows } from '../docs/api/notion-command.mjs';
-import { movesFromEntries, noteTransitions } from '../docs/api/done-ledger.mjs';
+import { coerceRow, mapOperationalRows } from '../docs/lib/notion-command.mjs';
+import { movesFromEntries, noteTransitions } from '../docs/lib/done-ledger.mjs';
 
 const LISTS = ['doing', 'waiting', 'backlog', 'done'];
 

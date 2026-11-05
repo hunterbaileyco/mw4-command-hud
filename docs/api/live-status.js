@@ -5,7 +5,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { webcrypto: wc } = require('node:crypto');
-const { commandSourceMode } = require('./command-flag');
+const { commandSourceMode } = require('../lib/command-flag');
 
 const STATUS_FILE = path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/status.json');
 const LIVE_PATH = 'mw4/status-live.json';
@@ -247,8 +247,8 @@ async function refreshLiveDecoupled(options) {
   const fetchImpl = options.fetchImpl || globalThis.fetch;
   const now = options.now || Date.now();
   const auth = options.auth || trelloAuth();
-  const { loadNotionCommand, notionApiKey } = await import('./notion-command.mjs');
-  const { runPreviewCycle, seedFromStatus } = await import('./command-assemble.mjs');
+  const { loadNotionCommand, notionApiKey } = await import('../lib/notion-command.mjs');
+  const { runPreviewCycle, seedFromStatus } = await import('../lib/command-assemble.mjs');
   const { ptDayStartIso } = await import('./status-model.mjs');
 
   let existing = null;

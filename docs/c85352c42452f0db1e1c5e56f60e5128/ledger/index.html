@@ -16,9 +16,12 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="../suite.css">
 <link rel="stylesheet" href="ledger.css">
+<script>try{document.documentElement.dataset.hud=localStorage.getItem('hud.mode')==='glass'?'glass':'mw4'}catch(e){document.documentElement.dataset.hud='mw4'}</script>
+<link rel="stylesheet" href="../glass.css">
 <title>MW4 // LEDGER</title>
 </head>
-<body class="sx-pad">
+<body class="sx-pad glass-ready">
+<div id="glass"></div>
 <div class="lg-sticky">
   <div class="lg-mock" id="srcFlag">▲ Mock — not live · sales / spend ▲<small>Profit first · rev − cogs − spend · all figures sample</small></div>
   <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · LEDGER</span><span class="clk" id="clk">—</span></div>
@@ -30,7 +33,7 @@
       <div class="brand">MW4 <span class="sl">//</span> LEDGER</div>
       <div class="mastsub">P&amp;L theater · <span class="h">profit before revenue</span> · <span class="smp" id="smp">SAMPLE</span></div>
     </div>
-    <div class="asof"><span class="dot"></span><span id="asof">AS OF —</span></div>
+    <div class="asof"><span class="dot"></span><span id="asof">AS OF —</span><span data-hud-mode class="hud-mode-slot"></span></div>
   </div>
   <div class="chrome ldg" id="counters"></div>
   <div class="maincol">
@@ -101,6 +104,9 @@
   <a href="../orbat/"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M12 7.5v3.5M12 11H6.5V16.5M12 11h5.5V16.5"/></svg>ORBAT</a>
   <a href="../files/"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8 13h8M8 17h5"/></svg>FILES</a>
 </nav></div>
+<script src="../roster.js"></script>
+<script src="../hud-mode.js"></script>
+<script src="../glass.js"></script>
 <script src="model.js"></script>
 <script src="ledger.js"></script>
 </body>

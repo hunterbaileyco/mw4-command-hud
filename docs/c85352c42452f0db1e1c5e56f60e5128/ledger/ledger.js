@@ -264,6 +264,7 @@
     if (!state.model.windows[state.win]) state.win = 'mtd';
     paintStatic(state.model);
     paintWindow();
+    if (window.MW4Glass) MW4Glass.show('ledger', state.model, { base: '../', home: '../' });
   }
 
   function clock() {
@@ -286,5 +287,5 @@
   clock();
   setInterval(clock, 1000);
   boot();
-  setInterval(boot, 60000);
+  setInterval(() => { if (!window.MW4Mode || MW4Mode.refreshOn()) boot(); }, 60000);
 })();

@@ -14,6 +14,8 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="stylesheet" href="../suite.css">
 <link rel="stylesheet" href="../theater.css">
+<script>try{document.documentElement.dataset.hud=localStorage.getItem('hud.mode')==='glass'?'glass':'mw4'}catch(e){document.documentElement.dataset.hud='mw4'}</script>
+<link rel="stylesheet" href="../glass.css">
 <title>MW4 // ORBAT</title>
 <style>
 *{box-sizing:border-box}
@@ -31,7 +33,8 @@ a{color:inherit;text-decoration:none}
 @media(min-width:900px){.brand{font-size:26px}}
 </style>
 </head>
-<body class="sx-pad">
+<body class="sx-pad glass-ready">
+<div id="glass"></div>
 <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · THEATER</span><span class="clk" id="clk">—</span></div>
 <div class="wrap">
   <div class="top">
@@ -40,7 +43,7 @@ a{color:inherit;text-decoration:none}
       <div class="brand">MW4 <span class="sl">//</span> ORBAT</div>
       <div class="mastsub">Chain of command · dispatch wire · creative gate · outside fence</div>
     </div>
-    <div class="asof"><span class="dot"></span><span id="nfile">13 ON FILE</span></div>
+    <div class="asof"><span class="dot"></span><span id="nfile">13 ON FILE</span><span data-hud-mode class="hud-mode-slot"></span></div>
   </div>
   <div class="chain"><span>HUNTER</span><em>▼</em><span class="o">KAL</span><em>▸</em><span>PRICE</span><em>▸</em><span class="a">9 WIRES · 8 LANES + CHO</span></div>
   <div class="brief"><b>BRIEF ▸</b> <b>Price is the only dispatcher.</b> Kal feeds intake into Price. Cho is a checkpoint — West, Jae, Park, Gaz and Ju Kwon pass it; Cho assigns nothing. Laswell (141-11) owns care@ only. Ghost and Dunn sit outside the wire.</div>
@@ -119,6 +122,9 @@ a{color:inherit;text-decoration:none}
   <a href="../files/"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8 13h8M8 17h5"/></svg>FILES</a>
 </nav></div>
 <script src="../roster.js"></script>
+<script src="../action-panel.js"></script>
+<script src="../hud-mode.js"></script>
+<script src="../glass.js"></script>
 <script>
 (() => {
   'use strict';
@@ -126,6 +132,7 @@ a{color:inherit;text-decoration:none}
   const clk = () => { $('clk').textContent = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) + ' PT'; };
   clk(); setInterval(clk, 1000);
   $('nfile').textContent = MW4Roster.FILES.length + ' ON FILE';
+  if (window.MW4Glass) MW4Glass.show('orbat', { ready: false, cards: [] }, { base: '../', home: '../' });
 
   function readBoxes() {
     const root = $('omap').getBoundingClientRect();
@@ -208,6 +215,7 @@ a{color:inherit;text-decoration:none}
         if (!op) return;
         el.textContent = zoneOf(op, cards);
       });
+      if (window.MW4Glass) MW4Glass.show('orbat', { ready: true, cards: cards }, { base: '../', home: '../' });
     } catch (_) { /* map still reads without the feed */ }
   }
   live();

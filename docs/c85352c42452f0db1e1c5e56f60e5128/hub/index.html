@@ -15,6 +15,8 @@
 <link rel="shortcut icon" href="../favicon.ico">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="../suite.css">
+<script>try{document.documentElement.dataset.hud=localStorage.getItem('hud.mode')==='glass'?'glass':'mw4'}catch(e){document.documentElement.dataset.hud='mw4'}</script>
+<link rel="stylesheet" href="../glass.css">
 <script src="../brand-icons.js"></script>
 <script src="../action-panel.js"></script>
 <script src="../ledger/model.js"></script>
@@ -145,11 +147,13 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
 .care.live .src .chip{color:var(--olive2)}
 </style>
 </head>
-<body class="sx-pad">
+<body class="sx-pad glass-ready">
+<div id="glass"></div>
 <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · FWD CMD POST</span><span class="clk" id="clk">—</span></div>
 <div class="wrap">
   <div class="sx-title">
     <div><div class="kick">◆ Forward command post · Restricted</div><h1>MW4 <span class="sl">//</span> Command suite</h1></div>
+    <span data-hud-mode class="hud-mode-slot"></span>
   </div>
 
   <div class="ilk" id="ilk">
@@ -264,6 +268,9 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   <a href="../files/"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8 13h8M8 17h5"/></svg>FILES</a>
 </nav></div>
 
+<script src="../hud-mode.js"></script>
+<script src="../glass.js"></script>
+<script src="../roster.js"></script>
 <script>
 (() => {
   'use strict';
@@ -305,14 +312,16 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
   }
   const down = (msg) => { $('ilk').classList.remove('live'); $('ist').textContent = 'LINK DOWN'; $('isync').innerHTML = '<a href="" onclick="location.reload();return false" style="color:var(--holdink)">' + esc(msg) + ' ↻</a>'; $('isync').style.display = 'block'; };
   async function pull() {
+    const force = window.MW4Mode && MW4Mode.takeForce();
+    if (!force && window.MW4Mode && !MW4Mode.refreshOn()) return;
     let ok = false;
-    try { hud(await get('status')); ok = true; } catch (err) { $('hudHint').innerHTML = '<span class="w">⚠ HUD FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; down(String(err.message || err).toUpperCase()); }
+    try { hud(await get('status')); ok = true; } catch (err) { $('hudHint').innerHTML = '<span class="w">⚠ HUD FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; down(String(err.message || err).toUpperCase()); if (window.MW4Glass) MW4Glass.show('command', null, { base: '../', home: '../', error: String(err.message || err) }); }
     try { soc(await get('social')); } catch (err) { $('socHint').innerHTML = '<span class="w">⚠ SOCIAL FEED · ' + esc(String(err.message || err).toUpperCase()) + '</span>'; }
     try { ledger(await get('ledger')); } catch (_) { ledger(null); }
     try { care(await get('care')); } catch (_) { care(null); }
     if (ok) { $('ilk').classList.add('live'); $('ist').textContent = 'INTEL LIVE'; }
   }
-  $('sync2').addEventListener('click', (e) => { e.preventDefault(); pull(); });
+  $('sync2').addEventListener('click', (e) => { e.preventDefault(); if (window.MW4Mode) MW4Mode.forceRefresh = true; pull(); });
   function setN(id, v) { const el = $(id); el.textContent = v; el.classList.remove('lk'); }
   // Older feeds put Command waiting only in glance.line1. Badge already merged both boards.
   function glanceOf(d) {
@@ -347,6 +356,7 @@ a{color:inherit;text-decoration:none}button,input{font:inherit}
     $('sit').innerHTML = items.length ? '<ul>' + items.join('') + '</ul>' : '<div class="lockd">No crossings in the last 6h</div>';
     $('sitc').textContent = ev.length + ' CROSSINGS · ' + (d.alerts || []).length + ' ALERTS';
     paintWire(d);
+    if (window.MW4Glass) MW4Glass.show('command', d, { base: '../', home: '../' });
   }
   const fileId = (op) => op === 'Ju Kwon' ? 'ju' : String(op || '').toLowerCase();
   const faceId = (op) => op === 'Ju Kwon' ? 'ju-kwon' : fileId(op);

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a1f3a">
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="stylesheet" href="../suite.css">
+<script>try{document.documentElement.dataset.hud=localStorage.getItem('hud.mode')==='glass'?'glass':'mw4'}catch(e){document.documentElement.dataset.hud='mw4'}</script>
+<link rel="stylesheet" href="../glass.css">
+<title>Kinsora · Settings</title>
+</head>
+<body class="glass-settings">
+<div id="glass"></div>
+<script src="../hud-mode.js"></script>
+<script src="../roster.js"></script>
+<script src="../glass.js"></script>
+<script>
+(() => {
+  const opts = { base: '../', home: '../' };
+  const draw = () => { if (window.MW4Glass) MW4Glass.show('settings', null, opts); };
+  draw();
+  window.addEventListener('hudmode', draw);
+})();
+</script>
+</body>
+</html>

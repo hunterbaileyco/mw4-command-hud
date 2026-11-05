@@ -13,6 +13,8 @@
 <link rel="shortcut icon" href="../favicon.ico">
 <link rel="apple-touch-icon" href="../apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="../suite.css">
+<script>try{document.documentElement.dataset.hud=localStorage.getItem('hud.mode')==='glass'?'glass':'mw4'}catch(e){document.documentElement.dataset.hud='mw4'}</script>
+<link rel="stylesheet" href="../glass.css">
 <script src="../brand-icons.js"></script>
 <script src="accounts.js"></script>
 <title>Kinsora social — published metrics</title>
@@ -150,14 +152,14 @@ details li{margin:4px 0}
 .down a{color:var(--tan);border-bottom:1px dotted var(--tan)}
 </style>
 </head>
-<body class="sx-pad">
-
+<body class="sx-pad glass-ready">
+<div id="glass"></div>
 <div id="app">
 <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · SIGINT · JAE</span><span class="clk" id="clk">—</span></div>
 <div class="wrap">
   <div class="top">
     <div><div class="kick">◆ SIGINT · published posts</div><div class="brand">MW4 <span class="sl">//</span> SOCIAL <span class="sl">·</span> JAE</div></div>
-    <div class="asof"><span class="dot" id="dot"></span><span id="asof">—</span></div>
+    <div class="asof"><span class="dot" id="dot"></span><span id="asof">—</span><span data-hud-mode class="hud-mode-slot"></span></div>
   </div>
   <div><h1>Kinsora social — published metrics</h1><div class="sub" id="sub"></div></div>
   <div class="warn" id="stale"></div>
@@ -221,6 +223,9 @@ details li{margin:4px 0}
 </nav></div>
 </div>
 
+<script src="../roster.js"></script>
+<script src="../hud-mode.js"></script>
+<script src="../glass.js"></script>
 <script>
 (() => {
   'use strict';
@@ -249,6 +254,7 @@ details li{margin:4px 0}
     catch (err) {
       $('asof').textContent = 'LINK DOWN'; $('dot').classList.add('stale');
       $('sub').innerHTML = `<div class="down">⚠ LINK DOWN · ${esc(err.message)}<br><br><a href="" onclick="location.reload();return false">RELOAD</a></div>`;
+      if (window.MW4Glass) MW4Glass.show('social', null, { base: '../', home: '../', error: err.message });
     }
   }
   $('lock').addEventListener('click', (e) => { e.preventDefault(); boot(); });
@@ -288,6 +294,7 @@ details li{margin:4px 0}
     $('notes').innerHTML = [...D.notes, ...D.errors].map((n) => '<li>' + esc(n) + '</li>').join('');
     $('foot').textContent = 'Sources · ' + D.sources.join(' · ');
     render();
+    if (window.MW4Glass) MW4Glass.show('social', D, { base: '../', home: '../' });
   }
   // tiny sparkline from the channel's own series (calendar) or per-post views by day posted
   function spark(key) {

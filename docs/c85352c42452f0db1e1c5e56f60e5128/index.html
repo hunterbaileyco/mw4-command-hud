@@ -16,6 +16,8 @@
 <link rel="shortcut icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="apple-touch-icon.png" sizes="180x180">
 <link rel="stylesheet" href="suite.css">
+<script>try{document.documentElement.dataset.hud=localStorage.getItem('hud.mode')==='glass'?'glass':'mw4'}catch(e){document.documentElement.dataset.hud='mw4'}</script>
+<link rel="stylesheet" href="glass.css">
 <script src="action-panel.js"></script>
 <title>MW4 // COMMAND</title>
 <style>
@@ -416,14 +418,14 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 </style>
 <link rel="stylesheet" href="theater.css">
 </head>
-<body class="sx-pad">
-
+<body class="sx-pad glass-ready">
+<div id="glass"></div>
 <div id="app">
 <div class="sx-band"><span class="cl">TOP SECRET // TF141</span><span class="mid">OP KINSORA · THEATER</span><span class="clk" id="clk">—</span></div>
 <div class="wrap">
   <div class="top">
     <div><div class="kick"><span class="sx-rec"></span>TF141 · Operator theater · CMD + TRADING</div><div class="brand">MW4 <span class="sl">//</span> COMMAND</div><div class="mastsub">AO DOING · <span class="h">HOLD = WAITING</span> · FOB QUEUE · DONE</div></div>
-    <div class="asof"><span class="dot" id="dot"></span><span id="upd">—</span><button class="snd" id="snd" type="button" aria-label="Toggle sound" title="Sound">🔊</button></div>
+    <div class="asof"><span class="dot" id="dot"></span><span id="upd">—</span><span data-hud-mode class="hud-mode-slot"></span><button class="snd" id="snd" type="button" aria-label="Toggle sound" aria-pressed="true" title="Sound">🔊</button></div>
   </div>
   <div class="chrome">
     <div class="act"><span class="l">DOING</span><span class="sub" id="subAct">AO · ACROSS WIRE</span><span class="n" id="nAct">0</span><i class="bar"><b id="bAct"></b></i></div>
@@ -496,7 +498,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 
   <div class="ft">
     <div class="boards"><a id="cmdLink" target="_blank" rel="noopener">CMD BOARD ↗</a><a id="kalLink" target="_blank" rel="noopener">TRADING BOARD ↗</a></div>
-    <div><span id="stale"></span>AUTO-REFRESH · POLLS 20S · <span id="ref">—</span> · <a href="hub/">HUB</a> · <a href="ledger/">LEDGER</a> · <a href="orbat/">ORBAT</a> · <a href="files/">FILES</a> · <a href="social/">SOCIAL</a> · <a href="#" id="fsync">SYNC</a></div>
+    <div><span id="stale"></span>AUTO-REFRESH · POLLS 20S · <span id="ref">—</span> · <a href="hub/">HUB</a> · <a href="ledger/">LEDGER</a> · <a href="orbat/">ORBAT</a> · <a href="files/">FILES</a> · <a href="social/">SOCIAL</a> · <a href="settings/">SETTINGS</a> · <a href="#" id="fsync">SYNC</a></div>
   </div>
 </div>
 <div class="sx-dock"><nav>
@@ -512,6 +514,8 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 <div id="sheet"><div class="pn" id="sheetp"></div></div>
 
 <script src="roster.js"></script>
+<script src="hud-mode.js"></script>
+<script src="glass.js"></script>
 <script>
 (() => {
   'use strict';
@@ -542,7 +546,12 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 
   // ---------- sound (Web Audio, no files) ----------
   let soundOn = localStorage.getItem(SKEY) !== '0', actx = null;
-  const paintSnd = () => { $('snd').textContent = soundOn ? '🔊' : '🔇'; $('snd').classList.toggle('off', !soundOn); };
+  const paintSnd = () => {
+    $('snd').textContent = soundOn ? '🔊' : '🔇';
+    $('snd').classList.toggle('off', !soundOn);
+    $('snd').setAttribute('aria-pressed', soundOn ? 'true' : 'false');
+    if (window.MW4Mode) MW4Mode.reflectSound(soundOn);
+  };
   function audio() {
     if (!actx) { const A = window.AudioContext || window.webkitAudioContext; if (!A) return null; actx = new A(); }
     if (actx.state === 'suspended') actx.resume().catch(() => {});
@@ -565,6 +574,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
   $('snd').addEventListener('click', (e) => { e.stopPropagation(); soundOn = !soundOn; localStorage.setItem(SKEY, soundOn ? '1' : '0'); paintSnd(); if (soundOn) blip('cleared'); });
   ['pointerdown', 'touchstart', 'keydown'].forEach((ev) => document.addEventListener(ev, () => { if (soundOn) audio(); }, { passive: true }));
   paintSnd();
+  window.addEventListener('hudsound', (e) => { soundOn = !!e.detail; paintSnd(); });
 
   let lastData = null, lastFetch = null, tab = 'doing', cards = [], pending = null, started = false;
   let prevZones = null;           // op -> committed zone from the previous render (in memory)
@@ -578,7 +588,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
 
   function unlock() {
     if (started) return; started = true;
-    load(); setInterval(load, POLL_MS);
+    load(); setInterval(() => { if (!window.MW4Mode || MW4Mode.refreshOn()) load(); }, POLL_MS);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) { if (pending) { const d = pending; pending = null; render(d); } load(); } });
   }
   $('fsync').addEventListener('click', (e) => { e.preventDefault(); load(); });
@@ -648,7 +658,11 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
       const d = await openEnv(await fetchEnv()); lastData = d; lastFetch = Date.now();
       if (document.hidden && prevZones) pending = d; else render(d); // hold deltas until Hunter is looking
       tick();
-    } catch (err) { $('ref').innerHTML = '<a href="" class="st" onclick="location.reload();return false">LINK DOWN · ' + esc(err.message) + '</a>'; if (!lastData) $('quiet').textContent = 'LINK DOWN · ' + err.message; }
+    } catch (err) {
+      $('ref').innerHTML = '<a href="" class="st" onclick="location.reload();return false">LINK DOWN · ' + esc(err.message) + '</a>';
+      if (!lastData) $('quiet').textContent = 'LINK DOWN · ' + err.message;
+      if (!lastData && window.MW4Glass) MW4Glass.show('command', null, { base: '', home: './', error: err.message });
+    }
   }
 
   const chip = (tag, tone) => `<span class="chip ${tone}">${tag}</span>`;
@@ -1006,6 +1020,7 @@ span.av.ini{display:flex;align-items:center;justify-content:center;font-family:v
     renderWork();
     renderOrbat(); heat();
     maybeHash();
+    if (window.MW4Glass) MW4Glass.show('command', d, { base: '', home: './' });
   }
   function workLimits() {
     const sm = window.matchMedia && matchMedia('(max-width:899px)').matches;

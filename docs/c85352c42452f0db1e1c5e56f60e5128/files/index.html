@@ -14,6 +14,8 @@
 <link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <link rel="stylesheet" href="../suite.css">
 <link rel="stylesheet" href="../theater.css">
+<script>try{document.documentElement.dataset.hud=localStorage.getItem('hud.mode')==='glass'?'glass':'mw4'}catch(e){document.documentElement.dataset.hud='mw4'}</script>
+<link rel="stylesheet" href="../glass.css">
 <title>MW4 // FILES</title>
 <style>
 *{box-sizing:border-box}
@@ -63,7 +65,7 @@ a{color:inherit}
       <div class="brand">MW4 <span class="sl">//</span> FILES</div>
       <div class="mastsub">Operator dossiers · callsign · lane · boundary · flow</div>
     </div>
-    <div class="asof"><span class="dot"></span><span id="nfile">13 FILES</span></div>
+    <div class="asof"><span class="dot"></span><span id="nfile">13 FILES</span><span data-hud-mode class="hud-mode-slot"></span></div>
   </div>
   <div class="files">
     <section class="panel" id="roster">
@@ -81,6 +83,7 @@ a{color:inherit}
   <a class="on" href="./"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M8 13h8M8 17h5"/></svg>FILES</a>
 </nav></div>
 <script src="../roster.js"></script>
+<script src="../hud-mode.js"></script>
 <script>
 (() => {
   'use strict';

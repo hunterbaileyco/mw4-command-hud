@@ -15,7 +15,8 @@ Blocked cards are excluded from Doing, Waiting, Backlog, and Done, and listed be
 | backlog | 1 | 1 | match |
 | doneToday | 0 | 1 | DIFF |
 
-Only Notion ids: none
+notionOnly (informational, not a failed read): none
+Trello-only active mismatch: none
 Only Trello ids: none
 
 ## Status mismatches

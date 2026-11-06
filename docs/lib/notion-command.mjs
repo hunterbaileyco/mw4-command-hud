@@ -11,15 +11,29 @@
 //   multi-lane. No roster match leaves the lane blank and flags unmapped-lane.
 //   Command never receives the Ghost fallback used for Kal cards.
 // - Hold is ignored when choosing a list. Waiting is only status "Waiting on Hunter".
-// - Operational rows are Record role "Current work" with a Trello card id.
-//   Roles whose names start with History, Legacy, or Template are excluded
-//   (History / reference, Legacy – needs review, Template / non-operational).
-//   Any other role, including blank, fails the read closed. Card id is the
-//   Trello id tail. card.url is kept only when it is already https://trello.com/.
+// - Operational rows are Record role "Current work". History, Legacy, and
+//   Template prefixes are excluded. Any other role fails the read closed.
+//   Notion is a superset of the open Command board. A Current work row whose
+//   Trello id is not on that board stays in the feed and is notionOnly in the
+//   diff. It is not a failed read.
+// - If a Trello card id exists, it is the card id and the Trello Source URL is
+//   the url, including cards from other boards. If it does not, the id is
+//   `notion:` plus the Notion page id with dashes removed (preview default,
+//   pending a product decision). That cannot collide with a 24-character
+//   Trello id. The url is the Notion page URL, which the Trello-only link
+//   allowlists ignore. The row is flagged no-trello-id.
+// - Primary lane (single select) and Completed date (date) are optional.
+//   Resolve them by name. MW4_NOTION_PRIMARY_LANE_ID and
+//   MW4_NOTION_COMPLETED_DATE_ID select by property id when Price sends them.
+//   A set Primary lane that matches the roster overrides the multi-select
+//   order. An unknown value warns and falls back to that order. A set
+//   Completed date is the Done-entry time. A null Completed date leaves
+//   doneToday unknown. Last edited, import time, and Source as-of are never
+//   that time.
 // - Source as-of, Last edited, Started, and import time are not completion
 //   times and are not freshness.
 
-import { LANES, hitLane } from '../api/status-model.mjs';
+import { LANES, board, hitLane } from '../api/status-model.mjs';
 import { trelloIdTail } from './done-ledger.mjs';
 
 export const NOTION_VERSION = '2025-09-03';
@@ -30,6 +44,8 @@ export const REQUEST_TIMEOUT_MS = 8000;
 export const BUDGET_MS = 20000;
 export const MAX_429_RETRIES = 3;
 export const RETRY_AFTER_CAP_MS = 2000;
+// Preview default until a product decision: stable, not a Trello id.
+export const NOTION_PAGE_ID_PREFIX = 'notion:';
 
 const STATUS_OPTIONS = ['Backlog', 'Doing', 'Waiting on Hunter', 'Blocked', 'Done'];
 const ROLE_PREFIXES = ['history', 'legacy', 'template'];
@@ -43,6 +59,20 @@ export function classifyRecordRole(role) {
   const lower = text.toLowerCase();
   if (ROLE_PREFIXES.some((prefix) => lower.startsWith(prefix))) return 'excluded';
   return 'unknown';
+}
+
+export function notionPageCardId(pageId) {
+  const compact = String(pageId || '').replace(/-/g, '').trim().toLowerCase();
+  if (!compact) return '';
+  return NOTION_PAGE_ID_PREFIX + compact;
+}
+
+export function propertyRefs(env) {
+  const source = env || {};
+  return {
+    primaryLaneId: String(source.MW4_NOTION_PRIMARY_LANE_ID || '').trim(),
+    completedDateId: String(source.MW4_NOTION_COMPLETED_DATE_ID || '').trim(),
+  };
 }
 
 export function notionApiKey(env) {
@@ -149,22 +179,39 @@ function titleOf(properties) {
   return '';
 }
 
-export function pageToRow(page) {
+function findProp(properties, name, id) {
+  if (!properties || typeof properties !== 'object') return null;
+  if (id) {
+    const byId = Object.values(properties).find((prop) => prop && prop.id === id);
+    if (byId) return byId;
+  }
+  if (properties[name]) return properties[name];
+  return Object.values(properties).find((prop) => prop && prop.name === name) || null;
+}
+
+export function pageToRow(page, refs = {}) {
   const properties = (page && page.properties) || {};
-  const trelloRaw = propText(properties['Trello card ID']);
-  const sourceUrl = propText(properties['Source URL']).trim();
-  return {
+  const trelloRaw = propText(findProp(properties, 'Trello card ID', ''));
+  const sourceUrl = propText(findProp(properties, 'Source URL', '')).trim();
+  const primaryProp = findProp(properties, 'Primary lane', refs.primaryLaneId);
+  const completedProp = findProp(properties, 'Completed date', refs.completedDateId);
+  const row = {
+    pageId: (page && page.id) || '',
+    pageUrl: (page && page.url) || '',
     trelloIdTail: trelloIdTail(trelloRaw),
     title: titleOf(properties),
-    status: propText(properties.Status),
-    lanes: propMulti(properties.Lane),
-    hold: propCheck(properties.Hold),
-    recordRole: propText(properties['Record role']),
+    status: propText(findProp(properties, 'Status', '')),
+    lanes: propMulti(findProp(properties, 'Lane', '')),
+    hold: propCheck(findProp(properties, 'Hold', '')),
+    recordRole: propText(findProp(properties, 'Record role', '')),
     sourceUrl,
-    sourceAsOf: propText(properties['Source as-of']),
-    started: propText(properties.Started),
+    sourceAsOf: propText(findProp(properties, 'Source as-of', '')),
+    started: propText(findProp(properties, 'Started', '')),
     lastEdited: (page && page.last_edited_time) || '',
   };
+  if (primaryProp) row.primaryLane = propText(primaryProp).trim();
+  if (completedProp) row.completedDate = propText(completedProp).trim();
+  return row;
 }
 
 function laneValues(value) {
@@ -177,8 +224,11 @@ export function coerceRow(row) {
   if (row && row.properties) return pageToRow(row);
   const sourceUrl = String((row && (row.sourceUrl || row['Source URL'])) || '').trim();
   const lanes = laneValues(row && (row.lanes || row.Lane));
-  const completion = row && (row.completionDate || row.completedAt || row['Completed at']);
-  return {
+  const hasPrimary = !!row && (Object.prototype.hasOwnProperty.call(row, 'primaryLane') || Object.prototype.hasOwnProperty.call(row, 'Primary lane'));
+  const hasCompleted = !!row && (Object.prototype.hasOwnProperty.call(row, 'completedDate') || Object.prototype.hasOwnProperty.call(row, 'Completed date'));
+  const out = {
+    pageId: String((row && (row.pageId || row.page_id)) || ''),
+    pageUrl: String((row && (row.pageUrl || row.url)) || ''),
     trelloIdTail: trelloIdTail(row && (row.trelloIdTail || row.trelloId || row['Trello card ID'])),
     title: String((row && (row.title || row.name || row.Name)) || ''),
     status: String((row && (row.status || row.Status)) || ''),
@@ -189,8 +239,13 @@ export function coerceRow(row) {
     sourceAsOf: String((row && (row.sourceAsOf || row.sourceAsOfTime || row['Source as-of'])) || ''),
     started: String((row && (row.started || row.Started)) || ''),
     lastEdited: String((row && (row.lastEdited || row.lastEditedTime || row['Last edited'])) || ''),
-    completionDate: completion ? String(completion) : '',
   };
+  if (hasPrimary) out.primaryLane = String((row.primaryLane ?? row['Primary lane']) || '').trim();
+  if (hasCompleted) {
+    const raw = row.completedDate ?? row['Completed date'];
+    out.completedDate = raw ? String(raw).trim() : '';
+  }
+  return out;
 }
 
 function optionNames(prop) {
@@ -207,7 +262,7 @@ function propByName(properties, name) {
   return found || null;
 }
 
-export function validateDataSource(body) {
+export function validateDataSource(body, refs = {}) {
   const properties = body && (body.properties || (body.data_source && body.data_source.properties));
   if (!properties || typeof properties !== 'object') fail('schema');
   for (const name of REQUIRED_PROPS) {
@@ -236,6 +291,12 @@ export function validateDataSource(body) {
   if (!['url', 'rich_text', 'formula'].includes(link.type)) fail('schema');
   const title = Object.values(properties).some((prop) => prop && prop.type === 'title');
   if (!title) fail('schema');
+  const primary = findProp(properties, 'Primary lane', refs.primaryLaneId);
+  if (refs.primaryLaneId && !primary) fail('schema');
+  if (primary && primary.type !== 'select' && primary.type !== 'status') fail('schema');
+  const completed = findProp(properties, 'Completed date', refs.completedDateId);
+  if (refs.completedDateId && !completed) fail('schema');
+  if (completed && completed.type !== 'date') fail('schema');
 }
 
 function retryAfterMs(header) {
@@ -352,7 +413,8 @@ export async function loadNotionCommand(options = {}) {
       { method: 'GET' },
       timeoutMs,
     );
-    validateDataSource(schema);
+    const refs = options.propertyRefs || propertyRefs(env);
+    validateDataSource(schema, refs);
     const rows = [];
     let cursor = '';
     let pages = 0;
@@ -369,7 +431,7 @@ export async function loadNotionCommand(options = {}) {
       );
       if (!page || !Array.isArray(page.results)) fail('partial');
       pages += 1;
-      for (const item of page.results) rows.push(pageToRow(item));
+      for (const item of page.results) rows.push(pageToRow(item, refs));
       const more = Boolean(page.has_more);
       if (!more) {
         const operational = rows.filter(isOperationalRow);
@@ -392,7 +454,7 @@ function isOperationalRow(row) {
   const kind = classifyRecordRole(row.recordRole);
   if (kind === 'unknown') fail('role');
   if (kind !== 'operational') return false;
-  if (!row.trelloIdTail) return false;
+  if (!row.trelloIdTail && !notionPageCardId(row.pageId)) fail('identity');
   return true;
 }
 
@@ -416,50 +478,108 @@ function trelloLink(url) {
   return '';
 }
 
+function ignoredPageUrl(row) {
+  const pageUrl = String(row.pageUrl || '').trim();
+  if (/^https:\/\//.test(pageUrl) && !/^https:\/\/trello\.com\//.test(pageUrl)) return pageUrl;
+  const compact = String(row.pageId || '').replace(/-/g, '').trim();
+  if (compact) return `https://www.notion.so/${compact}`;
+  return '';
+}
+
+// A date-only Completed date is that America/Los_Angeles calendar day.
+// 20:00Z is still that date in both PST and PDT.
+export function completedInstant(value) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return `${text}T20:00:00.000Z`;
+  return text;
+}
+
+export function evaluateCompletedDoneToday(doneCards, now) {
+  if (!doneCards.length) return { known: false, count: null };
+  if (doneCards.some((card) => !card.completedDate)) return { known: false, count: null };
+  const dump = {
+    lists: [{
+      name: 'Done',
+      cards: doneCards.map((card) => ({
+        id: card.id,
+        name: card.name || card.id,
+        desc: '',
+        movedToDoneAt: completedInstant(card.completedDate),
+      })),
+    }],
+  };
+  return { known: true, count: board(dump, '', 'CMD', now).out.counts.doneToday };
+}
+
 function cardFrom(row, lane) {
-  const link = trelloLink(row.sourceUrl);
+  const hasTrello = Boolean(row.trelloIdTail);
+  const link = hasTrello ? trelloLink(row.sourceUrl) : ignoredPageUrl(row);
   const desc = lane ? `Lane: ${lane}` : '';
-  return {
-    id: row.trelloIdTail,
+  const card = {
+    id: hasTrello ? row.trelloIdTail : notionPageCardId(row.pageId),
     name: row.title || 'Untitled',
     desc,
     description: desc,
-    shortUrl: link,
+    shortUrl: hasTrello ? link : '',
     url: link,
     labels: [],
     lastActivityAt: '',
   };
+  if (row.completedDate) card.movedToDoneAt = completedInstant(row.completedDate);
+  if (Object.prototype.hasOwnProperty.call(row, 'completedDate')) card.completedDate = row.completedDate || '';
+  return card;
 }
 
 // `rows` are simplified records or Notion pages. Hold does not affect the list.
 // Blocked uses the preview default (exclude) unless mapConfig.blocked is passed;
 // only "exclude" is accepted.
+function chooseLane(row, primaryEnabled) {
+  const fallback = resolveLane(row.lanes);
+  if (!primaryEnabled) return fallback;
+  const primary = String(row.primaryLane || '').trim();
+  if (!primary) return fallback;
+  const hit = hitLane(primary);
+  if (hit) return { lane: hit, codes: [], detail: '' };
+  return { lane: fallback.lane, codes: ['primary-lane-unknown', ...fallback.codes], detail: primary };
+}
+
 export function mapOperationalRows(rows, mapConfig = {}) {
   const mode = blockedMode(mapConfig.blocked || 'exclude');
   if (mode !== 'exclude') assertNever(mode);
+  const list = (Array.isArray(rows) ? rows : []).map(coerceRow);
+  const primaryEnabled = mapConfig.primaryLaneEnabled != null
+    ? Boolean(mapConfig.primaryLaneEnabled)
+    : list.some((row) => Object.prototype.hasOwnProperty.call(row, 'primaryLane'));
+  const completedEnabled = mapConfig.completedDateEnabled != null
+    ? Boolean(mapConfig.completedDateEnabled)
+    : list.some((row) => Object.prototype.hasOwnProperty.call(row, 'completedDate'));
   const buckets = { Backlog: [], Doing: [], 'Waiting on Hunter': [], Done: [] };
   const warnings = [];
-  const list = Array.isArray(rows) ? rows : [];
-  for (const raw of list) {
-    const row = coerceRow(raw);
+  for (const row of list) {
     if (!isOperationalRow(row)) continue;
-    const lane = resolveLane(row.lanes);
-    const linkOk = !row.sourceUrl || trelloLink(row.sourceUrl);
-    const linkCodes = linkOk ? [] : ['link-not-trello'];
+    const lane = chooseLane(row, primaryEnabled);
+    const hasTrello = Boolean(row.trelloIdTail);
+    const link = hasTrello ? trelloLink(row.sourceUrl) : '';
+    const linkCodes = [];
+    if (!hasTrello) linkCodes.push('no-trello-id');
+    else if (row.sourceUrl && !link) linkCodes.push('link-not-trello');
+    const id = hasTrello ? row.trelloIdTail : notionPageCardId(row.pageId);
     if (row.status === 'Blocked') {
       warnings.push({
-        id: row.trelloIdTail,
+        id,
         codes: ['blocked-excluded', ...lane.codes, ...linkCodes],
         status: row.status,
         picked: lane.lane,
         detail: lane.detail || '',
+        notionOnly: true,
       });
       continue;
     }
     const listName = listForStatus(row.status);
     if (!listName) {
       warnings.push({
-        id: row.trelloIdTail,
+        id,
         codes: ['status-unmapped', ...lane.codes, ...linkCodes],
         status: row.status,
         picked: lane.lane,
@@ -469,7 +589,7 @@ export function mapOperationalRows(rows, mapConfig = {}) {
     }
     if (lane.codes.length || linkCodes.length) {
       warnings.push({
-        id: row.trelloIdTail,
+        id,
         codes: [...lane.codes, ...linkCodes],
         status: row.status,
         picked: lane.lane,
@@ -478,15 +598,17 @@ export function mapOperationalRows(rows, mapConfig = {}) {
     }
     buckets[listName].push(cardFrom(row, lane.lane));
   }
+  const doneCards = buckets.Done;
   return {
     dump: {
       lists: [
         { name: 'Doing', cards: buckets.Doing },
         { name: 'Waiting on Hunter', cards: buckets['Waiting on Hunter'] },
         { name: 'Backlog', cards: buckets.Backlog },
-        { name: 'Done', cards: buckets.Done },
+        { name: 'Done', cards: doneCards },
       ],
     },
     warnings,
+    doneTodayStatus: completedEnabled ? evaluateCompletedDoneToday(doneCards, mapConfig.now || Date.now()) : null,
   };
 }

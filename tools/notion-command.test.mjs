@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { board, composeStatus } from '../docs/api/status-model.mjs';
 import {
-  DATA_SOURCE_ID, NOTION_VERSION, loadNotionCommand, mapOperationalRows, notionApiKey,
+  DATA_SOURCE_ID, NOTION_VERSION, evaluateCompletedDoneToday, loadNotionCommand, mapOperationalRows, notionApiKey, notionPageCardId,
 } from '../docs/lib/notion-command.mjs';
 import {
   MemoryLedgerStore, createLedgerStore, movesFromEntries, noteTransitions,
@@ -104,7 +104,7 @@ function notionFetch(pages, { schemaStatus = 200, schemaHeaders = {}, failSchema
 }
 
 function row(id, status, lane, extra = {}) {
-  return {
+  const out = {
     trelloId: id,
     title: extra.title || id,
     status,
@@ -116,6 +116,11 @@ function row(id, status, lane, extra = {}) {
     lastEdited: extra.lastEdited || '',
     started: extra.started || '',
   };
+  if (extra.primaryLane != null) out.primaryLane = extra.primaryLane;
+  if (extra.completedDate != null) out.completedDate = extra.completedDate;
+  if (extra.pageId) out.pageId = extra.pageId;
+  if (extra.url) out.url = extra.url;
+  return out;
 }
 
 function counts(rows, now = Date.parse('2026-11-05T20:00:00.000Z'), moves = []) {
@@ -578,6 +583,75 @@ const tradingLists = [{ name: 'Waiting on Hunter', cards: [{ id: 'k1', name: 'Gh
   check(!report.includes(SECRET) && !report.includes('2011-11-11') && !report.includes('2012-12-12'), 'sample report omits secrets and ignored clocks');
   check(fs.readFileSync('tools/fixtures/shadow-sample-report.md', 'utf8') === report, 'committed sample report matches the tool');
   check(diffCommand(result.notion, result.trello, result.warnings).waiting.notion === 1, 'waiting count is present');
+}
+
+// --- superset, notion page ids, primary lane, completed date ---
+{
+  const other = 'abababababababababababab';
+  const commandOnly = 'cdcdcdcdcdcdcdcdcdcdcdcd';
+  const nativePage = '40f16968-1b6f-8076-ad36-000b28dac4aa';
+  const notionRows = [
+    row('aaa111aaa111aaa111aaa111', 'Doing', 'Ko', { title: 'Gate repair', sourceUrl: 'https://trello.com/c/gateKo' }),
+    row(other, 'Backlog', 'Park', { title: 'Other board', sourceUrl: 'https://trello.com/c/otherBd' }),
+    {
+      trelloId: '',
+      pageId: nativePage,
+      url: 'https://www.notion.so/native-task',
+      title: 'Native task',
+      status: 'Waiting on Hunter',
+      lanes: ['West'],
+      recordRole: 'Current work',
+    },
+  ];
+  const mappedNative = mapOperationalRows(notionRows);
+  const native = mappedNative.dump.lists.find((list) => list.name === 'Waiting on Hunter').cards[0];
+  check(native.id === notionPageCardId(nativePage), 'missing Trello id uses the notion: page id');
+  check(native.id.startsWith('notion:'), 'notion page id keeps the documented prefix');
+  check(!native.url.startsWith('https://trello.com/'), 'page url is ignored by the Trello allowlist');
+  check(mappedNative.warnings.some((warning) => warning.id === native.id && warning.codes.includes('no-trello-id')), 'missing Trello id is flagged');
+  const trelloDump = {
+    lists: [
+      { name: 'Doing', cards: [{ id: 'aaa111aaa111aaa111aaa111', name: 'Gate repair', desc: 'Lane: Ko', shortUrl: 'https://trello.com/c/gateKo' }, { id: commandOnly, name: 'Only trello', desc: 'Lane: Jae', shortUrl: 'https://trello.com/c/onlyTr' }] },
+      { name: 'Backlog', cards: [] },
+      { name: 'Waiting on Hunter', cards: [] },
+      { name: 'Done', cards: [] },
+    ],
+  };
+  const superset = shadowFromDumps({ notionDump: { rows: notionRows }, trelloDump, now: Date.parse('2026-11-05T20:00:00.000Z') });
+  check(superset.diff.notionOnly.includes(other), 'other-board Current work is notionOnly');
+  check(superset.diff.notionOnly.includes(native.id), 'page-id row is notionOnly');
+  check(superset.diff.activeOnlyTrello.includes(commandOnly), 'Trello-only active card stays a mismatch');
+  check(superset.diff.doing.notion === 1 && superset.diff.backlog.notion === 1, 'superset rows stay in the Notion counts');
+}
+{
+  const overridden = mapOperationalRows([row('lane1lane1lane1lane1lane1', 'Doing', '', { lanes: ['Jae', 'West'], primaryLane: 'Ko', title: 'Primary' })]);
+  check(overridden.dump.lists[0].cards[0].desc === 'Lane: Ko', 'Primary lane overrides multi-select order');
+  check(!overridden.warnings.some((warning) => warning.codes.includes('multi-lane')), 'a resolved Primary lane is not a multi-lane warning');
+  const unknownPrimary = mapOperationalRows([row('lane2lane2lane2lane2lane2', 'Doing', '', { lanes: ['Jae', 'West'], primaryLane: 'Hunter', title: 'Fallback' })]);
+  check(unknownPrimary.warnings.some((warning) => warning.codes.includes('primary-lane-unknown')), 'unknown Primary lane warns');
+  check(unknownPrimary.dump.lists[0].cards[0].desc === 'Lane: West', 'unknown Primary lane falls back to roster order');
+}
+{
+  const noon = Date.parse('2026-11-05T20:00:00.000Z');
+  const today = mapOperationalRows([row('done1done1done1done1done1', 'Done', 'West', { completedDate: '2026-11-05', title: 'Today' })], { now: noon });
+  check(today.doneTodayStatus.known === true && today.doneTodayStatus.count === 1, 'Completed date today counts');
+  const yesterday = mapOperationalRows([row('done2done2done2done2done2', 'Done', 'West', { completedDate: '2026-11-04', title: 'Yesterday' })], { now: noon });
+  check(yesterday.doneTodayStatus.known === true && yesterday.doneTodayStatus.count === 0, 'Completed date yesterday is a known zero');
+  const missing = mapOperationalRows([row('done3done3done3done3done3', 'Done', 'West', { completedDate: '', title: 'No date' })], { now: noon });
+  check(missing.doneTodayStatus.known === false && missing.doneTodayStatus.count == null, 'null Completed date stays unknown');
+  const absent = mapOperationalRows([row('done4done4done4done4done4', 'Done', 'West', { title: 'No property' })]);
+  check(absent.doneTodayStatus == null, 'absent Completed date keeps the legacy path');
+  check(board(absent.dump, '', 'CMD', noon).out.counts.doneToday === 0, 'legacy first-seen Done does not count');
+  const pdtNow = Date.parse('2026-11-01T21:00:00.000Z');
+  const before = evaluateCompletedDoneToday([{ id: 'b', name: 'b', completedDate: '2026-11-01T06:30:00.000Z' }], pdtNow);
+  const after = evaluateCompletedDoneToday([{ id: 'a', name: 'a', completedDate: '2026-11-01T07:17:18.633Z' }], pdtNow);
+  check(before.known && before.count === 0, 'Completed date at 06:30Z is still the previous PT day');
+  check(after.known && after.count === 1, 'Completed date at 07:17Z is Nov 1 PT');
+  const pstNow = Date.parse('2026-11-05T20:00:00.000Z');
+  const pstBefore = evaluateCompletedDoneToday([{ id: 'c', name: 'c', completedDate: '2026-11-05T07:30:00.000Z' }], pstNow);
+  const pstAfter = evaluateCompletedDoneToday([{ id: 'd', name: 'd', completedDate: '2026-11-05T08:30:00.000Z' }], pstNow);
+  check(pstBefore.count === 0 && pstAfter.count === 1, 'Completed date follows the PST midnight boundary');
+  check(!JSON.stringify(today.dump).includes('2012-12-12'), 'Last edited is not the completion time');
 }
 
 console.log(`notion command checks ok (${checks})`);

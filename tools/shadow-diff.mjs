@@ -213,7 +213,7 @@ function auditRows(rows, notionBoard, trelloBoard) {
 
 export function shadowFromDumps({ notionDump, trelloDump, activities = null, now = Date.now(), ledgerEntries = [], previousDump = null }) {
   const rows = notionRows(notionDump);
-  const mapped = mapOperationalRows(rows);
+  const mapped = mapOperationalRows(rows, { now });
   const noted = noteTransitions({
     previousDump,
     nextDump: mapped.dump,
@@ -241,16 +241,20 @@ export function shadowFromDumps({ notionDump, trelloDump, activities = null, now
   diff.doing = { notion: notionFull.lists.doing.length, trello: trelloFull.lists.doing.length };
   diff.waiting = { notion: notionFull.lists.waiting.length, trello: trelloFull.lists.waiting.length };
   diff.backlog = { notion: notionFull.lists.backlog.length, trello: trelloFull.lists.backlog.length };
-  diff.doneToday = {
-    notion: notion.command.counts.doneToday || 0,
-    trello: trello.command.counts.doneToday || 0,
-  };
-  const doneCards = ((mapped.dump.lists || []).find((list) => list.name === 'Done') || {}).cards || [];
-  const completionOnOperational = rows.some((row) => classifyRecordRole(row.recordRole) === 'operational' && row.completionDate);
-  // No current Done cohort and no completion timestamp is not a measured zero.
-  if (!doneCards.length && !completionOnOperational && !noted.entries.length) {
-    diff.doneToday = { notion: null, trello: trello.command.counts.doneToday || 0, gap: true };
+  const trelloDoneToday = trello.command.counts.doneToday || 0;
+  if (mapped.doneTodayStatus) {
+    diff.doneToday = mapped.doneTodayStatus.known
+      ? { notion: mapped.doneTodayStatus.count, trello: trelloDoneToday }
+      : { notion: null, trello: trelloDoneToday, gap: true };
+  } else {
+    diff.doneToday = { notion: notion.command.counts.doneToday || 0, trello: trelloDoneToday };
+    const doneCards = ((mapped.dump.lists || []).find((list) => list.name === 'Done') || {}).cards || [];
+    const completionOnOperational = rows.some((row) => classifyRecordRole(row.recordRole) === 'operational' && row.completionDate);
+    if (!doneCards.length && !completionOnOperational && !noted.entries.length) {
+      diff.doneToday = { notion: null, trello: trelloDoneToday, gap: true };
+    }
   }
+  diff.notionOnly = diff.onlyNotion;
   const trelloIndex = indexDump(commandDump);
   diff.activeOnlyTrello = diff.onlyTrello.filter((id) => trelloIndex.get(id) && trelloIndex.get(id).list !== 'done');
   diff.doneOnlyTrello = diff.onlyTrello.filter((id) => trelloIndex.get(id) && trelloIndex.get(id).list === 'done');
@@ -292,7 +296,8 @@ export function renderReport(result, meta = {}) {
     line('backlog', diff.backlog.notion, diff.backlog.trello),
     line('doneToday', diff.doneToday.notion, diff.doneToday.trello),
     '',
-    `Only Notion ids: ${diff.onlyNotion.join(', ') || 'none'}`,
+    `notionOnly (informational, not a failed read): ${(diff.notionOnly || diff.onlyNotion).join(', ') || 'none'}`,
+    `Trello-only active mismatch: ${(diff.activeOnlyTrello || []).join(', ') || 'none'}`,
     `Only Trello ids: ${diff.onlyTrello.join(', ') || 'none'}`,
     '',
     '## Status mismatches',

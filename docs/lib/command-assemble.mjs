@@ -5,7 +5,7 @@
 // the status blob or a status file. persist is always false.
 
 import { composeStatus } from '../api/status-model.mjs';
-import { mapOperationalRows } from './notion-command.mjs';
+import { NotionReadError, mapOperationalRows } from './notion-command.mjs';
 import { movesFromEntries, noteTransitions } from './done-ledger.mjs';
 
 function iso(ms) {
@@ -89,8 +89,9 @@ export function planCommandLeg({ apiKeyPresent, notion, trello, seed, now, ledge
   let mapped;
   try {
     mapped = mapOperationalRows(notion.rows || [], mapConfig);
-  } catch {
-    return { leg: reuseLeg(seed, 'config'), entries, added: [], commandSource: 'notion' };
+  } catch (err) {
+    const reason = err instanceof NotionReadError ? err.code : 'config';
+    return { leg: reuseLeg(seed, reason), entries, added: [], commandSource: 'notion' };
   }
   const noted = noteTransitions({
     previousDump: seed && seed.dump,

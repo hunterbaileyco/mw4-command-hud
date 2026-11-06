@@ -47,7 +47,7 @@ function schemaBody(mutate) {
     'Record role': {
       name: 'Record role',
       type: 'select',
-      select: { options: ['History', 'Legacy', 'Template', 'Active'].map((name) => ({ name })) },
+      select: { options: ['Current work', 'History / reference', 'Legacy \u2013 needs review', 'Template / non-operational'].map((name) => ({ name })) },
     },
     Lane: { name: 'Lane', type: 'multi_select', multi_select: { options: [] } },
     Hold: { name: 'Hold', type: 'checkbox', checkbox: {} },
@@ -110,7 +110,7 @@ function row(id, status, lane, extra = {}) {
     status,
     lanes: extra.lanes || (lane ? [lane] : []),
     hold: Boolean(extra.hold),
-    recordRole: extra.recordRole == null ? 'Active' : extra.recordRole,
+    recordRole: extra.recordRole == null ? 'Current work' : extra.recordRole,
     sourceUrl: extra.sourceUrl == null ? `https://trello.com/c/${id.slice(0, 8)}` : extra.sourceUrl,
     sourceAsOf: extra.sourceAsOf || '',
     lastEdited: extra.lastEdited || '',
@@ -138,9 +138,9 @@ for (let i = 0; i < 14; i += 1) active.push(row(`b${String(i).padStart(2, '0')}b
 for (let i = 0; i < 7; i += 1) active.push(row(`d${String(i).padStart(2, '0')}d${String(i).padStart(2, '0')}d${String(i).padStart(2, '0')}dddd`, 'Doing', 'Ko'));
 for (let i = 0; i < 7; i += 1) active.push(row(`w${String(i).padStart(2, '0')}w${String(i).padStart(2, '0')}w${String(i).padStart(2, '0')}wwww`, 'Waiting on Hunter', 'Jae', { hold: true }));
 const withNoise = active.concat([
-  row('', 'Doing', 'Ko', { title: 'Template sample', recordRole: 'Template', sourceUrl: '' }),
-  row('hist1hist1hist1hist1hist1', 'Done', 'West', { recordRole: 'History' }),
-  row('leg1leg1leg1leg1leg1leg1', 'Done', 'West', { recordRole: 'Legacy' }),
+  row('', 'Doing', 'Ko', { title: 'Template sample', recordRole: 'Template / non-operational', sourceUrl: '' }),
+  row('hist1hist1hist1hist1hist1', 'Done', 'West', { recordRole: 'History / reference' }),
+  row('leg1leg1leg1leg1leg1leg1', 'Done', 'West', { recordRole: 'Legacy \u2013 needs review' }),
 ]);
 const bulk = counts(withNoise);
 check(bulk.built.out.counts.backlog === 14, 'backlog 14');
@@ -149,6 +149,14 @@ check(bulk.built.out.counts.waiting === 7, 'waiting 7 and Hold does not add or r
 check(bulk.built.out.counts.doneToday === 0, 'no completion stamps on the active set');
 check(!JSON.stringify(bulk.built.out).includes('Template sample'), 'template row excluded');
 check(!JSON.stringify(bulk.built.out).includes('hist1hist1'), 'history row excluded');
+assert.throws(() => mapOperationalRows([row('sidequestsidequestsideq1', 'Doing', 'Ko', { recordRole: 'Side quest' })]), (err) => err.code === 'role');
+{
+  const { fetchImpl } = notionFetch([], {
+    schemaBodyOverride: schemaBody((props) => { props['Record role'].select.options.push({ name: 'Side quest' }); }),
+  });
+  const loaded = await loadNotionCommand({ apiKey: SECRET, fetchImpl });
+  check(loaded.reason === 'schema' && loaded.rows.length === 0, 'an unknown Record role option fails the schema closed');
+}
 
 // --- blocked, multi-lane, blank lane, links, id tail ---
 const tail = 'abcdef1234567890abcdef12';

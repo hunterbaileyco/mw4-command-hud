@@ -11,9 +11,11 @@
 //   multi-lane. No roster match leaves the lane blank and flags unmapped-lane.
 //   Command never receives the Ghost fallback used for Kal cards.
 // - Hold is ignored when choosing a list. Waiting is only status "Waiting on Hunter".
-// - Record role History, Legacy, or Template is excluded. A row with no Trello
-//   card id is excluded. Card id is the Trello id tail. card.url is kept only
-//   when it is already an https://trello.com/ link.
+// - Operational rows are Record role "Current work" with a Trello card id.
+//   Roles whose names start with History, Legacy, or Template are excluded
+//   (History / reference, Legacy – needs review, Template / non-operational).
+//   Any other role, including blank, fails the read closed. Card id is the
+//   Trello id tail. card.url is kept only when it is already https://trello.com/.
 // - Source as-of, Last edited, Started, and import time are not completion
 //   times and are not freshness.
 
@@ -30,8 +32,18 @@ export const MAX_429_RETRIES = 3;
 export const RETRY_AFTER_CAP_MS = 2000;
 
 const STATUS_OPTIONS = ['Backlog', 'Doing', 'Waiting on Hunter', 'Blocked', 'Done'];
-const ROLE_OPTIONS = ['History', 'Legacy', 'Template'];
+const ROLE_PREFIXES = ['history', 'legacy', 'template'];
 const REQUIRED_PROPS = ['Status', 'Record role', 'Lane', 'Hold', 'Trello card ID', 'Source URL'];
+
+// operational = Current work. History / Legacy / Template prefixes are archive.
+// Anything else, including a blank role, is unknown and must fail closed.
+export function classifyRecordRole(role) {
+  const text = String(role ?? '').trim();
+  if (text === 'Current work') return 'operational';
+  const lower = text.toLowerCase();
+  if (ROLE_PREFIXES.some((prefix) => lower.startsWith(prefix))) return 'excluded';
+  return 'unknown';
+}
 
 export function notionApiKey(env) {
   const source = env || {};
@@ -69,17 +81,6 @@ function listForStatus(status) {
       return null;
     default:
       return null;
-  }
-}
-
-function excludedRole(role) {
-  switch (role) {
-    case 'History':
-    case 'Legacy':
-    case 'Template':
-      return true;
-    default:
-      return false;
   }
 }
 
@@ -166,29 +167,37 @@ export function pageToRow(page) {
   };
 }
 
+function laneValues(value) {
+  if (Array.isArray(value)) return value.map((item) => String(item || '').trim()).filter(Boolean);
+  if (typeof value === 'string' && value.trim()) return [value.trim()];
+  return [];
+}
+
 export function coerceRow(row) {
   if (row && row.properties) return pageToRow(row);
-  const sourceUrl = String((row && row.sourceUrl) || '').trim();
-  const lanes = Array.isArray(row && row.lanes) ? row.lanes.map((lane) => String(lane)) : [];
+  const sourceUrl = String((row && (row.sourceUrl || row['Source URL'])) || '').trim();
+  const lanes = laneValues(row && (row.lanes || row.Lane));
+  const completion = row && (row.completionDate || row.completedAt || row['Completed at']);
   return {
-    trelloIdTail: trelloIdTail(row && (row.trelloIdTail || row.trelloId)),
-    title: String((row && (row.title || row.name)) || ''),
-    status: String((row && row.status) || ''),
+    trelloIdTail: trelloIdTail(row && (row.trelloIdTail || row.trelloId || row['Trello card ID'])),
+    title: String((row && (row.title || row.name || row.Name)) || ''),
+    status: String((row && (row.status || row.Status)) || ''),
     lanes,
-    hold: Boolean(row && row.hold),
-    recordRole: String((row && (row.recordRole || row.role)) || ''),
+    hold: Boolean(row && (row.hold || row.Hold)),
+    recordRole: String((row && (row.recordRole || row.role || row['Record role'])) || ''),
     sourceUrl,
-    sourceAsOf: String((row && (row.sourceAsOf || row.sourceAsOfTime)) || ''),
-    started: String((row && row.started) || ''),
-    lastEdited: String((row && (row.lastEdited || row.lastEditedTime)) || ''),
+    sourceAsOf: String((row && (row.sourceAsOf || row.sourceAsOfTime || row['Source as-of'])) || ''),
+    started: String((row && (row.started || row.Started)) || ''),
+    lastEdited: String((row && (row.lastEdited || row.lastEditedTime || row['Last edited'])) || ''),
+    completionDate: completion ? String(completion) : '',
   };
 }
 
 function optionNames(prop) {
   if (!prop || typeof prop !== 'object') return [];
   const bucket = prop.status || prop.select || prop.multi_select || {};
-  const options = bucket.options || [];
-  return options.map((option) => option && option.name).filter(Boolean);
+  const options = bucket.options || prop.options || [];
+  return options.map((option) => (typeof option === 'string' ? option : option && option.name)).filter(Boolean);
 }
 
 function propByName(properties, name) {
@@ -211,15 +220,18 @@ export function validateDataSource(body) {
   }
   const role = propByName(properties, 'Record role');
   if (role.type !== 'select' && role.type !== 'status') fail('schema');
-  for (const option of ROLE_OPTIONS) {
-    if (!optionNames(role).includes(option)) fail('schema');
+  const roleNames = optionNames(role);
+  const roleKinds = roleNames.map((name) => classifyRecordRole(name));
+  if (!roleNames.length || roleKinds.includes('unknown') || !roleKinds.includes('operational')) fail('schema');
+  for (const prefix of ROLE_PREFIXES) {
+    if (!roleNames.some((name) => name.toLowerCase().startsWith(prefix))) fail('schema');
   }
   const lane = propByName(properties, 'Lane');
   if (lane.type !== 'multi_select') fail('schema');
   const hold = propByName(properties, 'Hold');
   if (hold.type !== 'checkbox') fail('schema');
   const trello = propByName(properties, 'Trello card ID');
-  if (!['rich_text', 'title', 'formula', 'unique_id'].includes(trello.type)) fail('schema');
+  if (!['rich_text', 'title', 'formula', 'unique_id', 'text'].includes(trello.type)) fail('schema');
   const link = propByName(properties, 'Source URL');
   if (!['url', 'rich_text', 'formula'].includes(link.type)) fail('schema');
   const title = Object.values(properties).some((prop) => prop && prop.type === 'title');
@@ -376,8 +388,11 @@ export async function loadNotionCommand(options = {}) {
 }
 
 function isOperationalRow(row) {
-  if (!row || !row.trelloIdTail) return false;
-  if (excludedRole(row.recordRole)) return false;
+  if (!row) return false;
+  const kind = classifyRecordRole(row.recordRole);
+  if (kind === 'unknown') fail('role');
+  if (kind !== 'operational') return false;
+  if (!row.trelloIdTail) return false;
   return true;
 }
 

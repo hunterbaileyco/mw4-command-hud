@@ -5,6 +5,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { webcrypto: wc } = require('node:crypto');
+const { commandSourceMode } = require('../lib/command-flag');
 
 const STATUS_FILE = path.join(__dirname, '../c85352c42452f0db1e1c5e56f60e5128/status.json');
 const LIVE_PATH = 'mw4/status-live.json';
@@ -18,6 +19,10 @@ const keyCache = new Map();
 let fileCache = { sig: '', env: null, plain: null, updatedAt: '' };
 let plainCache = { sig: '', buf: null };
 const inflight = new Map();
+// In-process last-good for the preview Notion path. Never written to the blob.
+let previewCommand = null;
+let previewKal = null;
+let previewEntries = [];
 
 function feedPass(override) {
   return String(override != null ? override : (process.env.MW4_FEED_PASS || '')).replace(/[\r\n]+$/, '');
@@ -230,7 +235,134 @@ async function fetchBoard(fetchImpl, auth, board, sinceIso) {
   return { dump: dumpFromLists(lists, spec.shortLink), actions };
 }
 
+function envOf(options) {
+  return (options && options.env) || process.env;
+}
+
+// Notion Command is preview-only. Kal stays on Trello. This path never calls
+// store.write, so it cannot update mw4/status-live.json. Flag unset keeps
+// refreshLiveInner's original coupled Trello fetch below.
+async function refreshLiveDecoupled(options) {
+  const env = envOf(options);
+  const fetchImpl = options.fetchImpl || globalThis.fetch;
+  const now = options.now || Date.now();
+  const auth = options.auth || trelloAuth();
+  const { loadNotionCommand, notionApiKey } = await import('../lib/notion-command.mjs');
+  const { runPreviewCycle, seedFromStatus } = await import('../lib/command-assemble.mjs');
+  const { ptDayStartIso } = await import('./status-model.mjs');
+
+  let existing = null;
+  try { existing = await readRecord(options.store || blobStore()); }
+  catch { existing = null; }
+  const actionId = String(options.actionId || '');
+  const seen = (existing && existing.meta && existing.meta.seen) || [];
+  if (actionId && seen.includes(actionId)) {
+    return { ok: true, skipped: 'duplicate', updatedAt: (existing.meta && existing.meta.updatedAt) || '', persist: false };
+  }
+
+  if (!previewCommand && !previewKal && options.seedFromFile !== false) {
+    try {
+      const pass = feedPass(options.pass);
+      if (pass) {
+        const file = await loadFile(pass, options.readFileEnv);
+        let basePlain = file.plain;
+        if (existing && existing.meta && existing.meta.updatedAt && existing.meta.updatedAt > file.updatedAt) {
+          try { basePlain = await decryptEnv(existing.env, pass); }
+          catch { /* keep the committed file */ }
+        }
+        const base = JSON.parse(Buffer.from(basePlain).toString('utf8'));
+        const seeded = seedFromStatus(base);
+        previewCommand = seeded.command;
+        previewKal = seeded.kal;
+      }
+    } catch { /* no readable baseline; last-good stays empty until a good read */ }
+  }
+
+  const since = ptDayStartIso(now);
+  const apiKey = notionApiKey(env);
+  let notion = null;
+  let commandTrello = null;
+  if (apiKey) {
+    notion = await loadNotionCommand({
+      env,
+      apiKey,
+      fetchImpl,
+      pageCap: options.pageCap,
+      budgetMs: options.budgetMs,
+      clock: options.clock,
+      timeoutMs: options.timeoutMs,
+      dataSourceId: options.dataSourceId,
+    });
+  } else if (auth) {
+    try {
+      const command = await fetchBoard(fetchImpl, auth, 'command', since);
+      commandTrello = { ok: true, dump: command.dump, actions: command.actions };
+    } catch {
+      commandTrello = { ok: false };
+    }
+  } else {
+    commandTrello = { ok: false };
+  }
+
+  let kalTrello = { ok: false };
+  if (auth) {
+    try {
+      const trading = await fetchBoard(fetchImpl, auth, 'trading', since);
+      kalTrello = { ok: true, dump: trading.dump, actions: trading.actions };
+    } catch {
+      kalTrello = { ok: false };
+    }
+  }
+
+  const blocked = String(env.MW4_COMMAND_BLOCKED || 'exclude').trim().toLowerCase();
+  const result = runPreviewCycle(
+    { command: previewCommand, kal: previewKal, entries: previewEntries },
+    {
+      apiKeyPresent: Boolean(apiKey),
+      notion,
+      commandTrello,
+      kalTrello,
+      now,
+      prev: options.prev || null,
+      mapConfig: { blocked: blocked || 'exclude' },
+    },
+  );
+  previewCommand = result.next.command;
+  previewKal = result.next.kal;
+  previewEntries = result.next.entries;
+  if (options.ledgerStore && result.added && result.added.length) {
+    try { await options.ledgerStore.append(result.added); }
+    catch (err) {
+      if (!err || (err.code !== 'LEDGER_DISABLED' && err.code !== 'LEDGER_PATH')) throw err;
+    }
+  }
+  if (!result.ok) {
+    return {
+      ok: true,
+      skipped: 'held',
+      reason: result.reason || '',
+      persist: false,
+      model: null,
+      commandSource: result.commandSource || '',
+      commandReason: result.commandReason || '',
+      kalReason: result.kalReason || '',
+    };
+  }
+  return {
+    ok: true,
+    skipped: 'preview-no-persist',
+    updatedAt: result.status.updatedAt,
+    persist: false,
+    model: result.status,
+    warnings: result.warnings || [],
+    commandSource: result.commandSource,
+    commandReason: result.commandReason || '',
+    kalReason: result.kalReason || '',
+  };
+}
+
 async function refreshLiveInner(options) {
+  if (commandSourceMode(envOf(options)) === 'notion') return refreshLiveDecoupled(options);
   const pass = feedPass(options.pass);
   if (!pass) throw new Error('feed key not configured');
   const auth = options.auth || trelloAuth();
@@ -299,6 +431,9 @@ function resetCaches() {
   plainCache = { sig: '', buf: null };
   keyCache.clear();
   inflight.clear();
+  previewCommand = null;
+  previewKal = null;
+  previewEntries = [];
 }
 
 async function publicState(board) {

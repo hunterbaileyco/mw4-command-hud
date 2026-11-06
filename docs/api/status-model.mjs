@@ -1,7 +1,7 @@
 // Shared MW4 status model. The box (tools/build-status.mjs) and the Trello webhook
 // both build cleartext through composeStatus, then encrypt. No filesystem, no network.
 
-const LANES = ['Ju Kwon', 'Price', 'West', 'Ko', 'Cho', 'Jae', 'Park', 'Dunn', 'Ghost', 'Soap', 'Gaz', 'Kal', 'Laswell'];
+export const LANES = ['Ju Kwon', 'Price', 'West', 'Ko', 'Cho', 'Jae', 'Park', 'Dunn', 'Ghost', 'Soap', 'Gaz', 'Kal', 'Laswell'];
 // Role labels. Dunn is Personal — never "Dunn Ops". Price is the only dispatcher. Flow: Kal → Price → lane.
 // Laswell owns care@ only. Ju Kwon stays Kinsora ops back-office. Intercom is not a care owner.
 const ROSTER = [

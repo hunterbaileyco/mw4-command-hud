@@ -263,6 +263,11 @@ export function snapFromStatus(status) {
 
 // Same cleartext the box writes before encryption. `prev` is the box snapshot
 // { snap, events } or a previous cleartext status (legacy).
+function dumpBoardUrl(dump) {
+  const u = String((dump && dump.board && dump.board.url) || '');
+  return /^https:\/\/(app\.notion\.com|www\.notion\.so)\//.test(u) ? u : '';
+}
+
 export function composeStatus({ commandDump, kalDump, commandMoves = [], kalMoves = [], prev = null, extra = null, now = Date.now() } = {}) {
   const C = board(commandDump, '', 'CMD', now, commandMoves);
   const Kb = board(kalDump, 'Ghost', 'KAL', now, kalMoves);
@@ -307,8 +312,9 @@ export function composeStatus({ commandDump, kalDump, commandMoves = [], kalMove
 
   const status = {
     updatedAt: new Date(now).toISOString(),
-    source: 'kinsora-command',
-    command: { boardUrl: 'https://trello.com/b/JcLDGY59/kinsora-command', ...cmd },
+    source: (commandDump && commandDump.source === 'notion') ? 'kinsora-notion' : 'kinsora-command',
+    // Notion pull (box) sets board.url to the Notion Tasks view; Trello dumps/webhook keep the Trello link.
+    command: { boardUrl: dumpBoardUrl(commandDump) || 'https://trello.com/b/JcLDGY59/kinsora-command', ...cmd },
     kal: { boardUrl: 'https://trello.com/b/9zrVdX34/kal-trading', ...kal },
     lanes: extraObj.lanes || lanes,
     alerts: extraObj.alerts || alerts,
